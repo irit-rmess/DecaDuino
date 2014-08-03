@@ -31,6 +31,8 @@
 #include "Arduino.h"
 #include <spi4teensy3.h>
 
+#define DECADUINO_DEBUG
+
 #define DW1000_IRQ0_PIN 9
 #define DW1000_IRQ1_PIN 0
 #define DW1000_IRQ2_PIN 1
@@ -43,6 +45,9 @@
 #define DW1000_REGISTER_DEV_ID 		0x00
 #define DW1000_REGISTER_EUI 		0x01
 #define DW1000_REGISTER_PANADR		0x03
+#define DW1000_REGISTER_TX_FCTRL	0x08
+#define DW1000_REGISTER_TX_BUFFER	0x09
+#define DW1000_REGISTER_SYS_CTRL	0x0D
 #define DW1000_REGISTER_SYS_MASK	0x0E
 #define DW1000_REGISTER_SYS_STATUS	0x0F
 #define DW1000_REGISTER_PMSC_CTRL0	0x36
@@ -51,7 +56,12 @@
 #define DW1000_REGISTER_PANADR_SHORT_ADDRESS_OFFSET 0x00
 #define DW1000_REGISTER_PANADR_PANID_OFFSET 0x02
 
+#define DW1000_REGISTER_TX_FCTRL_FRAME_LENGTH_MASK 0x3FF
+
+#define DW1000_REGISTER_SYS_CTRL_TXSTRT_MASK 0x1
+
 #define DW1000_REGISTER_SYS_MASK_MRXPRD_MASK
+
 
 #define DW1000_REGISTER_SYS_STATUS_RXDFR_MASK 0x00002000
 #define DW1000_REGISTER_SYS_STATUS_RXFCG_MASK 0x00004000
@@ -63,16 +73,16 @@ class DecaDuino {
     boolean init();
     void resetDW1000();
     void dummy();
-    void writeSpi(uint8_t address, uint8_t* buf, uint8_t len);
-    void readSpi(uint8_t address, uint8_t* buf, uint8_t len);
-    void writeSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* buf, uint8_t len);
-    void readSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* buf, uint8_t len);
+    void writeSpi(uint8_t address, uint8_t* buf, uint16_t len);
+    void readSpi(uint8_t address, uint8_t* buf, uint16_t len);
+    void writeSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* buf, uint16_t len);
+    void readSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* buf, uint16_t len);
     uint16_t getPanId();
     void setPanId(uint16_t panId);
     uint16_t getShortAddress();
     void setShortAddress(uint16_t shortAddress);
     void plmeRxEnableRequest(void);
-    void plmeDataRequest(uint8_t* buf, uint8_t len);
+    void plmeDataRequest(uint8_t* buf, uint16_t len);
 
     void _my_handleInterrupt(); //temp
 

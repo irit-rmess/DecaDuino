@@ -116,28 +116,27 @@ void DecaDuino::resetDW1000() {
 void DecaDuino::isr0() {
 
   Serial.println("isr0");
-  if (_DecaDuinoInterrupt[0]) _DecaDuinoInterrupt[0]->handleInterrupt();
+  if (_DecaDuinoInterrupt[DW1000_IRQ0_PIN]) _DecaDuinoInterrupt[DW1000_IRQ0_PIN]->handleInterrupt();
 }
 
 
 void DecaDuino::isr1() {
 
   Serial.println("isr1");
-  if (_DecaDuinoInterrupt[1]) _DecaDuinoInterrupt[1]->handleInterrupt();
+  if (_DecaDuinoInterrupt[DW1000_IRQ1_PIN]) _DecaDuinoInterrupt[DW1000_IRQ1_PIN]->handleInterrupt();
 }
 
 
 void DecaDuino::isr2() {
 
   Serial.println("isr2");
-  if (_DecaDuinoInterrupt[2]) _DecaDuinoInterrupt[2]->handleInterrupt();
+  if (_DecaDuinoInterrupt[DW1000_IRQ2_PIN]) _DecaDuinoInterrupt[DW1000_IRQ2_PIN]->handleInterrupt();
 }
 
 void DecaDuino::handleInterrupt() {
 
-}
-
-void DecaDuino::_my_handleInterrupt() {
+//}
+//void DecaDuino::_my_handleInterrupt() {
 
   uint32_t statusReg;
   uint16_t frameLen;
@@ -146,19 +145,60 @@ void DecaDuino::_my_handleInterrupt() {
   readSpi(DW1000_REGISTER_SYS_STATUS, buf, 4);
   statusReg = decodeUint32(buf);
 
-  Serial.print("interrupt mask: ");
-  sprintf((char*)buf,"%x\n", statusReg);
+#ifdef DECADUINO_DEBUG 
+  sprintf((char*)buf,"SYS_STATUS=%08x\n", statusReg);
   Serial.println((char*)buf);
+#endif
 
-  if ( statusReg & DW1000_REGISTER_SYS_STATUS_RXDFR_MASK ) { // RXDFR
+  //if ( statusReg & DW1000_REGISTER_SYS_STATUS_RXDFR_MASK ) { // RXDFR
 
     //if ( statusReg & DW1000_REGISTER_SYS_STATUS_RXFCG_MASK ) { // RXFCG
 
-  }
+  //}
 }
 
 
-void DecaDuino::readSpi(uint8_t address, uint8_t* buf, uint8_t len) {
+void DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
+
+  uint32_t ui32t;
+
+#ifdef DECADUINO_DEBUG 
+  sprintf((char*)buf,"I will send %dbyte(s)\n", len);
+  Serial.println((char*)buf);
+#endif
+
+  // copy PSDU in tx buffer
+  writeSpi(DW1000_REGISTER_TX_BUFFER, buf, len);
+
+  // read tx frame control register
+  readSpi(DW1000_REGISTER_TX_FCTRL, buf, 4);
+  ui32t = decodeUint32(buf);
+ 
+#ifdef DECADUINO_DEBUG 
+  sprintf((char*)buf,"TX_FCTRL=%08x\n", ui32t);
+  Serial.println((char*)buf);
+#endif
+
+  // set frame length
+  encodeUint32((ui32t & ~DW1000_REGISTER_TX_FCTRL_FRAME_LENGTH_MASK) | len, buf);
+  writeSpi(DW1000_REGISTER_TX_FCTRL, buf, 4);
+
+  // set tx start bit
+  readSpi(DW1000_REGISTER_SYS_CTRL, buf, 4);
+  ui32t = decodeUint32(buf) | DW1000_REGISTER_SYS_CTRL_TXSTRT_MASK;
+  encodeUint32(ui32t, buf);
+  writeSpi(DW1000_REGISTER_SYS_CTRL, buf, 4);
+
+#ifdef DECADUINO_DEBUG 
+  readSpi(DW1000_REGISTER_TX_FCTRL, buf, 4);
+  ui32t = decodeUint32(buf);
+  sprintf((char*)buf,"TX_FCTRL=%08x\n", ui32t);
+  Serial.println((char*)buf);
+#endif
+}
+
+
+void DecaDuino::readSpi(uint8_t address, uint8_t* buf, uint16_t len) {
 
   uint8_t addr = 0 | (address & 0x3F) ; // Mask register address (6bits) and preserve MSb at low (Read) and no subaddress
 
@@ -169,7 +209,7 @@ void DecaDuino::readSpi(uint8_t address, uint8_t* buf, uint8_t len) {
 }
 
 
-void DecaDuino::readSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* buf, uint8_t len) {
+void DecaDuino::readSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* buf, uint16_t len) {
 
   uint8_t addr = 0 | (address & 0x3F) | 0x40; // Mask register address (6bits), preserve MSb at low (Read) and set subaddress present bit (0x40)
   uint8_t sub_addr = 0 | (subAddress & 0x3F); // Mask register address (6bits)
@@ -182,7 +222,7 @@ void DecaDuino::readSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* 
 }
 
 
-void DecaDuino::writeSpi(uint8_t address, uint8_t* buf, uint8_t len) {
+void DecaDuino::writeSpi(uint8_t address, uint8_t* buf, uint16_t len) {
 
   uint8_t addr = 0 | (address & 0x3F) | 0x80; // Mask register address (6bits) and set MSb (Write) and no subaddress
 
@@ -193,7 +233,7 @@ void DecaDuino::writeSpi(uint8_t address, uint8_t* buf, uint8_t len) {
 }
 
 
-void DecaDuino::writeSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* buf, uint8_t len) {
+void DecaDuino::writeSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* buf, uint16_t len) {
 
   uint8_t addr = 0 | (address & 0x3F) | 0x80 | 0x40; // Mask register address (6bits), set MSb (Write) and set subaddress present bit (0x40)
   uint8_t sub_addr = 0 | (subAddress & 0x3F); // Mask register address (6bits)
