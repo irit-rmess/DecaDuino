@@ -33,22 +33,21 @@ boolean DecaDuino::init() {
   CORE_PIN14_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); // and then reassign pin 14 to SCK
 
   // Reset the DW1000 now
-  //resetDW1000();
-  delay(20);
+  resetDW1000();
 
   // Check the device type
   readSpi(DW1000_REGISTER_DEV_ID, buf, 4);
   if ( decodeUint32(buf) != 0xdeca0130 ) return false;
 
   // Attach interrupt handler
-  if (_interruptPin == 0) {
-    _DecaDuinoInterrupt[0] = this;
+  if (_interruptPin == DW1000_IRQ0_PIN) {
+    _DecaDuinoInterrupt[DW1000_IRQ0_PIN] = this;
     attachInterrupt(_interruptPin, DecaDuino::isr0, HIGH);
-  } else if (_interruptPin == 1) {
-    _DecaDuinoInterrupt[1] = this;
+  } else if (_interruptPin == DW1000_IRQ1_PIN) {
+    _DecaDuinoInterrupt[DW1000_IRQ1_PIN] = this;
     attachInterrupt(_interruptPin, DecaDuino::isr1, HIGH);
-  } else if (_interruptPin == 2) {
-    _DecaDuinoInterrupt[2] = this;
+  } else if (_interruptPin == DW1000_IRQ2_PIN) {
+    _DecaDuinoInterrupt[DW1000_IRQ2_PIN] = this;
     attachInterrupt(_interruptPin, DecaDuino::isr2, HIGH);
   } else return false;
 
@@ -74,9 +73,9 @@ boolean DecaDuino::init() {
 
   /*
   setPanId(0xCAFE);
-  setShortAddress(0x1234);
   Serial.print("PANid: ");
   Serial.println (getPanId(), HEX);
+  setShortAddress(0x1234);
   Serial.print("Short address: ");
   Serial.println (getShortAddress(), HEX);
   */
@@ -88,16 +87,29 @@ boolean DecaDuino::init() {
 
 void DecaDuino::resetDW1000() {
 
+/*
   uint32_t u32tmp;
 
   readSpi(DW1000_REGISTER_PMSC_CTRL0, buf, 4);
   u32tmp = decodeUint32(buf);
-  encodeUint32( ( u32tmp & 0xFFFFFFFFC ) | 1, buf);
+
+  // Set SYSCLKS bits to 01 and clear SOFTRESET bits
+  u32tmp = 1 | ( u32tmp & 0x0FFFFFFC );
+  encodeUint32( u32tmp, buf);
   writeSpi(DW1000_REGISTER_PMSC_CTRL0, buf, 4);
-  encodeUint32( u32tmp & 0x0FFFFFFFF, buf );
+
+  // Clear SOFTRESET bits
+  //encodeUint32( u32tmp & 0x0FFFFFFF, buf );
+  //writeSpi(DW1000_REGISTER_PMSC_CTRL0, buf, 4);
+
+  delay(100);
+
+  // Set SOFTRESET bits
+  u32tmp = 0xF0000000 | (u32tmp & 0xFFFFFFFC);
+  encodeUint32( u32tmp, buf);
   writeSpi(DW1000_REGISTER_PMSC_CTRL0, buf, 4);
-  encodeUint32( u32tmp | 0xF0000000, buf );
-  writeSpi(DW1000_REGISTER_PMSC_CTRL0, buf, 4);
+  delay(100);
+*/
 }
 
 
@@ -142,16 +154,54 @@ void DecaDuino::_my_handleInterrupt() {
 
     //if ( statusReg & DW1000_REGISTER_SYS_STATUS_RXFCG_MASK ) { // RXFCG
 
-???MANY LINES MISSING
+  }
+}
+
+
+void DecaDuino::readSpi(uint8_t address, uint8_t* buf, uint8_t len) {
+
+  uint8_t addr = 0 | (address & 0x3F) ; // Mask register address (6bits) and preserve MSb at low (Read) and no subaddress
+
+  digitalWrite(_slaveSelectPin, LOW);
+  spi4teensy3::send(addr);
+  spi4teensy3::receive(buf,len);
+  digitalWrite(_slaveSelectPin, HIGH);
+}
+
+
 void DecaDuino::readSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* buf, uint8_t len) {
 
-  uint8_t addr = 0 | (address & 0x3F) | 0x40; // Mask register address (6bits) and preserve MSb at low (Read) and subaddress (0x40)
+  uint8_t addr = 0 | (address & 0x3F) | 0x40; // Mask register address (6bits), preserve MSb at low (Read) and set subaddress present bit (0x40)
   uint8_t sub_addr = 0 | (subAddress & 0x3F); // Mask register address (6bits)
 
   digitalWrite(_slaveSelectPin, LOW);
   spi4teensy3::send(addr);
   spi4teensy3::send(sub_addr);
   spi4teensy3::receive(buf,len);
+  digitalWrite(_slaveSelectPin, HIGH);
+}
+
+
+void DecaDuino::writeSpi(uint8_t address, uint8_t* buf, uint8_t len) {
+
+  uint8_t addr = 0 | (address & 0x3F) | 0x80; // Mask register address (6bits) and set MSb (Write) and no subaddress
+
+  digitalWrite(_slaveSelectPin, LOW);
+  spi4teensy3::send(addr);
+  spi4teensy3::send(buf,len);
+  digitalWrite(_slaveSelectPin, HIGH);
+}
+
+
+void DecaDuino::writeSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* buf, uint8_t len) {
+
+  uint8_t addr = 0 | (address & 0x3F) | 0x80 | 0x40; // Mask register address (6bits), set MSb (Write) and set subaddress present bit (0x40)
+  uint8_t sub_addr = 0 | (subAddress & 0x3F); // Mask register address (6bits)
+
+  digitalWrite(_slaveSelectPin, LOW);
+  spi4teensy3::send(addr);
+  spi4teensy3::send(sub_addr);
+  spi4teensy3::send(buf,len);
   digitalWrite(_slaveSelectPin, HIGH);
 }
 

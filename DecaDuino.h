@@ -31,13 +31,13 @@
 #include "Arduino.h"
 #include <spi4teensy3.h>
 
-#define DW1000_IRQ0_PIN 0
-#define DW1000_IRQ1_PIN 1
-#define DW1000_IRQ2_PIN 2
+#define DW1000_IRQ0_PIN 9
+#define DW1000_IRQ1_PIN 0
+#define DW1000_IRQ2_PIN 1
 #define DW1000_CS0_PIN 10
 #define DW1000_CS1_PIN 10 // ToDo: check Teensy3.1 other SlaveSelect pins
 #define DW1000_CS2_PIN 10 // ToDo: check Teensy3.1 other SlaveSelect pins
-#define MAX_NB_DW1000_FOR_INTERRUPTS 3
+#define MAX_NB_DW1000_FOR_INTERRUPTS 32
 #define BUFFER_MAX_LEN 1024
 
 #define DW1000_REGISTER_DEV_ID 		0x00
