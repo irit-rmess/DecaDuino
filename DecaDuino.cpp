@@ -16,21 +16,20 @@ DecaDuino::DecaDuino(uint8_t slaveSelectPin, uint8_t interruptPin) {
 
 boolean DecaDuino::init() {
 
-  uint16_t i;
-  uint32_t u32tmp;
-
-  // Wait for DW1000 POR (up to 5msec)
-  delay(5);
+  uint16_t ui16t;
+  uint32_t ui32t;
 
   // Initialise the IRQ and Slave Select pin
   pinMode(_interruptPin, INPUT);
   pinMode(_slaveSelectPin, OUTPUT);
   digitalWrite(_slaveSelectPin, HIGH);
 
-  // Initialise the SPI port
-  spi4teensy3::init(1,0,0);
-  CORE_PIN13_CONFIG = PORT_PCR_MUX(1); // First reassign pin 13 to Alt1 so that it is not SCK but the LED still works
-  CORE_PIN14_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); // and then reassign pin 14 to SCK
+  // Wait for DW1000 POR (up to 5msec)
+  delay(5);
+
+  // Initialise buffer
+  for (ui16t=0; ui16t<BUFFER_MAX_LEN; ui16t++)
+    buf[ui16t] = 0;
 
   // Reset the DW1000 now
   resetDW1000();
@@ -50,10 +49,6 @@ boolean DecaDuino::init() {
     _DecaDuinoInterrupt[DW1000_IRQ2_PIN] = this;
     attachInterrupt(_interruptPin, DecaDuino::isr2, HIGH);
   } else return false;
-
-  // Initialise buffer
-  for (i=0; i<BUFFER_MAX_LEN; i++)
-    buf[i] = 0;
 
   // Configure DW1000
   // System Event Mask Register
@@ -87,29 +82,58 @@ boolean DecaDuino::init() {
 
 void DecaDuino::resetDW1000() {
 
-/*
-  uint32_t u32tmp;
+  uint32_t ui32tmp;
 
+  // Initialise the SPI port
+  spi4teensy3::init(5,0,0); // Low speed SPICLK for performing DW1000 reset
+  CORE_PIN13_CONFIG = PORT_PCR_MUX(1); // First reassign pin 13 to Alt1 so that it is not SCK but the LED still works
+  CORE_PIN14_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); // and then reassign pin 14 to SCK
+
+  // Getting PMSC_CTRL0 register
   readSpi(DW1000_REGISTER_PMSC_CTRL0, buf, 4);
-  u32tmp = decodeUint32(buf);
+  ui32tmp = decodeUint32(buf);
 
-  // Set SYSCLKS bits to 01 and clear SOFTRESET bits
-  u32tmp = 1 | ( u32tmp & 0x0FFFFFFC );
-  encodeUint32( u32tmp, buf);
+#ifdef DECADUINO_DEBUG 
+  sprintf((char*)buf,"PMSC_CTRL0=%08x", ui32tmp);
+  Serial.println((char*)buf);
+#endif
+
+  // Set SYSCLKS bits to 01
+  ui32tmp = ( ui32tmp & 0xFFFFFFFC ) | 1;
+  encodeUint32( ui32tmp, buf);
   writeSpi(DW1000_REGISTER_PMSC_CTRL0, buf, 4);
+  delay(1);
 
   // Clear SOFTRESET bits
-  //encodeUint32( u32tmp & 0x0FFFFFFF, buf );
-  //writeSpi(DW1000_REGISTER_PMSC_CTRL0, buf, 4);
+  ui32tmp &= 0x0FFFFFFF;
+  encodeUint32(ui32tmp, buf);
+  writeSpi(DW1000_REGISTER_PMSC_CTRL0, buf, 4);
+  delay(1);
 
-  delay(100);
+#ifdef DECADUINO_DEBUG 
+  sprintf((char*)buf,"PMSC_CTRL0=%08x", ui32tmp);
+  Serial.println((char*)buf);
+#endif
 
   // Set SOFTRESET bits
-  u32tmp = 0xF0000000 | (u32tmp & 0xFFFFFFFC);
-  encodeUint32( u32tmp, buf);
+  ui32tmp |= 0xF0000000;
+  ui32tmp &= 0xFFFFFFFC;
+  encodeUint32(ui32tmp, buf);
   writeSpi(DW1000_REGISTER_PMSC_CTRL0, buf, 4);
-  delay(100);
-*/
+  delay(1);
+
+  // Initialise the SPI port
+  spi4teensy3::init(1,0,0); // Normal speed SPICLK for performing DW1000 reset
+  CORE_PIN13_CONFIG = PORT_PCR_MUX(1); // First reassign pin 13 to Alt1 so that it is not SCK but the LED still works
+  CORE_PIN14_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); // and then reassign pin 14 to SCK
+  delay(1);
+
+#ifdef DECADUINO_DEBUG 
+  readSpi(DW1000_REGISTER_PMSC_CTRL0, buf, 4);
+  ui32tmp = decodeUint32(buf);
+  sprintf((char*)buf,"PMSC_CTRL0=%08x", ui32tmp);
+  Serial.println((char*)buf);
+#endif
 }
 
 
@@ -133,10 +157,14 @@ void DecaDuino::isr2() {
   if (_DecaDuinoInterrupt[DW1000_IRQ2_PIN]) _DecaDuinoInterrupt[DW1000_IRQ2_PIN]->handleInterrupt();
 }
 
+
 void DecaDuino::handleInterrupt() {
 
-//}
-//void DecaDuino::_my_handleInterrupt() {
+  // @todo make a private buffer for interrupt
+}
+
+
+void DecaDuino::_my_handleInterrupt() {
 
   uint32_t statusReg;
   uint16_t frameLen;
@@ -150,11 +178,19 @@ void DecaDuino::handleInterrupt() {
   Serial.println((char*)buf);
 #endif
 
-  //if ( statusReg & DW1000_REGISTER_SYS_STATUS_RXDFR_MASK ) { // RXDFR
+  if ( statusReg & DW1000_REGISTER_SYS_STATUS_RXDFR_MASK ) { // RXDFR
 
-    //if ( statusReg & DW1000_REGISTER_SYS_STATUS_RXFCG_MASK ) { // RXFCG
+#ifdef DECADUINO_DEBUG 
+    Serial.println("RXDFR");
+#endif
 
-  //}
+    if ( statusReg & DW1000_REGISTER_SYS_STATUS_RXFCG_MASK ) { // RXFCG
+
+#ifdef DECADUINO_DEBUG 
+      Serial.println("RXFCG");
+#endif
+    }
+  }
 }
 
 
@@ -193,6 +229,30 @@ void DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
   readSpi(DW1000_REGISTER_TX_FCTRL, buf, 4);
   ui32t = decodeUint32(buf);
   sprintf((char*)buf,"TX_FCTRL=%08x\n", ui32t);
+  Serial.println((char*)buf);
+#endif
+}
+
+
+void DecaDuino::plmeRxEnableRequest(void) {
+
+  uint32_t ui32t;
+
+#ifdef DECADUINO_DEBUG 
+  sprintf((char*)buf,"RX enable request\n");
+  Serial.println((char*)buf);
+#endif
+
+  // set rx enable bit in system control register
+  readSpi(DW1000_REGISTER_SYS_CTRL, buf, 4);
+  ui32t = decodeUint32(buf) | DW1000_REGISTER_SYS_CTRL_RXENAB_MASK;
+  encodeUint32(ui32t, buf);
+  writeSpi(DW1000_REGISTER_SYS_CTRL, buf, 4);
+
+#ifdef DECADUINO_DEBUG 
+  readSpi(DW1000_REGISTER_SYS_CTRL, buf, 4);
+  ui32t = decodeUint32(buf);
+  sprintf((char*)buf,"SYS_CTRL=%08x\n", ui32t);
   Serial.println((char*)buf);
 #endif
 }
