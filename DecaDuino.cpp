@@ -37,7 +37,7 @@ boolean DecaDuino::init() {
   // Check the device type
   if ( readSpiUint32(DW1000_REGISTER_DEV_ID) != 0xdeca0130 ) return false;
 
-  // Get Extended Unique Identifier – the 64-bit IEEE device address
+  // Load Extended Unique Identifier – the 64-bit IEEE device address - in memory
   euid = getEuid();
 
   // Attach interrupt handler
