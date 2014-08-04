@@ -77,19 +77,20 @@ class DecaDuino {
     boolean init();
     void resetDW1000();
     void dummy();
-    void writeSpi(uint8_t address, uint8_t* buf, uint16_t len);
     void readSpi(uint8_t address, uint8_t* buf, uint16_t len);
-    void writeSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* buf, uint16_t len);
     void readSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* buf, uint16_t len);
+    uint32_t readSpiUint32(uint8_t address);
+    void writeSpi(uint8_t address, uint8_t* buf, uint16_t len);
+    void writeSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* buf, uint16_t len);
+    void writeSpiUint32(uint8_t address, uint32_t ui32t);
     uint16_t getPanId();
-    void setPanId(uint16_t panId);
     uint16_t getShortAddress();
+    uint64_t getEuid();
+    void setPanId(uint16_t panId);
     void setShortAddress(uint16_t shortAddress);
     void plmeRxEnableRequest(void);
     void plmeRxDisableRequest(void);
     void plmeDataRequest(uint8_t* buf, uint16_t len);
-
-    void _my_handleInterrupt(); //temp
 
   private:
     /*
@@ -108,7 +109,7 @@ class DecaDuino {
     void encodeUint16 ( uint16_t from, uint8_t *to );
 
     /*
-    * Return a UINT32 based on two UINT8
+    * Return a UINT32 based on four UINT8
     * @author Adrien van den Bossche <bossche@irit.fr>
     * @date 20111123
     */
@@ -122,7 +123,24 @@ class DecaDuino {
     */
     void encodeUint32 ( uint32_t from, uint8_t *to );
 
+
+    /*
+    * Return a UINT64 based on eight UINT8
+    * @author Adrien van den Bossche <bossche@irit.fr>
+    * @date 20140804
+    */
+    uint64_t decodeUint64 ( uint8_t *data );
+
+    /*
+    * Place data from at to address
+    * No return
+    * @author Adrien van den Bossche <bossche@irit.fr>
+    * @date 20111011
+    */
+    void encodeUint64 ( uint64_t from, uint8_t *to );
+
     uint8_t buf[BUFFER_MAX_LEN];
+    uint64_t euid;
 
   protected:
     static void isr0();

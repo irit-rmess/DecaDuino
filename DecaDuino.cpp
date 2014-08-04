@@ -24,19 +24,21 @@ boolean DecaDuino::init() {
   pinMode(_slaveSelectPin, OUTPUT);
   digitalWrite(_slaveSelectPin, HIGH);
 
-  // Wait for DW1000 POR (up to 5msec)
-  delay(5);
-
   // Initialise buffer
   for (ui16t=0; ui16t<BUFFER_MAX_LEN; ui16t++)
     buf[ui16t] = 0;
+
+  // Wait for DW1000 POR (up to 5msec)
+  delay(5);
 
   // Reset the DW1000 now
   resetDW1000();
 
   // Check the device type
-  readSpi(DW1000_REGISTER_DEV_ID, buf, 4);
-  if ( decodeUint32(buf) != 0xdeca0130 ) return false;
+  if ( readSpiUint32(DW1000_REGISTER_DEV_ID) != 0xdeca0130 ) return false;
+
+  // Get Extended Unique Identifier – the 64-bit IEEE device address
+  euid = getEuid();
 
   // Attach interrupt handler
   if (_interruptPin == DW1000_IRQ0_PIN) {
@@ -50,16 +52,13 @@ boolean DecaDuino::init() {
     attachInterrupt(_interruptPin, DecaDuino::isr2, HIGH);
   } else return false;
 
-  delay(3000);
 
   // --- Configure DW1000 -----------------------------------------------------------------------------------------
 
   // System Configuration Register
-  readSpi(DW1000_REGISTER_SYS_CFG, buf, 4);
-  ui32t = decodeUint32(buf);
+  ui32t = readSpiUint32(DW1000_REGISTER_SYS_CFG);
   ui32t |= DW1000_REGISTER_SYS_CFG_RXAUTR_MASK; // RXAUTR: Receiver Auto-Re-enable after a RX failure
-  encodeUint32(ui32t, buf);
-  writeSpi(DW1000_REGISTER_SYS_CFG, buf, 4);
+  writeSpiUint32(DW1000_REGISTER_SYS_CFG,ui32t);
 
 #ifdef DECADUINO_DEBUG 
   sprintf((char*)buf,"SYS_CFG=%08x", ui32t);
@@ -67,11 +66,9 @@ boolean DecaDuino::init() {
 #endif
 
   // System Event Mask Register
-  readSpi(DW1000_REGISTER_SYS_MASK, buf, 4);
-  ui32t = decodeUint32(buf);
+  ui32t = readSpiUint32(DW1000_REGISTER_SYS_MASK);
   ui32t |= DW1000_REGISTER_SYS_MASK_MRXFCG_MASK; // MRXFCG: interrupt when good frame (FCS OK) received
-  encodeUint32(ui32t, buf);
-  writeSpi(DW1000_REGISTER_SYS_MASK, buf, 4);
+  writeSpiUint32(DW1000_REGISTER_SYS_MASK, ui32t);
 
 #ifdef DECADUINO_DEBUG 
   sprintf((char*)buf,"SYS_MASK=%08x", ui32t);
@@ -79,24 +76,6 @@ boolean DecaDuino::init() {
 #endif
 
   // --- End of DW1000 configuration ------------------------------------------------------------------------------
-
-  /*
-  readSpi(0x0E, buf, 4);
-  for (i=0; i<4; i++) {
-    Serial.print ("|");
-    Serial.print (buf[i], HEX);
-  }
-  Serial.println("|");
-  */
-
-  /*
-  setPanId(0xCAFE);
-  Serial.print("PANid: ");
-  Serial.println (getPanId(), HEX);
-  setShortAddress(0x1234);
-  Serial.print("Short address: ");
-  Serial.println (getShortAddress(), HEX);
-  */
 
   // Return true if everything OK
   return true;
@@ -113,8 +92,7 @@ void DecaDuino::resetDW1000() {
   CORE_PIN14_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); // and then reassign pin 14 to SCK
 
   // Getting PMSC_CTRL0 register
-  readSpi(DW1000_REGISTER_PMSC_CTRL0, buf, 4);
-  ui32t = decodeUint32(buf);
+  ui32t = readSpiUint32(DW1000_REGISTER_PMSC_CTRL0);
 
 #ifdef DECADUINO_DEBUG 
   sprintf((char*)buf,"PMSC_CTRL0=%08x", ui32t);
@@ -123,14 +101,12 @@ void DecaDuino::resetDW1000() {
 
   // Set SYSCLKS bits to 01
   ui32t = ( ui32t & 0xFFFFFFFC ) | 1;
-  encodeUint32(ui32t, buf);
-  writeSpi(DW1000_REGISTER_PMSC_CTRL0, buf, 4);
+  writeSpiUint32(DW1000_REGISTER_PMSC_CTRL0, ui32t);
   delay(1);
 
   // Clear SOFTRESET bits
   ui32t &= 0x0FFFFFFF;
-  encodeUint32(ui32t, buf);
-  writeSpi(DW1000_REGISTER_PMSC_CTRL0, buf, 4);
+  writeSpiUint32(DW1000_REGISTER_PMSC_CTRL0, ui32t);
   delay(1);
 
 #ifdef DECADUINO_DEBUG 
@@ -141,8 +117,7 @@ void DecaDuino::resetDW1000() {
   // Set SOFTRESET bits
   ui32t |= 0xF0000000;
   ui32t &= 0xFFFFFFFC;
-  encodeUint32(ui32t, buf);
-  writeSpi(DW1000_REGISTER_PMSC_CTRL0, buf, 4);
+  writeSpiUint32(DW1000_REGISTER_PMSC_CTRL0, ui32t);
   delay(1);
 
   // Initialise the SPI port
@@ -152,8 +127,7 @@ void DecaDuino::resetDW1000() {
   delay(1);
 
 #ifdef DECADUINO_DEBUG 
-  readSpi(DW1000_REGISTER_PMSC_CTRL0, buf, 4);
-  ui32t = decodeUint32(buf);
+  ui32t = readSpiUint32(DW1000_REGISTER_PMSC_CTRL0);
   sprintf((char*)buf,"PMSC_CTRL0=%08x", ui32t);
   Serial.println((char*)buf);
 #endif
@@ -191,8 +165,7 @@ void DecaDuino::handleInterrupt() {
   ack = 0;
 
   // Read System Event Status Register
-  readSpi(DW1000_REGISTER_SYS_STATUS, buf, 4);
-  statusReg = decodeUint32(buf);
+  statusReg = readSpiUint32(DW1000_REGISTER_SYS_STATUS);
 
 #ifdef DECADUINO_DEBUG 
   sprintf((char*)buf,"SYS_STATUS=%08x ", statusReg);
@@ -248,8 +221,8 @@ void DecaDuino::handleInterrupt() {
   }
 
   // Acknoledge by writing '1' in all set bits in the System Event Status Register
-  encodeUint32(statusReg, buf);
-  writeSpi(DW1000_REGISTER_SYS_STATUS, buf, 4);
+  //writeSpiUint32(DW1000_REGISTER_SYS_STATUS, statusReg);
+  writeSpiUint32(DW1000_REGISTER_SYS_STATUS, ack);
 }
 
 
@@ -266,8 +239,7 @@ void DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
   writeSpi(DW1000_REGISTER_TX_BUFFER, buf, len);
 
   // read tx frame control register
-  readSpi(DW1000_REGISTER_TX_FCTRL, buf, 4);
-  ui32t = decodeUint32(buf);
+  ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
  
 #ifdef DECADUINO_DEBUG 
   sprintf((char*)buf,"TX_FCTRL=%08x\n", ui32t);
@@ -275,17 +247,16 @@ void DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
 #endif
 
   // set frame length
-  encodeUint32((ui32t & ~DW1000_REGISTER_TX_FCTRL_FRAME_LENGTH_MASK) | len, buf);
-  writeSpi(DW1000_REGISTER_TX_FCTRL, buf, 4);
+  ui32t = (ui32t & ~DW1000_REGISTER_TX_FCTRL_FRAME_LENGTH_MASK) | len;
+  writeSpiUint32(DW1000_REGISTER_TX_FCTRL, ui32t);
 
   // set tx start bit
-  readSpi(DW1000_REGISTER_SYS_CTRL, buf, 4);
-  ui32t = decodeUint32(buf) | DW1000_REGISTER_SYS_CTRL_TXSTRT_MASK;
-  encodeUint32(ui32t, buf);
-  writeSpi(DW1000_REGISTER_SYS_CTRL, buf, 4);
+  ui32t = readSpiUint32(DW1000_REGISTER_SYS_CTRL);
+  ui32t |= DW1000_REGISTER_SYS_CTRL_TXSTRT_MASK;
+  writeSpiUint32(DW1000_REGISTER_SYS_CTRL, ui32t);
 
 #ifdef DECADUINO_DEBUG 
-  readSpi(DW1000_REGISTER_TX_FCTRL, buf, 4);
+  ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
   ui32t = decodeUint32(buf);
   sprintf((char*)buf,"TX_FCTRL=%08x\n", ui32t);
   Serial.println((char*)buf);
@@ -303,10 +274,9 @@ void DecaDuino::plmeRxEnableRequest(void) {
 #endif
 
   // set rx enable bit in system control register
-  readSpi(DW1000_REGISTER_SYS_CTRL, buf, 4);
-  ui32t = decodeUint32(buf) | DW1000_REGISTER_SYS_CTRL_RXENAB_MASK;
-  encodeUint32(ui32t, buf);
-  writeSpi(DW1000_REGISTER_SYS_CTRL, buf, 4);
+  ui32t = readSpiUint32(DW1000_REGISTER_SYS_CTRL);
+  ui32t |= DW1000_REGISTER_SYS_CTRL_RXENAB_MASK;
+  writeSpiUint32(DW1000_REGISTER_SYS_CTRL, ui32t);
 }
 
 
@@ -320,10 +290,9 @@ void DecaDuino::plmeRxDisableRequest(void) {
 #endif
 
   // set transceiver off bit in system control register
-  readSpi(DW1000_REGISTER_SYS_CTRL, buf, 4);
-  ui32t = decodeUint32(buf) | DW1000_REGISTER_SYS_CTRL_TRXOFF_MASK;
-  encodeUint32(ui32t, buf);
-  writeSpi(DW1000_REGISTER_SYS_CTRL, buf, 4);
+  ui32t = readSpiUint32(DW1000_REGISTER_SYS_CTRL);
+  ui32t |= DW1000_REGISTER_SYS_CTRL_TRXOFF_MASK;
+  writeSpiUint32(DW1000_REGISTER_SYS_CTRL, ui32t);
 }
 
 
@@ -351,6 +320,15 @@ void DecaDuino::readSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* 
 }
 
 
+uint32_t DecaDuino::readSpiUint32(uint8_t address) {
+
+  uint8_t buf[4];
+
+  readSpi(address, buf, 4);
+  return decodeUint32(buf);
+}
+
+
 void DecaDuino::writeSpi(uint8_t address, uint8_t* buf, uint16_t len) {
 
   uint8_t addr = 0 | (address & 0x3F) | 0x80; // Mask register address (6bits) and set MSb (Write) and no subaddress
@@ -372,6 +350,15 @@ void DecaDuino::writeSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t*
   spi4teensy3::send(sub_addr);
   spi4teensy3::send(buf,len);
   digitalWrite(_slaveSelectPin, HIGH);
+}
+
+
+void DecaDuino::writeSpiUint32(uint8_t address, uint32_t ui32t) {
+
+  uint8_t buf[4];
+
+  encodeUint32(ui32t, buf);
+  writeSpi(address, buf, 4);
 }
 
 
@@ -403,6 +390,25 @@ void DecaDuino::encodeUint32 ( uint32_t from, uint8_t *to ) {
 }
 
 
+uint64_t DecaDuino::decodeUint64 ( uint8_t *data ) {
+
+  return 0 | (data[7] << 56) | (data[6] << 48) | (data[5] << 40) | (data[4] << 32) | (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0];
+}
+
+
+void DecaDuino::encodeUint64 ( uint64_t from, uint8_t *to ) {
+
+  to[7] = (from & 0xFF00000000000000) >> 56;
+  to[6] = (from & 0xFF000000000000) >> 48;
+  to[5] = (from & 0xFF0000000000) >> 40;
+  to[4] = (from & 0xFF00000000) >> 32;
+  to[3] = (from & 0xFF000000) >> 24;
+  to[2] = (from & 0xFF0000) >> 16;
+  to[1] = (from & 0xFF00) >> 8;
+  to[0] = from & 0xFF;
+}
+
+
 uint16_t DecaDuino::getPanId() {
 
   readSpiSubAddress(DW1000_REGISTER_PANADR, DW1000_REGISTER_PANADR_PANID_OFFSET, buf, 2);
@@ -410,17 +416,24 @@ uint16_t DecaDuino::getPanId() {
 }
 
 
-void DecaDuino::setPanId(uint16_t panId) {
-
-  encodeUint16(panId, buf);
-  writeSpiSubAddress(DW1000_REGISTER_PANADR, DW1000_REGISTER_PANADR_PANID_OFFSET, buf, 2);
-}
-
-
 uint16_t DecaDuino::getShortAddress() {
 
   readSpiSubAddress(DW1000_REGISTER_PANADR, DW1000_REGISTER_PANADR_SHORT_ADDRESS_OFFSET, buf, 2);
   return decodeUint16(buf);
+}
+
+
+uint64_t DecaDuino::getEuid() {
+
+  readSpi(DW1000_REGISTER_EUI, buf, 8);
+  return decodeUint64(buf);
+}
+
+
+void DecaDuino::setPanId(uint16_t panId) {
+
+  encodeUint16(panId, buf);
+  writeSpiSubAddress(DW1000_REGISTER_PANADR, DW1000_REGISTER_PANADR_PANID_OFFSET, buf, 2);
 }
 
 
