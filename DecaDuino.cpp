@@ -4,6 +4,7 @@
 // See the README file in this directory for documentation
 
 #include "DecaDuino.h"
+#include <util/atomic.h>
 
 DecaDuino* DecaDuino::_DecaDuinoInterrupt[MAX_NB_DW1000_FOR_INTERRUPTS] = {0, 0, 0};
 
@@ -300,10 +301,12 @@ void DecaDuino::readSpi(uint8_t address, uint8_t* buf, uint16_t len) {
 
   uint8_t addr = 0 | (address & 0x3F) ; // Mask register address (6bits) and preserve MSb at low (Read) and no subaddress
 
-  digitalWrite(_slaveSelectPin, LOW);
-  spi4teensy3::send(addr);
-  spi4teensy3::receive(buf,len);
-  digitalWrite(_slaveSelectPin, HIGH);
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    digitalWrite(_slaveSelectPin, LOW);
+    spi4teensy3::send(addr);
+    spi4teensy3::receive(buf,len);
+    digitalWrite(_slaveSelectPin, HIGH);
+  }
 }
 
 
@@ -312,11 +315,13 @@ void DecaDuino::readSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* 
   uint8_t addr = 0 | (address & 0x3F) | 0x40; // Mask register address (6bits), preserve MSb at low (Read) and set subaddress present bit (0x40)
   uint8_t sub_addr = 0 | (subAddress & 0x3F); // Mask register address (6bits)
 
-  digitalWrite(_slaveSelectPin, LOW);
-  spi4teensy3::send(addr);
-  spi4teensy3::send(sub_addr);
-  spi4teensy3::receive(buf,len);
-  digitalWrite(_slaveSelectPin, HIGH);
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    digitalWrite(_slaveSelectPin, LOW);
+    spi4teensy3::send(addr);
+    spi4teensy3::send(sub_addr);
+    spi4teensy3::receive(buf,len);
+    digitalWrite(_slaveSelectPin, HIGH); 
+  }
 }
 
 
@@ -333,10 +338,12 @@ void DecaDuino::writeSpi(uint8_t address, uint8_t* buf, uint16_t len) {
 
   uint8_t addr = 0 | (address & 0x3F) | 0x80; // Mask register address (6bits) and set MSb (Write) and no subaddress
 
-  digitalWrite(_slaveSelectPin, LOW);
-  spi4teensy3::send(addr);
-  spi4teensy3::send(buf,len);
-  digitalWrite(_slaveSelectPin, HIGH);
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    digitalWrite(_slaveSelectPin, LOW);
+    spi4teensy3::send(addr);
+    spi4teensy3::send(buf,len);
+    digitalWrite(_slaveSelectPin, HIGH);
+  }
 }
 
 
@@ -345,11 +352,13 @@ void DecaDuino::writeSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t*
   uint8_t addr = 0 | (address & 0x3F) | 0x80 | 0x40; // Mask register address (6bits), set MSb (Write) and set subaddress present bit (0x40)
   uint8_t sub_addr = 0 | (subAddress & 0x3F); // Mask register address (6bits)
 
-  digitalWrite(_slaveSelectPin, LOW);
-  spi4teensy3::send(addr);
-  spi4teensy3::send(sub_addr);
-  spi4teensy3::send(buf,len);
-  digitalWrite(_slaveSelectPin, HIGH);
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    digitalWrite(_slaveSelectPin, LOW);
+    spi4teensy3::send(addr);
+    spi4teensy3::send(sub_addr);
+    spi4teensy3::send(buf,len);
+    digitalWrite(_slaveSelectPin, HIGH);
+  }
 }
 
 
