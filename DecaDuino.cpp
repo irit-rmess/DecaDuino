@@ -188,7 +188,7 @@ void DecaDuino::handleInterrupt() {
 #endif
       // get frame length
       readSpi(DW1000_REGISTER_RX_FINFO, debugStr, 2);
-      frameLen = decodeUint16(debugStr) & DW1000_REGISTER_RX_FINFO_RXFLEN_MASK;
+      frameLen = decodeUint16(debugStr) & DW1000_REGISTER_RX_FINFO_RXFLEN_MASK - 2; // FCS is 2-bytes long. Avoid it.
 #ifdef DECADUINO_DEBUG 
   sprintf((char*)debugStr,"length=%dbytes |", frameLen);
   Serial.print((char*)debugStr);
@@ -224,6 +224,7 @@ void DecaDuino::handleInterrupt() {
   // Acknoledge by writing '1' in all set bits in the System Event Status Register
   //writeSpiUint32(DW1000_REGISTER_SYS_STATUS, statusReg);
   writeSpiUint32(DW1000_REGISTER_SYS_STATUS, ack);
+
 #ifdef DECADUINO_DEBUG 
       Serial.println();
 #endif
@@ -239,25 +240,27 @@ void DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
   Serial.println((char*)debugStr);
 #endif
 
-  // copy PSDU in tx buffer
-  writeSpi(DW1000_REGISTER_TX_BUFFER, buf, len);
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    // copy PSDU in tx buffer
+    writeSpi(DW1000_REGISTER_TX_BUFFER, buf, len);
 
-  // read tx frame control register
-  ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
+    // read tx frame control register
+    ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
  
 #ifdef DECADUINO_DEBUG 
-  sprintf((char*)debugStr,"TX_FCTRL=%08x\n", ui32t);
-  Serial.println((char*)debugStr);
+    sprintf((char*)debugStr,"TX_FCTRL=%08x\n", ui32t);
+    Serial.println((char*)debugStr);
 #endif
 
-  // set frame length
-  ui32t = (ui32t & ~DW1000_REGISTER_TX_FCTRL_FRAME_LENGTH_MASK) | len;
-  writeSpiUint32(DW1000_REGISTER_TX_FCTRL, ui32t);
+    // set frame length
+    ui32t = (ui32t & ~DW1000_REGISTER_TX_FCTRL_FRAME_LENGTH_MASK) | len+2; // FCS is 2-bytes long
+    writeSpiUint32(DW1000_REGISTER_TX_FCTRL, ui32t);
 
-  // set tx start bit
-  ui32t = readSpiUint32(DW1000_REGISTER_SYS_CTRL);
-  ui32t |= DW1000_REGISTER_SYS_CTRL_TXSTRT_MASK;
-  writeSpiUint32(DW1000_REGISTER_SYS_CTRL, ui32t);
+    // set tx start bit
+    ui32t = readSpiUint32(DW1000_REGISTER_SYS_CTRL);
+    ui32t |= DW1000_REGISTER_SYS_CTRL_TXSTRT_MASK;
+    writeSpiUint32(DW1000_REGISTER_SYS_CTRL, ui32t);
+  }
 
 #ifdef DECADUINO_DEBUG 
   ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
