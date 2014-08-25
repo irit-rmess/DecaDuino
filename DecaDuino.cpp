@@ -122,7 +122,7 @@ void DecaDuino::resetDW1000() {
   delay(1);
 
   // Initialise the SPI port
-  spi4teensy3::init(1,0,0); // Normal speed SPICLK for performing DW1000 reset
+  spi4teensy3::init(1,0,0); // Normal speed SPICLK after performing DW1000 reset
   CORE_PIN13_CONFIG = PORT_PCR_MUX(1); // First reassign pin 13 to Alt1 so that it is not SCK but the LED still works
   CORE_PIN14_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); // and then reassign pin 14 to SCK
   delay(1);
@@ -137,21 +137,21 @@ void DecaDuino::resetDW1000() {
 
 void DecaDuino::isr0() {
 
-  Serial.println("isr0");
+  Serial.println("\n###isr0###");
   if (_DecaDuinoInterrupt[DW1000_IRQ0_PIN]) _DecaDuinoInterrupt[DW1000_IRQ0_PIN]->handleInterrupt();
 }
 
 
 void DecaDuino::isr1() {
 
-  Serial.println("isr1");
+  Serial.println("\n###isr1###");
   if (_DecaDuinoInterrupt[DW1000_IRQ1_PIN]) _DecaDuinoInterrupt[DW1000_IRQ1_PIN]->handleInterrupt();
 }
 
 
 void DecaDuino::isr2() {
 
-  Serial.println("isr2");
+  Serial.println("\n###isr2###");
   if (_DecaDuinoInterrupt[DW1000_IRQ2_PIN]) _DecaDuinoInterrupt[DW1000_IRQ2_PIN]->handleInterrupt();
 }
 
@@ -224,6 +224,9 @@ void DecaDuino::handleInterrupt() {
   // Acknoledge by writing '1' in all set bits in the System Event Status Register
   //writeSpiUint32(DW1000_REGISTER_SYS_STATUS, statusReg);
   writeSpiUint32(DW1000_REGISTER_SYS_STATUS, ack);
+#ifdef DECADUINO_DEBUG 
+      Serial.println();
+#endif
 }
 
 
