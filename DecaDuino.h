@@ -123,7 +123,6 @@ class DecaDuino {
     */
     void encodeUint32 ( uint32_t from, uint8_t *to );
 
-
     /*
     * Return a UINT64 based on eight UINT8
     * @author Adrien van den Bossche <bossche@irit.fr>
@@ -141,6 +140,9 @@ class DecaDuino {
 
     uint8_t buf[BUFFER_MAX_LEN];
     uint64_t euid;
+#ifdef DECADUINO_DEBUG
+    uint8_t debugStr[BUFFER_MAX_LEN];
+#endif
 
   protected:
     static void isr0();

@@ -62,8 +62,8 @@ boolean DecaDuino::init() {
   writeSpiUint32(DW1000_REGISTER_SYS_CFG,ui32t);
 
 #ifdef DECADUINO_DEBUG 
-  sprintf((char*)buf,"SYS_CFG=%08x", ui32t);
-  Serial.println((char*)buf);
+  sprintf((char*)debugStr,"SYS_CFG=%08x", ui32t);
+  Serial.println((char*)debugStr);
 #endif
 
   // System Event Mask Register
@@ -72,8 +72,8 @@ boolean DecaDuino::init() {
   writeSpiUint32(DW1000_REGISTER_SYS_MASK, ui32t);
 
 #ifdef DECADUINO_DEBUG 
-  sprintf((char*)buf,"SYS_MASK=%08x", ui32t);
-  Serial.println((char*)buf);
+  sprintf((char*)debugStr,"SYS_MASK=%08x", ui32t);
+  Serial.println((char*)debugStr);
 #endif
 
   // --- End of DW1000 configuration ------------------------------------------------------------------------------
@@ -96,8 +96,8 @@ void DecaDuino::resetDW1000() {
   ui32t = readSpiUint32(DW1000_REGISTER_PMSC_CTRL0);
 
 #ifdef DECADUINO_DEBUG 
-  sprintf((char*)buf,"PMSC_CTRL0=%08x", ui32t);
-  Serial.println((char*)buf);
+  sprintf((char*)debugStr,"PMSC_CTRL0=%08x", ui32t);
+  Serial.println((char*)debugStr);
 #endif
 
   // Set SYSCLKS bits to 01
@@ -111,8 +111,8 @@ void DecaDuino::resetDW1000() {
   delay(1);
 
 #ifdef DECADUINO_DEBUG 
-  sprintf((char*)buf,"PMSC_CTRL0=%08x", ui32t);
-  Serial.println((char*)buf);
+  sprintf((char*)debugStr,"PMSC_CTRL0=%08x", ui32t);
+  Serial.println((char*)debugStr);
 #endif
 
   // Set SOFTRESET bits
@@ -129,8 +129,8 @@ void DecaDuino::resetDW1000() {
 
 #ifdef DECADUINO_DEBUG 
   ui32t = readSpiUint32(DW1000_REGISTER_PMSC_CTRL0);
-  sprintf((char*)buf,"PMSC_CTRL0=%08x", ui32t);
-  Serial.println((char*)buf);
+  sprintf((char*)debugStr,"PMSC_CTRL0=%08x", ui32t);
+  Serial.println((char*)debugStr);
 #endif
 }
 
@@ -169,8 +169,8 @@ void DecaDuino::handleInterrupt() {
   statusReg = readSpiUint32(DW1000_REGISTER_SYS_STATUS);
 
 #ifdef DECADUINO_DEBUG 
-  sprintf((char*)buf,"SYS_STATUS=%08x ", statusReg);
-  Serial.print((char*)buf);
+  sprintf((char*)debugStr,"SYS_STATUS=%08x ", statusReg);
+  Serial.print((char*)debugStr);
 #endif
 
   // Checking RX frame interrupt
@@ -187,19 +187,19 @@ void DecaDuino::handleInterrupt() {
       Serial.print("RXFCG ");
 #endif
       // get frame length
-      readSpi(DW1000_REGISTER_RX_FINFO, buf, 2);
-      frameLen = decodeUint16(buf) & DW1000_REGISTER_RX_FINFO_RXFLEN_MASK;
+      readSpi(DW1000_REGISTER_RX_FINFO, debugStr, 2);
+      frameLen = decodeUint16(debugStr) & DW1000_REGISTER_RX_FINFO_RXFLEN_MASK;
 #ifdef DECADUINO_DEBUG 
-  sprintf((char*)buf,"length=%dbytes |", frameLen);
-  Serial.print((char*)buf);
+  sprintf((char*)debugStr,"length=%dbytes |", frameLen);
+  Serial.print((char*)debugStr);
 #endif
 
       // get frame data
       readSpi(DW1000_REGISTER_RX_BUFFER, buf, frameLen);
 #ifdef DECADUINO_DEBUG
       for (i=0; i<frameLen; i++) { 
-        sprintf((char*)buf,"%02x|", buf[i]);
-        Serial.print((char*)buf);
+        sprintf((char*)debugStr,"%02x|", buf[i]);
+        Serial.print((char*)debugStr);
       }
 #endif
 
@@ -235,8 +235,8 @@ void DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
   uint32_t ui32t;
 
 #ifdef DECADUINO_DEBUG 
-  sprintf((char*)buf,"I will send %dbyte(s)\n", len);
-  Serial.println((char*)buf);
+  sprintf((char*)debugStr,"I will send %dbyte(s)\n", len);
+  Serial.println((char*)debugStr);
 #endif
 
   // copy PSDU in tx buffer
@@ -246,8 +246,8 @@ void DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
   ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
  
 #ifdef DECADUINO_DEBUG 
-  sprintf((char*)buf,"TX_FCTRL=%08x\n", ui32t);
-  Serial.println((char*)buf);
+  sprintf((char*)debugStr,"TX_FCTRL=%08x\n", ui32t);
+  Serial.println((char*)debugStr);
 #endif
 
   // set frame length
@@ -262,8 +262,8 @@ void DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
 #ifdef DECADUINO_DEBUG 
   ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
   ui32t = decodeUint32(buf);
-  sprintf((char*)buf,"TX_FCTRL=%08x\n", ui32t);
-  Serial.println((char*)buf);
+  sprintf((char*)debugStr,"TX_FCTRL=%08x\n", ui32t);
+  Serial.println((char*)debugStr);
 #endif
 }
 
@@ -273,8 +273,8 @@ void DecaDuino::plmeRxEnableRequest(void) {
   uint32_t ui32t;
 
 #ifdef DECADUINO_DEBUG 
-  sprintf((char*)buf,"RX enable request");
-  Serial.println((char*)buf);
+  sprintf((char*)debugStr,"RX enable request");
+  Serial.println((char*)debugStr);
 #endif
 
   // set rx enable bit in system control register
@@ -289,8 +289,8 @@ void DecaDuino::plmeRxDisableRequest(void) {
   uint32_t ui32t;
 
 #ifdef DECADUINO_DEBUG 
-  sprintf((char*)buf,"RX disable request");
-  Serial.println((char*)buf);
+  sprintf((char*)debugStr,"RX disable request");
+  Serial.println((char*)debugStr);
 #endif
 
   // set transceiver off bit in system control register
