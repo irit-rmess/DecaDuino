@@ -1,7 +1,6 @@
 #include <spi4teensy3.h>
 #include <DecaDuino.h>
 
-int i;
 int rxFrames;
 
 DecaDuino decaduino;
@@ -9,10 +8,6 @@ uint8_t txData[128];
 uint8_t rxData[128];
 uint16_t rxLen;
 #define FRAME_LEN 64
-
-#define SENDER
-// ou
-//#define RECEIVER
 
 
 void setup() {
@@ -24,11 +19,9 @@ void setup() {
     while(1);
   }
   
-  #ifdef RECEIVER
   rxFrames = 0;
   decaduino.setRxBuffer(rxData, &rxLen);
   decaduino.plmeRxEnableRequest();
-  #endif
   
   //Serial.println(decaduino.getEuid, HEX);
 }
@@ -37,7 +30,6 @@ void loop() {
   
   int i;
 
-  #ifdef RECEIVER
   if ( decaduino.rxFrameAvailable() ) {
     digitalWrite(13, HIGH);
     Serial.print("["); Serial.print(++rxFrames); Serial.print("] ");
@@ -51,17 +43,6 @@ void loop() {
     decaduino.plmeRxEnableRequest();
     digitalWrite(13, LOW);
   }
-  #endif
-
-  #ifdef SENDER
-  digitalWrite(13, HIGH);
-  for (i=0; i<FRAME_LEN; i++)
-    txData[i] = i;
-  decaduino.plmeDataRequest(txData, FRAME_LEN);
-  delay(1);
-  digitalWrite(13, LOW);
-  delay(1000);
-  #endif
 }
 
 

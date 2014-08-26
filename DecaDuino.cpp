@@ -63,8 +63,8 @@ boolean DecaDuino::init() {
 
   // System Configuration Register
   ui32t = readSpiUint32(DW1000_REGISTER_SYS_CFG);
-  //ui32t |= DW1000_REGISTER_SYS_CFG_RXAUTR_MASK; // RXAUTR: Receiver Auto-Re-enable after a RX failure
-  //writeSpiUint32(DW1000_REGISTER_SYS_CFG,ui32t);
+  ui32t |= DW1000_REGISTER_SYS_CFG_RXAUTR_MASK; // RXAUTR: Receiver Auto-Re-enable after a RX failure
+  writeSpiUint32(DW1000_REGISTER_SYS_CFG,ui32t);
 
 #ifdef DECADUINO_DEBUG 
   sprintf((char*)debugStr,"SYS_CFG=%08x", ui32t);
@@ -206,7 +206,7 @@ void DecaDuino::handleInterrupt() {
     return;
 
 #ifdef DECADUINO_DEBUG 
-  Serial.println("\n###isr###");
+  Serial.print("\n###isr### ");
   //ui32t = readSpiUint32(DW1000_REGISTER_SYS_MASK);
   //sprintf((char*)debugStr,"SYS_MASK  =%08x", ui32t);
   //Serial.println((char*)debugStr);
@@ -240,18 +240,11 @@ void DecaDuino::handleInterrupt() {
         ui32t = (readSpiUint32(DW1000_REGISTER_RX_FINFO) & DW1000_REGISTER_RX_FINFO_RXFLEN_MASK) - 2; // FCS is 2-bytes long. Avoid it in the len.
         *rxDataLen = (uint16_t)ui32t;
 #ifdef DECADUINO_DEBUG 
-        sprintf((char*)debugStr,"length=%dbytes |", *rxDataLen);
+        sprintf((char*)debugStr,"length=%dbytes ", *rxDataLen);
         Serial.print((char*)debugStr);
 #endif
-
         // get frame data
         readSpi(DW1000_REGISTER_RX_BUFFER, rxData, *rxDataLen);
-#ifdef DECADUINO_DEBUG
-        for (i=0; i<*rxDataLen; i++) { 
-          sprintf((char*)debugStr,"%02x|", rxData[i]);
-          Serial.print((char*)debugStr);
-        }
-#endif
         rxDataAvailable = true;
       }
       // Clearing the RXFCG bit (it clears the interrupt if enabled)
@@ -273,7 +266,6 @@ void DecaDuino::handleInterrupt() {
   }
 
   // Acknoledge by writing '1' in all set bits in the System Event Status Register
-  //writeSpiUint32(DW1000_REGISTER_SYS_STATUS, sysStatusReg);
   writeSpiUint32(DW1000_REGISTER_SYS_STATUS, ack);
 
 #ifdef DECADUINO_DEBUG 
@@ -287,8 +279,8 @@ uint8_t DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
   uint32_t ui32t;
 
 #ifdef DECADUINO_DEBUG 
-  sprintf((char*)debugStr,"I will send %dbyte(s)\n", len);
-  Serial.println((char*)debugStr);
+  sprintf((char*)debugStr,"Request to send %dbyte(s) ", len);
+  Serial.print((char*)debugStr);
 #endif
 
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
@@ -297,29 +289,19 @@ uint8_t DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
 
     // read tx frame control register
     ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
- 
-#ifdef DECADUINO_DEBUG 
-    sprintf((char*)debugStr,"TX_FCTRL=%08x\n", ui32t);
-    Serial.println((char*)debugStr);
-#endif
 
     // set frame length
     ui32t = (ui32t & ~DW1000_REGISTER_TX_FCTRL_FRAME_LENGTH_MASK) | len+2; // FCS is 2-bytes long
     writeSpiUint32(DW1000_REGISTER_TX_FCTRL, ui32t);
 
     // set tx start bit
-    //ui32t = readSpiUint32(DW1000_REGISTER_SYS_CTRL);
-    //ui32t |= DW1000_REGISTER_SYS_CTRL_TXSTRT_MASK;
-    //writeSpiUint32(DW1000_REGISTER_SYS_CTRL, ui32t);
     writeSpiUint32(DW1000_REGISTER_SYS_CTRL, DW1000_REGISTER_SYS_CTRL_TXSTRT_MASK);
   }
 
 #ifdef DECADUINO_DEBUG 
-  //sprintf((char*)debugStr,"SYS_CTRL=%08x\n", ui32t);
-  //Serial.println((char*)debugStr);
   ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
   sprintf((char*)debugStr,"TX_FCTRL=%08x\n", ui32t);
-  Serial.println((char*)debugStr);
+  Serial.print((char*)debugStr);
 #endif
 
   return true;
