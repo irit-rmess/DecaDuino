@@ -78,10 +78,10 @@ class DecaDuino {
     void resetDW1000();
     void dummy();
     void readSpi(uint8_t address, uint8_t* buf, uint16_t len);
-    void readSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* buf, uint16_t len);
+    void readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len);
     uint32_t readSpiUint32(uint8_t address);
     void writeSpi(uint8_t address, uint8_t* buf, uint16_t len);
-    void writeSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* buf, uint16_t len);
+    void writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len);
     void writeSpiUint32(uint8_t address, uint32_t ui32t);
     uint16_t getPanId();
     uint16_t getShortAddress();

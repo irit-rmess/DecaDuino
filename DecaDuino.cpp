@@ -32,6 +32,10 @@ boolean DecaDuino::init() {
   // Wait for DW1000 POR (up to 5msec)
   delay(5);
 
+#ifdef DECADUINO_DEBUG 
+  delay(3000); // delay to see next messages on console for debug
+#endif
+
   // Reset the DW1000 now
   resetDW1000();
 
@@ -52,7 +56,6 @@ boolean DecaDuino::init() {
     _DecaDuinoInterrupt[DW1000_IRQ2_PIN] = this;
     attachInterrupt(_interruptPin, DecaDuino::isr2, HIGH);
   } else return false;
-
 
   // --- Configure DW1000 -----------------------------------------------------------------------------------------
 
@@ -75,7 +78,7 @@ boolean DecaDuino::init() {
   sprintf((char*)debugStr,"SYS_MASK=%08x", ui32t);
   Serial.println((char*)debugStr);
 #endif
-
+  
   // --- End of DW1000 configuration ------------------------------------------------------------------------------
 
   // Return true if everything OK
@@ -137,21 +140,27 @@ void DecaDuino::resetDW1000() {
 
 void DecaDuino::isr0() {
 
+#ifdef DECADUINO_DEBUG 
   Serial.println("\n###isr0###");
+#endif
   if (_DecaDuinoInterrupt[DW1000_IRQ0_PIN]) _DecaDuinoInterrupt[DW1000_IRQ0_PIN]->handleInterrupt();
 }
 
 
 void DecaDuino::isr1() {
 
+#ifdef DECADUINO_DEBUG 
   Serial.println("\n###isr1###");
+#endif
   if (_DecaDuinoInterrupt[DW1000_IRQ1_PIN]) _DecaDuinoInterrupt[DW1000_IRQ1_PIN]->handleInterrupt();
 }
 
 
 void DecaDuino::isr2() {
 
+#ifdef DECADUINO_DEBUG 
   Serial.println("\n###isr2###");
+#endif
   if (_DecaDuinoInterrupt[DW1000_IRQ2_PIN]) _DecaDuinoInterrupt[DW1000_IRQ2_PIN]->handleInterrupt();
 }
 
@@ -224,6 +233,7 @@ void DecaDuino::handleInterrupt() {
   // Acknoledge by writing '1' in all set bits in the System Event Status Register
   //writeSpiUint32(DW1000_REGISTER_SYS_STATUS, statusReg);
   writeSpiUint32(DW1000_REGISTER_SYS_STATUS, ack);
+  delay(10);
 
 #ifdef DECADUINO_DEBUG 
       Serial.println();
@@ -316,17 +326,30 @@ void DecaDuino::readSpi(uint8_t address, uint8_t* buf, uint16_t len) {
 }
 
 
-void DecaDuino::readSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* buf, uint16_t len) {
+void DecaDuino::readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len) {
 
-  uint8_t addr = 0 | (address & 0x3F) | 0x40; // Mask register address (6bits), preserve MSb at low (Read) and set subaddress present bit (0x40)
-  uint8_t sub_addr = 0 | (subAddress & 0x3F); // Mask register address (6bits)
+  uint8_t addr, sub_addr, sub_sub_addr;
 
-  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-    digitalWrite(_slaveSelectPin, LOW);
-    spi4teensy3::send(addr);
-    spi4teensy3::send(sub_addr);
-    spi4teensy3::receive(buf,len);
-    digitalWrite(_slaveSelectPin, HIGH); 
+  addr = 0 | (address & 0x3F) | 0x40; // Mask register address (6bits), preserve MSb at low (Read) and set subaddress present bit (0x40)
+
+  if ( subAddress < 128 ) {
+
+    // This is a 2-bytes header SPI transaction
+
+    sub_addr = 0 | (subAddress & 0x3F); // Mask register address (6bits)
+
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+      digitalWrite(_slaveSelectPin, LOW);
+      spi4teensy3::send(addr);
+      spi4teensy3::send(sub_addr);
+      spi4teensy3::receive(buf,len);
+      digitalWrite(_slaveSelectPin, HIGH); 
+    }
+
+  } else {
+
+    // This is a 3-bytes header SPI transaction
+    /** @todo implement readSpiSubAddress in case of a 3-bytes header SPI transaction */
   }
 }
 
@@ -353,17 +376,30 @@ void DecaDuino::writeSpi(uint8_t address, uint8_t* buf, uint16_t len) {
 }
 
 
-void DecaDuino::writeSpiSubAddress(uint8_t address, uint8_t subAddress, uint8_t* buf, uint16_t len) {
+void DecaDuino::writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len) {
 
-  uint8_t addr = 0 | (address & 0x3F) | 0x80 | 0x40; // Mask register address (6bits), set MSb (Write) and set subaddress present bit (0x40)
-  uint8_t sub_addr = 0 | (subAddress & 0x3F); // Mask register address (6bits)
+  uint8_t addr, sub_addr, sub_sub_addr;
 
-  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-    digitalWrite(_slaveSelectPin, LOW);
-    spi4teensy3::send(addr);
-    spi4teensy3::send(sub_addr);
-    spi4teensy3::send(buf,len);
-    digitalWrite(_slaveSelectPin, HIGH);
+  addr = 0 | (address & 0x3F) | 0x80 | 0x40; // Mask register address (6bits), set MSb (Write) and set subaddress present bit (0x40)
+
+  if ( subAddress < 128 ) {
+
+    // This is a 2-bytes header SPI transaction
+
+    sub_addr = 0 | (subAddress & 0x3F); // Mask register address (6bits)
+
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+      digitalWrite(_slaveSelectPin, LOW);
+      spi4teensy3::send(addr);
+      spi4teensy3::send(sub_addr);
+      spi4teensy3::send(buf,len);
+      digitalWrite(_slaveSelectPin, HIGH);
+    }
+
+  } else {
+
+    // This is a 3-bytes header SPI transaction
+    /** @todo implement writeSpiSubAddress in case of a 3-bytes header SPI transaction */
   }
 }
 
