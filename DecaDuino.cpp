@@ -61,8 +61,8 @@ boolean DecaDuino::init() {
 
   // System Configuration Register
   ui32t = readSpiUint32(DW1000_REGISTER_SYS_CFG);
-  ui32t |= DW1000_REGISTER_SYS_CFG_RXAUTR_MASK; // RXAUTR: Receiver Auto-Re-enable after a RX failure
-  writeSpiUint32(DW1000_REGISTER_SYS_CFG,ui32t);
+  //ui32t |= DW1000_REGISTER_SYS_CFG_RXAUTR_MASK; // RXAUTR: Receiver Auto-Re-enable after a RX failure
+  //writeSpiUint32(DW1000_REGISTER_SYS_CFG,ui32t);
 
 #ifdef DECADUINO_DEBUG 
   sprintf((char*)debugStr,"SYS_CFG=%08x", ui32t);
@@ -78,7 +78,31 @@ boolean DecaDuino::init() {
   sprintf((char*)debugStr,"SYS_MASK=%08x", ui32t);
   Serial.println((char*)debugStr);
 #endif
-  
+
+  // Load the LDE algorithm microcode into LDE RAM or disable LDE execution (clear LDERUNE)
+  // Load the LDE algorithm microcode into LDE RAM (procedure p.22 DW1000 User Manual + comment p.21)
+  // /!\ ceci utilise la mémoire OTP donc potentiellement destructeur. Implémenté mais
+  // non testé : je préfère "disable LDE execution" plus bas
+  //encodeUint16(0x0301, buf);
+  //writeSpiSubAddress(0x36, 0, buf, 2);
+  //encodeUint16(0x8000, buf);
+  //writeSpiSubAddress(0x2D, 0x06, buf, 2);
+  //delay(1);
+  //encodeUint16(0x0200, buf);
+  //writeSpiSubAddress(0x36, 0, buf, 2);
+
+  // Disable LDE execution (clear LDERUNE)
+  readSpiSubAddress(0x36, 4, buf, 4);
+  ui32t = decodeUint32(buf);
+  ui32t &= 0xFFFDFFFF; // clear bit17 (LDERUNE)
+  encodeUint32(ui32t, buf);
+  writeSpiSubAddress(0x36, 4, buf, 4);
+
+#ifdef DECADUINO_DEBUG 
+  sprintf((char*)debugStr,"PMSC_CTRL1=%08x", ui32t);
+  Serial.println((char*)debugStr);
+#endif
+
   // --- End of DW1000 configuration ------------------------------------------------------------------------------
 
   // Return true if everything OK
@@ -141,7 +165,7 @@ void DecaDuino::resetDW1000() {
 void DecaDuino::isr0() {
 
 #ifdef DECADUINO_DEBUG 
-  Serial.println("\n###isr0###");
+  //Serial.println("\n###isr0###");
 #endif
   if (_DecaDuinoInterrupt[DW1000_IRQ0_PIN]) _DecaDuinoInterrupt[DW1000_IRQ0_PIN]->handleInterrupt();
 }
@@ -150,7 +174,7 @@ void DecaDuino::isr0() {
 void DecaDuino::isr1() {
 
 #ifdef DECADUINO_DEBUG 
-  Serial.println("\n###isr1###");
+  //Serial.println("\n###isr1###");
 #endif
   if (_DecaDuinoInterrupt[DW1000_IRQ1_PIN]) _DecaDuinoInterrupt[DW1000_IRQ1_PIN]->handleInterrupt();
 }
@@ -159,7 +183,7 @@ void DecaDuino::isr1() {
 void DecaDuino::isr2() {
 
 #ifdef DECADUINO_DEBUG 
-  Serial.println("\n###isr2###");
+  //Serial.println("\n###isr2###");
 #endif
   if (_DecaDuinoInterrupt[DW1000_IRQ2_PIN]) _DecaDuinoInterrupt[DW1000_IRQ2_PIN]->handleInterrupt();
 }
@@ -168,29 +192,37 @@ void DecaDuino::isr2() {
 void DecaDuino::handleInterrupt() {
 
   uint8_t buf[BUFFER_MAX_LEN];
-  uint32_t statusReg, ack;
+  uint32_t sysStatusReg, ack, ui32t;
   uint16_t frameLen;
   uint16_t i;
 
   ack = 0;
 
   // Read System Event Status Register
-  statusReg = readSpiUint32(DW1000_REGISTER_SYS_STATUS);
+  sysStatusReg = readSpiUint32(DW1000_REGISTER_SYS_STATUS);
+
+  // If IRQS is cleared, no enabled interrupt (SYS_MASK) have assert the IRQ pin: exit
+  if ( ! ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_IRQS_MASK ) )
+    return;
 
 #ifdef DECADUINO_DEBUG 
-  sprintf((char*)debugStr,"SYS_STATUS=%08x ", statusReg);
+  Serial.println("\n###isr###");
+  //ui32t = readSpiUint32(DW1000_REGISTER_SYS_MASK);
+  //sprintf((char*)debugStr,"SYS_MASK  =%08x", ui32t);
+  //Serial.println((char*)debugStr);
+  sprintf((char*)debugStr,"SYS_STATUS=%08x ", sysStatusReg);
   Serial.print((char*)debugStr);
 #endif
 
   // Checking RX frame interrupt
-  if ( statusReg & DW1000_REGISTER_SYS_STATUS_RXDFR_MASK ) { // RXDFR
+  if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_RXDFR_MASK ) { // RXDFR
 
 #ifdef DECADUINO_DEBUG 
     Serial.print("RXDFR ");
 #endif
 
     // Good frame
-    if ( statusReg & DW1000_REGISTER_SYS_STATUS_RXFCG_MASK ) { // RXFCG
+    if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_RXFCG_MASK ) { // RXFCG
 
 #ifdef DECADUINO_DEBUG 
       Serial.print("RXFCG ");
@@ -217,7 +249,7 @@ void DecaDuino::handleInterrupt() {
     }
 
     // Bad frame (FCS error)
-    if ( statusReg & DW1000_REGISTER_SYS_STATUS_RXFCE_MASK ) { // RXFCE
+    if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_RXFCE_MASK ) { // RXFCE
 
 #ifdef DECADUINO_DEBUG 
       Serial.println("RXFCG (FCS error)");
@@ -231,9 +263,8 @@ void DecaDuino::handleInterrupt() {
   }
 
   // Acknoledge by writing '1' in all set bits in the System Event Status Register
-  //writeSpiUint32(DW1000_REGISTER_SYS_STATUS, statusReg);
+  //writeSpiUint32(DW1000_REGISTER_SYS_STATUS, sysStatusReg);
   writeSpiUint32(DW1000_REGISTER_SYS_STATUS, ack);
-  delay(10);
 
 #ifdef DECADUINO_DEBUG 
       Serial.println();
@@ -267,14 +298,16 @@ void DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
     writeSpiUint32(DW1000_REGISTER_TX_FCTRL, ui32t);
 
     // set tx start bit
-    ui32t = readSpiUint32(DW1000_REGISTER_SYS_CTRL);
-    ui32t |= DW1000_REGISTER_SYS_CTRL_TXSTRT_MASK;
-    writeSpiUint32(DW1000_REGISTER_SYS_CTRL, ui32t);
+    //ui32t = readSpiUint32(DW1000_REGISTER_SYS_CTRL);
+    //ui32t |= DW1000_REGISTER_SYS_CTRL_TXSTRT_MASK;
+    //writeSpiUint32(DW1000_REGISTER_SYS_CTRL, ui32t);
+    writeSpiUint32(DW1000_REGISTER_SYS_CTRL, DW1000_REGISTER_SYS_CTRL_TXSTRT_MASK);
   }
 
 #ifdef DECADUINO_DEBUG 
+  //sprintf((char*)debugStr,"SYS_CTRL=%08x\n", ui32t);
+  //Serial.println((char*)debugStr);
   ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
-  ui32t = decodeUint32(buf);
   sprintf((char*)debugStr,"TX_FCTRL=%08x\n", ui32t);
   Serial.println((char*)debugStr);
 #endif
@@ -291,9 +324,15 @@ void DecaDuino::plmeRxEnableRequest(void) {
 #endif
 
   // set rx enable bit in system control register
-  ui32t = readSpiUint32(DW1000_REGISTER_SYS_CTRL);
-  ui32t |= DW1000_REGISTER_SYS_CTRL_RXENAB_MASK;
-  writeSpiUint32(DW1000_REGISTER_SYS_CTRL, ui32t);
+  //ui32t = readSpiUint32(DW1000_REGISTER_SYS_CTRL);
+  //ui32t |= DW1000_REGISTER_SYS_CTRL_RXENAB_MASK;
+  //writeSpiUint32(DW1000_REGISTER_SYS_CTRL, ui32t);
+  writeSpiUint32(DW1000_REGISTER_SYS_CTRL, DW1000_REGISTER_SYS_CTRL_RXENAB_MASK);
+
+#ifdef DECADUINO_DEBUG 
+  //sprintf((char*)debugStr,"SYS_CTRL=%08x\n", ui32t);
+  //Serial.println((char*)debugStr);
+#endif
 }
 
 
@@ -307,9 +346,15 @@ void DecaDuino::plmeRxDisableRequest(void) {
 #endif
 
   // set transceiver off bit in system control register
-  ui32t = readSpiUint32(DW1000_REGISTER_SYS_CTRL);
-  ui32t |= DW1000_REGISTER_SYS_CTRL_TRXOFF_MASK;
-  writeSpiUint32(DW1000_REGISTER_SYS_CTRL, ui32t);
+  //ui32t = readSpiUint32(DW1000_REGISTER_SYS_CTRL);
+  //ui32t |= DW1000_REGISTER_SYS_CTRL_TRXOFF_MASK;
+  //writeSpiUint32(DW1000_REGISTER_SYS_CTRL, ui32t);
+  writeSpiUint32(DW1000_REGISTER_SYS_CTRL, DW1000_REGISTER_SYS_CTRL_TRXOFF_MASK);
+
+#ifdef DECADUINO_DEBUG 
+  //sprintf((char*)debugStr,"SYS_CTRL=%08x\n", ui32t);
+  //Serial.println((char*)debugStr);
+#endif
 }
 
 
