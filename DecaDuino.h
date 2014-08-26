@@ -31,7 +31,7 @@
 #include "Arduino.h"
 #include <spi4teensy3.h>
 
-#define DECADUINO_DEBUG
+//#define DECADUINO_DEBUG
 
 #define DW1000_IRQ0_PIN 9
 #define DW1000_IRQ1_PIN 0
@@ -40,7 +40,7 @@
 #define DW1000_CS1_PIN 10 // ToDo: check Teensy3.1 other SlaveSelect pins
 #define DW1000_CS2_PIN 10 // ToDo: check Teensy3.1 other SlaveSelect pins
 #define MAX_NB_DW1000_FOR_INTERRUPTS 32
-#define BUFFER_MAX_LEN 1024
+#define DEBUG_STR_LEN 256
 
 #define DW1000_REGISTER_DEV_ID 		0x00
 #define DW1000_REGISTER_EUI 		0x01
@@ -92,9 +92,14 @@ class DecaDuino {
     uint64_t getEuid();
     void setPanId(uint16_t panId);
     void setShortAddress(uint16_t shortAddress);
+    uint8_t plmeDataRequest(uint8_t* buf, uint16_t len);
+    uint8_t send(uint8_t* buf, uint16_t len);
+    void setRxBuffer(uint8_t* buf, uint16_t *len);
     void plmeRxEnableRequest(void);
+    void plmeRxEnableRequest(uint8_t* buf, uint16_t *len);
     void plmeRxDisableRequest(void);
-    void plmeDataRequest(uint8_t* buf, uint16_t len);
+    uint8_t rxFrameAvailable(void);
+    uint8_t rxFrameAvailable(uint8_t* buf, uint16_t *len);
 
   private:
     /*
@@ -142,10 +147,14 @@ class DecaDuino {
     */
     void encodeUint64 ( uint64_t from, uint8_t *to );
 
-    uint8_t buf[BUFFER_MAX_LEN];
+    //uint8_t buf[BUFFER_MAX_LEN];
     uint64_t euid;
+    uint8_t *rxData;
+    uint16_t *rxDataLen;
+    uint8_t rxDataAvailable;
+
 #ifdef DECADUINO_DEBUG
-    uint8_t debugStr[BUFFER_MAX_LEN];
+    uint8_t debugStr[DEBUG_STR_LEN];
 #endif
 
   protected:
