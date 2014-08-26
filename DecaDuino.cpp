@@ -81,30 +81,6 @@ boolean DecaDuino::init() {
   Serial.println((char*)debugStr);
 #endif
 
-  // Load the LDE algorithm microcode into LDE RAM or disable LDE execution (clear LDERUNE)
-  // Load the LDE algorithm microcode into LDE RAM (procedure p.22 DW1000 User Manual + comment p.21)
-  // /!\ ceci utilise la mémoire OTP donc potentiellement destructeur. Implémenté mais
-  // non testé : je préfère "disable LDE execution" plus bas
-  //encodeUint16(0x0301, buf);
-  //writeSpiSubAddress(0x36, 0, buf, 2);
-  //encodeUint16(0x8000, buf);
-  //writeSpiSubAddress(0x2D, 0x06, buf, 2);
-  //delay(1);
-  //encodeUint16(0x0200, buf);
-  //writeSpiSubAddress(0x36, 0, buf, 2);
-
-  // Disable LDE execution (clear LDERUNE)
-  readSpiSubAddress(0x36, 4, buf, 4);
-  ui32t = decodeUint32(buf);
-  ui32t &= 0xFFFDFFFF; // clear bit17 (LDERUNE)
-  encodeUint32(ui32t, buf);
-  writeSpiSubAddress(0x36, 4, buf, 4);
-
-#ifdef DECADUINO_DEBUG 
-  sprintf((char*)debugStr,"PMSC_CTRL1=%08x", ui32t);
-  Serial.println((char*)debugStr);
-#endif
-
   // --- End of DW1000 configuration ------------------------------------------------------------------------------
 
   // Return true if everything OK
@@ -114,12 +90,44 @@ boolean DecaDuino::init() {
 
 void DecaDuino::resetDW1000() {
 
+  uint8_t buf[8];
   uint32_t ui32t;
 
   // Initialise the SPI port
   spi4teensy3::init(5,0,0); // Low speed SPICLK for performing DW1000 reset
   CORE_PIN13_CONFIG = PORT_PCR_MUX(1); // First reassign pin 13 to Alt1 so that it is not SCK but the LED still works
   CORE_PIN14_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); // and then reassign pin 14 to SCK
+
+  // Load the LDE algorithm microcode into LDE RAM or disable LDE execution (clear LDERUNE)
+  // Load the LDE algorithm microcode into LDE RAM (procedure p.22 DW1000 User Manual + comment p.21)
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+
+    digitalWrite(_slaveSelectPin, LOW);
+    buf[0] = 0xF6;
+    buf[1] = 0x00;
+    buf[2] = 0x01;
+    buf[3] = 0x03;
+    spi4teensy3::send(buf,4);
+    digitalWrite(_slaveSelectPin, HIGH);
+
+    digitalWrite(_slaveSelectPin, LOW);
+    buf[0] = 0xED;
+    buf[1] = 0x06;
+    buf[2] = 0x00;
+    buf[3] = 0x80;
+    spi4teensy3::send(buf,4);
+    digitalWrite(_slaveSelectPin, HIGH);
+
+    delayMicroseconds(160);
+
+    digitalWrite(_slaveSelectPin, LOW);
+    buf[0] = 0xF6;
+    buf[1] = 0x00;
+    buf[2] = 0x00;
+    buf[3] = 0x02;
+    spi4teensy3::send(buf,4);
+    digitalWrite(_slaveSelectPin, HIGH);
+  }
 
   // Getting PMSC_CTRL0 register
   ui32t = readSpiUint32(DW1000_REGISTER_PMSC_CTRL0);
@@ -271,6 +279,7 @@ void DecaDuino::handleInterrupt() {
 #ifdef DECADUINO_DEBUG 
       Serial.println();
 #endif
+
 }
 
 
@@ -410,11 +419,11 @@ void DecaDuino::readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t*
 
   addr = 0 | (address & 0x3F) | 0x40; // Mask register address (6bits), preserve MSb at low (Read) and set subaddress present bit (0x40)
 
-  if ( subAddress < 128 ) {
+  if ( subAddress < 0x80 ) {
 
     // This is a 2-bytes header SPI transaction
 
-    sub_addr = 0 | (subAddress & 0x3F); // Mask register address (6bits)
+    sub_addr = 0 | (subAddress & 0x7F); // Mask register address (6bits)
 
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
       digitalWrite(_slaveSelectPin, LOW);
@@ -460,11 +469,11 @@ void DecaDuino::writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t
 
   addr = 0 | (address & 0x3F) | 0x80 | 0x40; // Mask register address (6bits), set MSb (Write) and set subaddress present bit (0x40)
 
-  if ( subAddress < 128 ) {
+  if ( subAddress < 0x80 ) {
 
     // This is a 2-bytes header SPI transaction
 
-    sub_addr = 0 | (subAddress & 0x3F); // Mask register address (6bits)
+    sub_addr = 0 | (subAddress & 0x7F); // Mask register address (6bits)
 
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
       digitalWrite(_slaveSelectPin, LOW);
@@ -582,3 +591,7 @@ void DecaDuino::setShortAddress(uint16_t shortAddress) {
   writeSpiSubAddress(DW1000_REGISTER_PANADR, DW1000_REGISTER_PANADR_SHORT_ADDRESS_OFFSET, buf, 2);
 }
 
+
+void DecaDuino::test(void) {
+
+}

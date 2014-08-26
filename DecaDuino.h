@@ -100,6 +100,7 @@ class DecaDuino {
     void plmeRxDisableRequest(void);
     uint8_t rxFrameAvailable(void);
     uint8_t rxFrameAvailable(uint8_t* buf, uint16_t *len);
+    void test(void);
 
   private:
     /*
