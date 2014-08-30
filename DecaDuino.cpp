@@ -74,18 +74,34 @@ boolean DecaDuino::init() {
   // System Event Mask Register
   ui32t = readSpiUint32(DW1000_REGISTER_SYS_MASK);
   ui32t |= DW1000_REGISTER_SYS_MASK_MRXFCG_MASK; // MRXFCG: interrupt when good frame (FCS OK) received
+  ui32t |= DW1000_REGISTER_SYS_MASK_MTXFRS_MASK;
   writeSpiUint32(DW1000_REGISTER_SYS_MASK, ui32t);
+
+uint8_t val[2]={0x7C,0xCD};
+writeSpi(0x18,val,2);
+
 
 #ifdef DECADUINO_DEBUG 
   sprintf((char*)debugStr,"SYS_MASK=%08x", ui32t);
   Serial.println((char*)debugStr);
 #endif
 
+val[0]=0;
+val[1]=0;
+
+
+readSpi(0x18,val,2);
+sprintf((char*)debugStr,"TX_ANTD=%04x", val);
+  Serial.println((char*)debugStr);
+
+
   // --- End of DW1000 configuration ------------------------------------------------------------------------------
 
+
+lastTxOK=false;
   // Return true if everything OK
   return true;
-}
+}//end of init()
 
 
 void DecaDuino::resetDW1000() {
@@ -254,6 +270,30 @@ void DecaDuino::handleInterrupt() {
         // get frame data
         readSpi(DW1000_REGISTER_RX_BUFFER, rxData, *rxDataLen);
         rxDataAvailable = true;
+
+    if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_LDEDONE_MASK ) {
+//read the timestamp 8 bits du sub04 puis 32 bits du sub00
+  uint8_t bafLo[4];
+  uint8_t bafHi;
+readSpiSubAddress(0x15, 0x00, bafLo,4);
+readSpiSubAddress(0x15, 0x04, &bafHi,1);
+
+
+double kinto=bafLo[0]*256*256*256*256+bafLo[1]*256*256*256+bafLo[2]*256*256+bafLo[3]*256+bafHi;
+kinto=kinto*TIME_UNIT;//seconds
+
+#ifdef DECADUINO_DEBUG 
+  /*Serial.println("\nRX Frame timestamp");
+      sprintf((char*)debugStr,"hi=%02x  ", bafHi);
+        Serial.print((char*)debugStr);
+        sprintf((char*)debugStr,"lo=%08x ", bafLo);
+        Serial.print((char*)debugStr);*/
+
+        sprintf((char*)debugStr,"rx value=%fs ", kinto);
+        Serial.print((char*)debugStr);
+
+#endif
+}
       }
       // Clearing the RXFCG bit (it clears the interrupt if enabled)
       ack |= DW1000_REGISTER_SYS_STATUS_RXFCG_MASK;
@@ -273,6 +313,36 @@ void DecaDuino::handleInterrupt() {
     ack |= DW1000_REGISTER_SYS_STATUS_RXDFR_MASK;
   }
 
+//manage TX completion interrupt
+    if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_TXFRS_MASK ) { // TXFRS
+	lastTxOK=true;
+	Serial.println("LastTx OK");
+	
+//read the timestamp 8 bits du sub04 puis 32 bits du sub00
+  uint8_t bufLo[4];
+  uint8_t bufHi;
+readSpiSubAddress(0x17, 0x00, bufLo,4);
+readSpiSubAddress(0x1, 0x04, &bufHi,1);
+
+double kinta=bufLo[0]*256*256*256*256+bufLo[1]*256*256*256+bufLo[2]*256*256+bufLo[3]*256+bufHi;
+kinta=kinta*TIME_UNIT;//seconds
+
+#ifdef DECADUINO_DEBUG 
+/*Serial.println("\nTX Frame timestamp");
+        sprintf((char*)debugStr,"hi=%02x  ", bufHi);
+        Serial.print((char*)debugStr);
+        sprintf((char*)debugStr,"lo=%08x ", bufLo);
+        Serial.print((char*)debugStr);*/
+
+  sprintf((char*)debugStr,"tx value=%f s", kinta);
+        Serial.print((char*)debugStr);
+
+#endif
+
+	ack|=DW1000_REGISTER_SYS_STATUS_TXFRS_MASK;
+
+}
+
   // Acknoledge by writing '1' in all set bits in the System Event Status Register
   writeSpiUint32(DW1000_REGISTER_SYS_STATUS, ack);
 
@@ -280,6 +350,15 @@ void DecaDuino::handleInterrupt() {
       Serial.println();
 #endif
 
+}
+
+bool DecaDuino::hasTxSucceeded(){
+bool res=false;
+if(lastTxOK){
+	res=true;
+//Serial.println("last TX has succeeded!");
+}//else Serial.println("last TX has NOT succeeded!");
+return res;
 }
 
 
@@ -312,6 +391,7 @@ uint8_t DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
   sprintf((char*)debugStr,"TX_FCTRL=%08x\n", ui32t);
   Serial.print((char*)debugStr);
 #endif
+lastTxOK=false;
 
   return true;
 }
@@ -368,7 +448,7 @@ void DecaDuino::plmeRxDisableRequest(void) {
   Serial.println((char*)debugStr);
 #endif
 
-  // set transceiver off bit in system control register
+  // set transceiver off bit in system control register (go to idle mode)
   writeSpiUint32(DW1000_REGISTER_SYS_CTRL, DW1000_REGISTER_SYS_CTRL_TRXOFF_MASK);
 }
 
