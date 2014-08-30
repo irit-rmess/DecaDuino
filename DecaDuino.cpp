@@ -591,6 +591,37 @@ void DecaDuino::setShortAddress(uint16_t shortAddress) {
   writeSpiSubAddress(DW1000_REGISTER_PANADR, DW1000_REGISTER_PANADR_SHORT_ADDRESS_OFFSET, buf, 2);
 }
 
+void DecaDuino::sleepRequest(void) {
+
+  uint8_t ui8t;
+
+#ifdef DECADUINO_DEBUG 
+  sprintf((char*)debugStr,"sleep request");
+  Serial.println((char*)debugStr);
+#endif
+
+  readSpiSubAddress(DW1000_REGISTER_AON_CFG0, DW1000_REGISTER_OFFSET_AON_CFG0, &ui8t, 1);
+  ui8t |= DW1000_REGISTER_AON_CFG0_SLEEP_EN_MASK;
+  writeSpiSubAddress(DW1000_REGISTER_AON_CFG0, DW1000_REGISTER_OFFSET_AON_CFG0, &ui8t, 1);
+
+  readSpiSubAddress(DW1000_REGISTER_AON_CTRL, DW1000_REGISTER_OFFSET_AON_CTRL, &ui8t, 1);
+  ui8t |= DW1000_REGISTER_AON_CTRL_UPL_CFG_MASK;
+  writeSpiSubAddress(DW1000_REGISTER_AON_CTRL, DW1000_REGISTER_OFFSET_AON_CTRL, &ui8t, 1);
+  delay(1);
+
+  // The DWM1000 is now sleeping
+}
+
+
+void DecaDuino::deepsleepRequest(void) {
+
+}
+
+
+void DecaDuino::wakeRequest(void) {
+
+}
+
 
 void DecaDuino::test(void) {
 
