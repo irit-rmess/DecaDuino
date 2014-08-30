@@ -1,13 +1,12 @@
 #include <spi4teensy3.h>
 #include <DecaDuino.h>
 
-int rxFrames;
-
 DecaDuino decaduino;
 uint8_t txData[128];
 uint8_t rxData[128];
 uint16_t rxLen;
 #define FRAME_LEN 64
+int rxFrames;
 
 
 void setup() {
@@ -15,15 +14,13 @@ void setup() {
   pinMode(13, OUTPUT);
   if ( !decaduino.init() ) {
     Serial.println("decaduino init failed");
-   
+    digitalWrite(13, HIGH);   
     while(1);
   }
   
   rxFrames = 0;
   decaduino.setRxBuffer(rxData, &rxLen);
   decaduino.plmeRxEnableRequest();
-  
-  //Serial.println(decaduino.getEuid, HEX);
 }
 
 void loop() {

@@ -14,13 +14,12 @@ uint16_t rxLen;
 // ou
 //#define RECEIVER
 
-
 void setup() {
 
   pinMode(13, OUTPUT);
   if ( !decaduino.init() ) {
     Serial.println("decaduino init failed");
-   
+    digitalWrite(13, HIGH);  
     while(1);
   }
   
@@ -29,8 +28,6 @@ void setup() {
   decaduino.setRxBuffer(rxData, &rxLen);
   decaduino.plmeRxEnableRequest();
   #endif
-  
-  //Serial.println(decaduino.getEuid, HEX);
 }
 
 void loop() {
@@ -62,6 +59,8 @@ void loop() {
   digitalWrite(13, LOW);
   delay(1000);
   #endif
+  
+  // End of the cycle
 }
 
 

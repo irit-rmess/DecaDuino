@@ -13,11 +13,9 @@ void setup() {
   pinMode(13, OUTPUT);
   if ( !decaduino.init() ) {
     Serial.println("decaduino init failed");
-   
+    digitalWrite(13, HIGH);
     while(1);
   }
-  
-  //Serial.println(decaduino.getEuid, HEX);
 }
 
 void loop() {
