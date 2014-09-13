@@ -77,8 +77,8 @@ boolean DecaDuino::init() {
   ui32t |= DW1000_REGISTER_SYS_MASK_MTXFRS_MASK;
   writeSpiUint32(DW1000_REGISTER_SYS_MASK, ui32t);
 
-uint8_t val[2]={0x7C,0xCD};
-writeSpi(0x18,val,2);
+//uint8_t val[2]={0x7C,0xCD};
+//writeSpi(0x18,val,2);
 
 
 #ifdef DECADUINO_DEBUG 
@@ -86,13 +86,13 @@ writeSpi(0x18,val,2);
   Serial.println((char*)debugStr);
 #endif
 
-val[0]=0;
-val[1]=0;
+//val[0]=0;
+//val[1]=0;
 
 
-readSpi(0x18,val,2);
-sprintf((char*)debugStr,"TX_ANTD=%04x", val);
-  Serial.println((char*)debugStr);
+//readSpi(0x18,val,2);
+//sprintf((char*)debugStr,"TX_ANTD=%04x", val);
+//  Serial.println((char*)debugStr);
 
 
   // --- End of DW1000 configuration ------------------------------------------------------------------------------
@@ -110,12 +110,13 @@ void DecaDuino::resetDW1000() {
   uint32_t ui32t;
 
   // Initialise the SPI port
-  spi4teensy3::init(5,0,0); // Low speed SPICLK for performing DW1000 reset
+  spi4teensy3::init(4,0,0); // Low speed SPICLK for performing DW1000 reset
   CORE_PIN13_CONFIG = PORT_PCR_MUX(1); // First reassign pin 13 to Alt1 so that it is not SCK but the LED still works
   CORE_PIN14_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); // and then reassign pin 14 to SCK
 
   // Load the LDE algorithm microcode into LDE RAM or disable LDE execution (clear LDERUNE)
   // Load the LDE algorithm microcode into LDE RAM (procedure p.22 DW1000 User Manual + comment p.21)
+/*
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
 
     digitalWrite(_slaveSelectPin, LOW);
@@ -144,6 +145,8 @@ void DecaDuino::resetDW1000() {
     spi4teensy3::send(buf,4);
     digitalWrite(_slaveSelectPin, HIGH);
   }
+*/
+  delay(100);
 
   // Getting PMSC_CTRL0 register
   ui32t = readSpiUint32(DW1000_REGISTER_PMSC_CTRL0);
@@ -174,8 +177,41 @@ void DecaDuino::resetDW1000() {
   writeSpiUint32(DW1000_REGISTER_PMSC_CTRL0, ui32t);
   delay(1);
 
+  delay(5);
+
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+
+    digitalWrite(_slaveSelectPin, LOW);
+    buf[0] = 0xF6;
+    buf[1] = 0x00;
+    buf[2] = 0x01;
+    buf[3] = 0x03;
+    spi4teensy3::send(buf,4);
+    digitalWrite(_slaveSelectPin, HIGH);
+
+    digitalWrite(_slaveSelectPin, LOW);
+    buf[0] = 0xED;
+    buf[1] = 0x06;
+    buf[2] = 0x00;
+    buf[3] = 0x80;
+    spi4teensy3::send(buf,4);
+    digitalWrite(_slaveSelectPin, HIGH);
+
+    delayMicroseconds(160);
+
+    digitalWrite(_slaveSelectPin, LOW);
+    buf[0] = 0xF6;
+    buf[1] = 0x00;
+    buf[2] = 0x00;
+    buf[3] = 0x02;
+    spi4teensy3::send(buf,4);
+    digitalWrite(_slaveSelectPin, HIGH);
+  }
+
+
   // Initialise the SPI port
-  spi4teensy3::init(1,0,0); // Normal speed SPICLK after performing DW1000 reset
+  //spi4teensy3::init(1,0,0); // Normal speed SPICLK after performing DW1000 reset
+  spi4teensy3::init(2,0,0); // Normal speed SPICLK after performing DW1000 reset
   CORE_PIN13_CONFIG = PORT_PCR_MUX(1); // First reassign pin 13 to Alt1 so that it is not SCK but the LED still works
   CORE_PIN14_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); // and then reassign pin 14 to SCK
   delay(1);
@@ -322,7 +358,7 @@ kinto=kinto*TIME_UNIT;//seconds
   uint8_t bufLo[4];
   uint8_t bufHi;
 readSpiSubAddress(0x17, 0x00, bufLo,4);
-readSpiSubAddress(0x1, 0x04, &bufHi,1);
+readSpiSubAddress(0x17, 0x04, &bufHi,1);
 
 double kinta=bufLo[0]*256*256*256*256+bufLo[1]*256*256*256+bufLo[2]*256*256+bufLo[3]*256+bufHi;
 kinta=kinta*TIME_UNIT;//seconds
