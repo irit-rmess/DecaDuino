@@ -46,6 +46,15 @@
 
 #define TIME_UNIT 1/(499.2*128*1000000)
 
+#define MSG_TYPE_SDSTWR_START 1
+#define MSG_TYPE_SDSTWR_ACKREQ 2
+#define MSG_TYPE_SDSTWR_ACK 3
+#define MSG_TYPE_SDSTWR_DATA_REPLY 4
+
+#define RX_RANGING_INIT_STATE 1
+#define RX_RANGING_WAITING_FOR_START_STATE 2
+#define RX_RANGING_WAITING_FOR_ACK_STATE 3
+
 #define DW1000_REGISTER_DEV_ID 		0x00
 
 #define DW1000_REGISTER_EUI 		0x01
@@ -127,8 +136,9 @@ class DecaDuino {
     uint8_t plmeDataRequest(uint8_t* buf, uint16_t len);
     uint8_t send(uint8_t* buf, uint16_t len);
     void setRxBuffer(uint8_t* buf, uint16_t *len);
-	uint8_t sdsTwrRequest(uint64_t destination);
-	float rangeNode(uint64_t destination);
+    uint8_t sdsTwrRequest(uint64_t destination);
+    float rangeNode(uint64_t destination);
+    void rxRangingEngine(uint8_t* rxMsg, uint16_t len);
     void plmeRxEnableRequest(void);
     void plmeRxEnableRequest(uint8_t* buf, uint16_t *len);
     void plmeRxDisableRequest(void);
@@ -140,8 +150,8 @@ class DecaDuino {
     void test(void);
     bool lastTxOK;
     bool hasTxSucceeded(void);
-	uint64_t lastTxTimestamp;
-	uint64_t lastRxTimestamp;
+    uint64_t lastTxTimestamp;
+    uint64_t lastRxTimestamp;
 
   private:
     /*
@@ -194,6 +204,8 @@ class DecaDuino {
     uint8_t *rxData;
     uint16_t *rxDataLen;
     uint8_t rxDataAvailable;
+    uint64_t t1, t2, t3, t4, t5, t6, lastTof;
+    uint8_t rxRangingState;
 
 #ifdef DECADUINO_DEBUG
     uint8_t debugStr[DEBUG_STR_LEN];
