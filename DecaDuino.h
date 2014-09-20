@@ -42,6 +42,8 @@
 #define MAX_NB_DW1000_FOR_INTERRUPTS 32
 #define DEBUG_STR_LEN 256
 
+#define RANGING_ERROR 0x00
+
 #define TIME_UNIT 1/(499.2*128*1000000)
 
 #define DW1000_REGISTER_DEV_ID 		0x00
@@ -125,6 +127,8 @@ class DecaDuino {
     uint8_t plmeDataRequest(uint8_t* buf, uint16_t len);
     uint8_t send(uint8_t* buf, uint16_t len);
     void setRxBuffer(uint8_t* buf, uint16_t *len);
+	uint8_t sdsTwrRequest(uint64_t destination);
+	float rangeNode(uint64_t destination);
     void plmeRxEnableRequest(void);
     void plmeRxEnableRequest(uint8_t* buf, uint16_t *len);
     void plmeRxDisableRequest(void);
@@ -136,6 +140,8 @@ class DecaDuino {
     void test(void);
     bool lastTxOK;
     bool hasTxSucceeded(void);
+	uint64_t lastTxTimestamp;
+	uint64_t lastRxTimestamp;
 
   private:
     /*

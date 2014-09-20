@@ -253,8 +253,10 @@ void DecaDuino::isr2() {
 
 void DecaDuino::handleInterrupt() {
 
-  uint32_t sysStatusReg, ack, ui32t;
+  uint8_t buf[8];
   uint16_t i;
+  uint32_t sysStatusReg, ack, ui32t;
+  uint64_t ui64t;
 
   ack = 0;
 
@@ -307,29 +309,42 @@ void DecaDuino::handleInterrupt() {
         readSpi(DW1000_REGISTER_RX_BUFFER, rxData, *rxDataLen);
         rxDataAvailable = true;
 
-    if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_LDEDONE_MASK ) {
-//read the timestamp 8 bits du sub04 puis 32 bits du sub00
-  uint8_t bafLo[4];
-  uint8_t bafHi;
-readSpiSubAddress(0x15, 0x00, bafLo,4);
-readSpiSubAddress(0x15, 0x04, &bafHi,1);
+		if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_LDEDONE_MASK ) {
+/*
+		//read the timestamp 8 bits du sub04 puis 32 bits du sub00
+		  uint8_t bafLo[4];
+		  uint8_t bafHi;
+		  readSpiSubAddress(0x15, 0x00, bafLo,4);
+		  readSpiSubAddress(0x15, 0x04, &bafHi,1);
 
 
-double kinto=bafLo[0]*256*256*256*256+bafLo[1]*256*256*256+bafLo[2]*256*256+bafLo[3]*256+bafHi;
-kinto=kinto*TIME_UNIT;//seconds
+		  double kinto=bafLo[0]*256*256*256*256+bafLo[1]*256*256*256+bafLo[2]*256*256+bafLo[3]*256+bafHi;
+		  kinto=kinto*TIME_UNIT;//seconds
 
 #ifdef DECADUINO_DEBUG 
-  /*Serial.println("\nRX Frame timestamp");
-      sprintf((char*)debugStr,"hi=%02x  ", bafHi);
-        Serial.print((char*)debugStr);
-        sprintf((char*)debugStr,"lo=%08x ", bafLo);
-        Serial.print((char*)debugStr);*/
+		  //Serial.println("\nRX Frame timestamp");
+		  //sprintf((char*)debugStr,"hi=%02x  ", bafHi);
+		  //Serial.print((char*)debugStr);
+		  //sprintf((char*)debugStr,"lo=%08x ", bafLo);
+		  //Serial.print((char*)debugStr);
 
-        sprintf((char*)debugStr,"rx value=%fs ", kinto);
-        Serial.print((char*)debugStr);
-
+		  sprintf((char*)debugStr,"rx value=%fs ", kinto);
+		  Serial.print((char*)debugStr);
 #endif
-}
+*/
+			encodeUint64(0, buf); // init buffer
+			//encodeUint64(0x0123456789ABCDEF, buf); // init buffer
+			//readSpiSubAddress(0x15, 0x00, buf, 4);
+			//readSpiSubAddress(0x15, 0x04, &buf[4],1);
+			readSpi(0x15, buf, 5);
+			lastRxTimestamp = decodeUint64(buf);
+
+#ifdef DECADUINO_DEBUG 
+			sprintf((char*)debugStr, "\nRX Frame timestamp %08x %08x\n", decodeUint32(&buf[4]), decodeUint32(buf));
+			Serial.print((char*)debugStr);
+#endif
+
+		}
       }
       // Clearing the RXFCG bit (it clears the interrupt if enabled)
       ack |= DW1000_REGISTER_SYS_STATUS_RXFCG_MASK;
@@ -349,35 +364,44 @@ kinto=kinto*TIME_UNIT;//seconds
     ack |= DW1000_REGISTER_SYS_STATUS_RXDFR_MASK;
   }
 
-//manage TX completion interrupt
-    if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_TXFRS_MASK ) { // TXFRS
+  // Manage TX completion interrupt
+  if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_TXFRS_MASK ) { // TXFRS
 	lastTxOK=true;
 	Serial.println("LastTx OK");
 	
-//read the timestamp 8 bits du sub04 puis 32 bits du sub00
-  uint8_t bufLo[4];
-  uint8_t bufHi;
-readSpiSubAddress(0x17, 0x00, bufLo,4);
-readSpiSubAddress(0x17, 0x04, &bufHi,1);
+	// Read TX timestamp
+	/*
+	uint8_t bufLo[4];
+	uint8_t bufHi;
+	readSpiSubAddress(0x17, 0x00, bufLo,4);
+	readSpiSubAddress(0x17, 0x04, &bufHi,1);
+	double kinta=bufLo[0]*256*256*256*256+bufLo[1]*256*256*256+bufLo[2]*256*256+bufLo[3]*256+bufHi;
+	kinta=kinta*TIME_UNIT;//seconds
+	#ifdef DECADUINO_DEBUG 
+	Serial.println("\nTX Frame timestamp");
+	sprintf((char*)debugStr,"hi=%02x  ", bufHi);
+	Serial.print((char*)debugStr);
+	sprintf((char*)debugStr,"lo=%08x ", bufLo);
+	Serial.print((char*)debugStr);
+	sprintf((char*)debugStr,"tx value=%f s", kinta);
+	Serial.print((char*)debugStr);
+	#endif
+	*/
 
-double kinta=bufLo[0]*256*256*256*256+bufLo[1]*256*256*256+bufLo[2]*256*256+bufLo[3]*256+bufHi;
-kinta=kinta*TIME_UNIT;//seconds
+	encodeUint64(0, buf); // init buffer
+    //encodeUint64(0x0123456789ABCDEF, buf); // init buffer
+    //readSpiSubAddress(0x17, 0x00, buf, 4);
+    //readSpiSubAddress(0x17, 0x04, &buf[4],1);
+	readSpi(0x17, buf, 5);
+    lastTxTimestamp = decodeUint64(buf);
 
 #ifdef DECADUINO_DEBUG 
-/*Serial.println("\nTX Frame timestamp");
-        sprintf((char*)debugStr,"hi=%02x  ", bufHi);
-        Serial.print((char*)debugStr);
-        sprintf((char*)debugStr,"lo=%08x ", bufLo);
-        Serial.print((char*)debugStr);*/
-
-  sprintf((char*)debugStr,"tx value=%f s", kinta);
-        Serial.print((char*)debugStr);
-
+    sprintf((char*)debugStr, "\nTX Frame timestamp %08x %08x\n", decodeUint32(&buf[4]), decodeUint32(buf));
+    Serial.print((char*)debugStr);
 #endif
 
 	ack|=DW1000_REGISTER_SYS_STATUS_TXFRS_MASK;
-
-}
+  }
 
   // Acknoledge by writing '1' in all set bits in the System Event Status Register
   writeSpiUint32(DW1000_REGISTER_SYS_STATUS, ack);
@@ -388,6 +412,8 @@ kinta=kinta*TIME_UNIT;//seconds
 
 }
 
+
+
 bool DecaDuino::hasTxSucceeded(){
 bool res=false;
 if(lastTxOK){
@@ -395,6 +421,28 @@ if(lastTxOK){
 //Serial.println("last TX has succeeded!");
 }//else Serial.println("last TX has NOT succeeded!");
 return res;
+}
+
+uint8_t DecaDuino::sdsTwrRequest(uint64_t destination) {
+
+  // Send START message to destination
+  // Remember t1
+  // Start timemout and wait for ACK+REQ message
+  // On receive, remember t4, send ACK and remember t5
+  // Start timemout and wait for DATA_REPLY message
+  // On receive, remember t2, t3 and t5 in the frame
+  // Compute ToF
+}
+
+
+float DecaDuino::rangeNode(uint64_t destination) {
+
+  // call sdsTwrRequest
+  if ( sdsTwrRequest(destination) ) {
+    //return computed_range;
+  } else {
+    return RANGING_ERROR;
+  }
 }
 
 
