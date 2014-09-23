@@ -31,7 +31,7 @@
 #include "Arduino.h"
 #include <spi4teensy3.h>
 
-#define DECADUINO_DEBUG
+//#define DECADUINO_DEBUG
 
 #define DW1000_IRQ0_PIN 9
 #define DW1000_IRQ1_PIN 0
@@ -46,6 +46,7 @@
 
 #define TIME_UNIT 1/(499.2*128*1000000)
 
+#define MSG_TYPE_SDSTWR_EMPTY 0
 #define MSG_TYPE_SDSTWR_START 1
 #define MSG_TYPE_SDSTWR_ACKREQ 2
 #define MSG_TYPE_SDSTWR_ACK 3
@@ -53,7 +54,9 @@
 
 #define RX_RANGING_INIT_STATE 1
 #define RX_RANGING_WAITING_FOR_START_STATE 2
-#define RX_RANGING_WAITING_FOR_ACK_STATE 3
+#define RX_RANGING_SENDING_ACKREQ_STATE 3
+#define RX_RANGING_WAITING_FOR_ACK_STATE 4
+#define RX_RANGING_SENDING_DATA_REPLY_STATE 5
 
 #define DW1000_REGISTER_DEV_ID 		0x00
 
@@ -138,7 +141,7 @@ class DecaDuino {
     void setRxBuffer(uint8_t* buf, uint16_t *len);
     uint8_t sdsTwrRequest(uint64_t destination);
     float rangeNode(uint64_t destination);
-    void rxRangingEngine(uint8_t* rxMsg, uint16_t len);
+    void sdstwrRangingEngine(void);
     void plmeRxEnableRequest(void);
     void plmeRxEnableRequest(uint8_t* buf, uint16_t *len);
     void plmeRxDisableRequest(void);
@@ -152,8 +155,7 @@ class DecaDuino {
     bool hasTxSucceeded(void);
     uint64_t lastTxTimestamp;
     uint64_t lastRxTimestamp;
-
-  private:
+	uint8_t lastRangingMsgReceived;
     /*
     * Return a UINT16 based on two UINT8
     * @author Adrien van den Bossche <bossche@irit.fr>
@@ -198,6 +200,8 @@ class DecaDuino {
     * @date 20111011
     */
     void encodeUint64 ( uint64_t from, uint8_t *to );
+	
+	void printUint64 ( uint64_t ui64 );
 
     //uint8_t buf[BUFFER_MAX_LEN];
     uint64_t euid;
@@ -210,7 +214,8 @@ class DecaDuino {
 #ifdef DECADUINO_DEBUG
     uint8_t debugStr[DEBUG_STR_LEN];
 #endif
-
+  private:
+  
   protected:
     static void isr0();
     static void isr1();
