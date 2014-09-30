@@ -94,7 +94,8 @@ boolean DecaDuino::init() {
 //sprintf((char*)debugStr,"TX_ANTD=%04x", val);
 //  Serial.println((char*)debugStr);
 
-  ui16t = 0x8000;
+  //ui16t = 0x8000;
+  ui16t = 33000;
   encodeUint16(ui16t, buf);
   writeSpi(0x18, buf, 2);
 
@@ -342,15 +343,27 @@ void DecaDuino::handleInterrupt() {
 		  //readSpiSubAddress(0x15, 0x04, &buf[4],1);
 		  readSpi(0x15, buf, 5);
 		  lastRxTimestamp = decodeUint64(buf);
-
+		  
 #ifdef DECADUINO_DEBUG 
 		  sprintf((char*)debugStr, "\nRX Frame timestamp %08x %08x\n", decodeUint32(&buf[4]), decodeUint32(buf));
 		  Serial.print((char*)debugStr);
 		  sprintf((char*)debugStr, "\nRX Frame timestamp ");
+		  Serial.print((char*)debugStr);
 		  printUint64(lastRxTimestamp);
 		  Serial.println();
 #endif
-          lastRangingMsgReceived = buf[0];
+//          lastRangingMsgReceived = buf[0];
+
+#ifdef DECADUINO_DEBUG 
+		  readSpi(0x14, buf, 3);
+          ui32t = decodeUint32(buf) & 0x0007FFFF;
+          if ( ui32t & 0x00080000 ) ui32t |= 0xFFF80000;		  
+		  Serial.print("RXTOFS=0x");
+		  Serial.println(ui32t, HEX);
+		  ui32t = 0x01F00000/ui32t;
+		  Serial.print("clock offset=0x");
+		  Serial.println(ui32t, HEX);		  
+#endif
   	    }
       }
       // Clearing the RXFCG bit (it clears the interrupt if enabled)
