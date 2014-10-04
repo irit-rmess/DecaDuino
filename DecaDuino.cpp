@@ -94,7 +94,8 @@ boolean DecaDuino::init() {
 //sprintf((char*)debugStr,"TX_ANTD=%04x", val);
 //  Serial.println((char*)debugStr);
 
-  ui16t = 33000;
+  //ui16t = 33000;
+  ui16t = 32870;
   encodeUint16(ui16t, buf);
   writeSpi(0x18, buf, 2);
 

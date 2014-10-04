@@ -21,7 +21,7 @@
 int i;
 int rxFrames;
 
-uint64_t t1, t2, t3, t4, tof;
+uint64_t t2, t3;
 
 DecaDuino decaduino;
 uint8_t txData[128];

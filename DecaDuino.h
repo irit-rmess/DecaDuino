@@ -31,7 +31,7 @@
 #include "Arduino.h"
 #include <spi4teensy3.h>
 
-#define DECADUINO_DEBUG
+//#define DECADUINO_DEBUG
 
 #define DW1000_IRQ0_PIN 9
 #define DW1000_IRQ1_PIN 0

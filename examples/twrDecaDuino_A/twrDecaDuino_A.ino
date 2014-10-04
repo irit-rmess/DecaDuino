@@ -29,7 +29,8 @@
 int i;
 int rxFrames;
 
-uint64_t t1, t2, t3, t4, tof;
+uint64_t t1, t2, t3, t4;
+int32_t tof;
 
 DecaDuino decaduino;
 uint8_t txData[128];
@@ -141,9 +142,9 @@ void loop() {
       t2 = decaduino.decodeUint64(&rxData[1]);
       t3 = decaduino.decodeUint64(&rxData[9]);
       tof = (t4 - t1 - (t3 - t2))/2;
-      Serial.print("ToF = ");
-      decaduino.printUint64(tof);
-      Serial.print(" d = ");
+      Serial.print("ToF=");
+      Serial.print(tof, HEX);
+      Serial.print(" d=");
       Serial.print(tof*COEFF);
       Serial.println();
       state = TWR_ENGINE_STATE_INIT;
