@@ -46,6 +46,10 @@
 
 #define TIME_UNIT 1/(499.2*128*1000000)
 
+#define RANGING_PROTOCOL_TWR 1
+#define RANGING_PROTOCOL_SDS_TWR 2
+#define DEFAULT_RANGING_PROTOCOL RANGING_PROTOCOL_TWR
+
 #define MSG_TYPE_SDSTWR_EMPTY 0
 #define MSG_TYPE_SDSTWR_START 1
 #define MSG_TYPE_SDSTWR_ACKREQ 2
@@ -139,9 +143,10 @@ class DecaDuino {
     uint8_t plmeDataRequest(uint8_t* buf, uint16_t len);
     uint8_t send(uint8_t* buf, uint16_t len);
     void setRxBuffer(uint8_t* buf, uint16_t *len);
+    float rangeNode(uint64_t destination, uint8_t protocol);
+    uint8_t twrRequest(uint64_t destination);
     uint8_t sdsTwrRequest(uint64_t destination);
-    float rangeNode(uint64_t destination);
-    void sdstwrRangingEngine(void);
+    void rangingEngine(void);
     void plmeRxEnableRequest(void);
     void plmeRxEnableRequest(uint8_t* buf, uint16_t *len);
     void plmeRxDisableRequest(void);
@@ -155,7 +160,6 @@ class DecaDuino {
     bool hasTxSucceeded(void);
     uint64_t lastTxTimestamp;
     uint64_t lastRxTimestamp;
-	uint8_t lastRangingMsgReceived;
     /*
     * Return a UINT16 based on two UINT8
     * @author Adrien van den Bossche <bossche@irit.fr>
@@ -200,16 +204,13 @@ class DecaDuino {
     * @date 20111011
     */
     void encodeUint64 ( uint64_t from, uint8_t *to );
-	
-	void printUint64 ( uint64_t ui64 );
+    void printUint64 ( uint64_t ui64 );
 
     //uint8_t buf[BUFFER_MAX_LEN];
     uint64_t euid;
     uint8_t *rxData;
     uint16_t *rxDataLen;
     uint8_t rxDataAvailable;
-    uint64_t t1, t2, t3, t4, t5, t6, lastTof;
-    uint8_t rxRangingState;
 
 #ifdef DECADUINO_DEBUG
     uint8_t debugStr[DEBUG_STR_LEN];

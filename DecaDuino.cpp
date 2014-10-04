@@ -94,15 +94,14 @@ boolean DecaDuino::init() {
 //sprintf((char*)debugStr,"TX_ANTD=%04x", val);
 //  Serial.println((char*)debugStr);
 
-  //ui16t = 0x8000;
   ui16t = 33000;
   encodeUint16(ui16t, buf);
   writeSpi(0x18, buf, 2);
 
+
   // --- End of DW1000 configuration ------------------------------------------------------------------------------
 
   lastTxOK = false;
-  rxRangingState = RX_RANGING_INIT_STATE;
 
   // Return true if everything OK
   return true;
@@ -316,55 +315,22 @@ void DecaDuino::handleInterrupt() {
         rxDataAvailable = true;
 
         if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_LDEDONE_MASK ) {
-/*
-		  //read the timestamp 8 bits du sub04 puis 32 bits du sub00
-		  uint8_t bafLo[4];
-		  uint8_t bafHi;
-		  readSpiSubAddress(0x15, 0x00, bafLo,4);
-		  readSpiSubAddress(0x15, 0x04, &bafHi,1);
-
-		  double kinto=bafLo[0]*256*256*256*256+bafLo[1]*256*256*256+bafLo[2]*256*256+bafLo[3]*256+bafHi;
-		  kinto=kinto*TIME_UNIT;//seconds
-
+          encodeUint64(0, buf); // init buffer
+          readSpi(0x15, buf, 5);
+          lastRxTimestamp = decodeUint64(buf);
 #ifdef DECADUINO_DEBUG 
-		  //Serial.println("\nRX Frame timestamp");
-		  //sprintf((char*)debugStr,"hi=%02x  ", bafHi);
-		  //Serial.print((char*)debugStr);
-		  //sprintf((char*)debugStr,"lo=%08x ", bafLo);
-		  //Serial.print((char*)debugStr);
-
-		  sprintf((char*)debugStr,"rx value=%fs ", kinto);
-		  Serial.print((char*)debugStr);
-#endif
-*/
-		  encodeUint64(0, buf); // init buffer
-		  //encodeUint64(0x0123456789ABCDEF, buf); // init buffer
-		  //readSpiSubAddress(0x15, 0x00, buf, 4);
-		  //readSpiSubAddress(0x15, 0x04, &buf[4],1);
-		  readSpi(0x15, buf, 5);
-		  lastRxTimestamp = decodeUint64(buf);
-		  
-#ifdef DECADUINO_DEBUG 
-		  sprintf((char*)debugStr, "\nRX Frame timestamp %08x %08x\n", decodeUint32(&buf[4]), decodeUint32(buf));
-		  Serial.print((char*)debugStr);
-		  sprintf((char*)debugStr, "\nRX Frame timestamp ");
-		  Serial.print((char*)debugStr);
-		  printUint64(lastRxTimestamp);
-		  Serial.println();
-#endif
-//          lastRangingMsgReceived = buf[0];
-
-#ifdef DECADUINO_DEBUG 
-		  readSpi(0x14, buf, 3);
+          sprintf((char*)debugStr, "\nRX Frame timestamp %08x %08x\n", decodeUint32(&buf[4]), decodeUint32(buf));
+          Serial.println((char*)debugStr);
+          readSpi(0x14, buf, 3);
           ui32t = decodeUint32(buf) & 0x0007FFFF;
           if ( ui32t & 0x00080000 ) ui32t |= 0xFFF80000;		  
-		  Serial.print("RXTOFS=0x");
-		  Serial.println(ui32t, HEX);
-		  ui32t = 0x01F00000/ui32t;
-		  Serial.print("clock offset=0x");
-		  Serial.println(ui32t, HEX);		  
+          Serial.print("RXTOFS=0x");
+          Serial.println(ui32t, HEX);
+          ui32t = 0x01F00000/ui32t;
+          Serial.print("clock offset=0x");
+          Serial.println(ui32t, HEX);		  
 #endif
-  	    }
+        }
       }
       // Clearing the RXFCG bit (it clears the interrupt if enabled)
       ack |= DW1000_REGISTER_SYS_STATUS_RXFCG_MASK;
@@ -394,28 +360,7 @@ void DecaDuino::handleInterrupt() {
 #endif
 
     // Read TX timestamp
-    /*
-    uint8_t bufLo[4];
-    uint8_t bufHi;
-    readSpiSubAddress(0x17, 0x00, bufLo,4);
-    readSpiSubAddress(0x17, 0x04, &bufHi,1);
-    double kinta=bufLo[0]*256*256*256*256+bufLo[1]*256*256*256+bufLo[2]*256*256+bufLo[3]*256+bufHi;
-    kinta=kinta*TIME_UNIT;//seconds
-#ifdef DECADUINO_DEBUG 
-    Serial.println("\nTX Frame timestamp");
-    sprintf((char*)debugStr,"hi=%02x  ", bufHi);
-    Serial.print((char*)debugStr);
-    sprintf((char*)debugStr,"lo=%08x ", bufLo);
-    Serial.print((char*)debugStr);
-    sprintf((char*)debugStr,"tx value=%f s", kinta);
-    Serial.print((char*)debugStr);
-#endif
-*/
-
     encodeUint64(0, buf); // init buffer
-    //encodeUint64(0x0123456789ABCDEF, buf); // init buffer
-    //readSpiSubAddress(0x17, 0x00, buf, 4);
-    //readSpiSubAddress(0x17, 0x04, &buf[4],1);
     readSpi(0x17, buf, 5);
     lastTxTimestamp = decodeUint64(buf);
 
@@ -442,190 +387,27 @@ bool DecaDuino::hasTxSucceeded() {
 }
 
 
+float DecaDuino::rangeNode(uint64_t destination, uint8_t protocol=DEFAULT_RANGING_PROTOCOL) {
+
+  // ToDo
+}
+
+
+uint8_t DecaDuino::twrRequest(uint64_t destination) {
+
+  // ToDo
+}
+
+
 uint8_t DecaDuino::sdsTwrRequest(uint64_t destination) {
 
-  uint8_t buf[25];
-  uint8_t again;
-  uint16_t len;
-
-  // Send START message to destination and remember t1
-#ifdef DECADUINO_DEBUG 
-  Serial.println("SDSTWR: Send START");
-  delay(5);
-#endif
-  buf[0] = MSG_TYPE_SDSTWR_START;
-  plmeDataRequest(buf, 1);
-  while ( !hasTxSucceeded() );
-  t1 = lastTxTimestamp;
-#ifdef DECADUINO_DEBUG 
-  Serial.print("SDSTWR: t1=");
-  printUint64(t1);
-  Serial.println();
-#endif
-
-  // Start timemout and wait for ACK+REQ message
-  again = true;
-#ifdef DECADUINO_DEBUG 
-  Serial.println("SDSTWR: Wait for ACK+REQ");
-#endif
-  do {
-    plmeRxEnableRequest(buf, &len);
-    while ( !rxFrameAvailable() );
-    if ( buf[0] == MSG_TYPE_SDSTWR_ACKREQ ) 
-      again = false;
-#ifdef DECADUINO_DEBUG 
-      Serial.println("SDSTWR: ACK+REQ received");
-#endif
-  } while (again);
-
-  // On receive, remember t4, send ACK and remember t5
-  t4 = lastRxTimestamp;
-#ifdef DECADUINO_DEBUG 
-  Serial.println("SDSTWR: Send ACK");
-  delay(5);
-#endif
-  buf[0] = MSG_TYPE_SDSTWR_ACK;
-  plmeDataRequest(buf, 1);
-  while ( !hasTxSucceeded() );
-  t5 = lastTxTimestamp;
-#ifdef DECADUINO_DEBUG 
-  Serial.print("SDSTWR: t5=");
-  printUint64(t5);
-  Serial.println();
-#endif
-
-  // Start timemout and wait for DATA_REPLY message
-  again = true;
-#ifdef DECADUINO_DEBUG 
-  Serial.println("SDSTWR: Wait for DATA_REPLY");
-#endif
-  do {
-    plmeRxEnableRequest(buf, &len);
-    while ( !rxFrameAvailable() );
-    if ( buf[0] == MSG_TYPE_SDSTWR_DATA_REPLY ) 
-      again = false;
-  } while (again);
-
-  // On receive, extract t2, t3 and t5 in the frame
-#ifdef DECADUINO_DEBUG 
-  Serial.println("SDSTWR: DATA_REPLY received");
-#endif
-  t2 = decodeUint64(&buf[1]);
-  t3 = decodeUint64(&buf[9]);
-  t5 = decodeUint64(&buf[17]);
-#ifdef DECADUINO_DEBUG 
-  Serial.print("SDSTWR: t2=");
-  printUint64(t2);
-  Serial.println();
-  Serial.print("SDSTWR: t3=");
-  printUint64(t3);
-  Serial.println();
-  Serial.print("SDSTWR: t5=");
-  printUint64(t5);
-  Serial.println();
-#endif
-
-  // Compute ToF
-  lastTof = (t4-t1-t3-t2+t6-t3-t5-t4)/4;
-
-#ifdef DECADUINO_DEBUG 
-  sprintf((char*)debugStr, "\nTof = %08x\n", (uint32_t)lastTof);
-  Serial.print((char*)debugStr);
-#endif
-
-  return true;
+  // ToDo
 }
 
 
-void DecaDuino::sdstwrRangingEngine(void) {
+void DecaDuino::rangingEngine(void) {
 
-  uint8_t buf[25];
-
-  switch (rxRangingState) {
-
-    case RX_RANGING_INIT_STATE:
-      rxRangingState = RX_RANGING_WAITING_FOR_START_STATE;
-      lastRangingMsgReceived = MSG_TYPE_SDSTWR_EMPTY;
-      break;
-
-    case RX_RANGING_WAITING_FOR_START_STATE:
-      if ( lastRangingMsgReceived == MSG_TYPE_SDSTWR_START ) {
-        // START received: remember t2, sending ACK+REQ then wait for ACK
-        t2 = lastRxTimestamp;
-#ifdef DECADUINO_DEBUG 
-        Serial.println("SDSTWR: START received, t2=");
-        printUint64(t2);
-        Serial.println();
-#endif
-        rxRangingState = RX_RANGING_SENDING_ACKREQ_STATE;
-      }
-      break;
-
-    case RX_RANGING_SENDING_ACKREQ_STATE:
-#ifdef DECADUINO_DEBUG 
-      Serial.println("SDSTWR: Send ACK+REQ");
-      delay(5);
-#endif
-      buf[0] = MSG_TYPE_SDSTWR_ACKREQ;
-      plmeDataRequest(buf, 1);
-      while ( !hasTxSucceeded() );
-      t3 = lastTxTimestamp;
-#ifdef DECADUINO_DEBUG 
-      Serial.print("SDSTWR: t3=");
-      printUint64(t3);
-      Serial.println();
-#endif
-      rxRangingState = RX_RANGING_WAITING_FOR_ACK_STATE;
-      break;
-
-    case RX_RANGING_WAITING_FOR_ACK_STATE:
-      if ( lastRangingMsgReceived == MSG_TYPE_SDSTWR_ACK ) {
-        // ACK received: remember t6, send DATA_REPLY and return to init;
-        t6 = lastRxTimestamp;
-#ifdef DECADUINO_DEBUG 
-        Serial.println("SDSTWR: ACK received, t6=");
-        printUint64(t6);
-        Serial.println();
-#endif
-        rxRangingState = RX_RANGING_SENDING_DATA_REPLY_STATE;
-      }
-      break;
-
-    case RX_RANGING_SENDING_DATA_REPLY_STATE:
-#ifdef DECADUINO_DEBUG 
-      Serial.println("SDSTWR: Send DATA_REPLY");
-      delay(5);
-#endif
-      buf[0] = MSG_TYPE_SDSTWR_DATA_REPLY;
-      encodeUint64(t2, &buf[1]);
-      encodeUint64(t3, &buf[9]);
-      encodeUint64(t6, &buf[17]);
-      plmeDataRequest(buf, 25);
-      while ( !hasTxSucceeded() );
-#ifdef DECADUINO_DEBUG
-      Serial.println("SDSTWR: DATA_REPLY sent. RX part ranging OK");
-#endif
-      rxRangingState = RX_RANGING_INIT_STATE;
-      break;
-
-    default:
-#ifdef DECADUINO_DEBUG
-      Serial.println("SDSTWR: unknown state. reset ranging engine");
-#endif
-      rxRangingState = RX_RANGING_INIT_STATE;
-      break;
-  }
-}
-
-
-float DecaDuino::rangeNode(uint64_t destination) {
-
-  // call sdsTwrRequest
-  if ( sdsTwrRequest(destination) ) {
-    //return computed_range;
-  } else {
-    return RANGING_ERROR;
-  }
+  // ToDo
 }
 
 
