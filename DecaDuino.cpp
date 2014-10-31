@@ -214,7 +214,6 @@ void DecaDuino::resetDW1000() {
     digitalWrite(_slaveSelectPin, HIGH);
   }
 
-
   // Initialise the SPI port
   //spi4teensy3::init(1,0,0); // Normal speed SPICLK after performing DW1000 reset
   spi4teensy3::init(2,0,0); // Normal speed SPICLK after performing DW1000 reset
@@ -227,6 +226,8 @@ void DecaDuino::resetDW1000() {
   sprintf((char*)debugStr,"PMSC_CTRL0=%08x", ui32t);
   Serial.println((char*)debugStr);
 #endif
+
+  trxStatus = DW1000_TRX_STATUS_IDLE;
 }
 
 
@@ -284,6 +285,8 @@ void DecaDuino::handleInterrupt() {
 
   // Checking RX frame interrupt
   if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_RXDFR_MASK ) { // RXDFR
+
+    trxStatus = DW1000_TRX_STATUS_IDLE;
 
 #ifdef DECADUINO_DEBUG 
     Serial.print("RXDFR ");
@@ -354,6 +357,8 @@ void DecaDuino::handleInterrupt() {
   // Manage TX completion interrupt
   if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_TXFRS_MASK ) { // TXFRS
 
+    trxStatus = DW1000_TRX_STATUS_IDLE;
+
     lastTxOK = true;
 
 #ifdef DECADUINO_DEBUG
@@ -390,7 +395,22 @@ bool DecaDuino::hasTxSucceeded() {
 
 float DecaDuino::rangeNode(uint64_t destination, uint8_t protocol=DEFAULT_RANGING_PROTOCOL) {
 
-  // ToDo
+  switch(protocol) {
+
+    case RANGING_PROTOCOL_TWR:
+      twrRequest(destination);
+      break;
+
+    case RANGING_PROTOCOL_SDS_TWR:
+      sdsTwrRequest(destination);
+      break;
+
+    default:
+#ifdef DECADUINO_DEBUG 
+      Serial.println("rangeNode(): unknown ranging protocol");
+#endif
+      break;
+  }
 }
 
 
@@ -420,6 +440,8 @@ uint8_t DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
   sprintf((char*)debugStr,"Request to send %dbyte(s) ", len);
   Serial.print((char*)debugStr);
 #endif
+
+  trxStatus = DW1000_TRX_STATUS_TX;
 
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     // copy PSDU in tx buffer
@@ -477,6 +499,8 @@ void DecaDuino::plmeRxEnableRequest(void) {
 
   // set rx enable bit in system control register
   writeSpiUint32(DW1000_REGISTER_SYS_CTRL, DW1000_REGISTER_SYS_CTRL_RXENAB_MASK);
+
+  trxStatus = DW1000_TRX_STATUS_RX;
 }
 
 
@@ -503,6 +527,8 @@ void DecaDuino::plmeRxDisableRequest(void) {
 
   // set transceiver off bit in system control register (go to idle mode)
   writeSpiUint32(DW1000_REGISTER_SYS_CTRL, DW1000_REGISTER_SYS_CTRL_TRXOFF_MASK);
+
+  trxStatus = DW1000_TRX_STATUS_IDLE;
 }
 
 
@@ -530,6 +556,12 @@ uint8_t DecaDuino::rxFrameAvailable(uint8_t* buf, uint16_t *len) {
     }
   }
   return false;
+}
+
+
+uint8_t DecaDuino::getTrxStatus(void) {
+
+  return trxStatus;
 }
 
 
@@ -754,7 +786,9 @@ void DecaDuino::sleepRequest(void) {
   writeSpiSubAddress(DW1000_REGISTER_AON_CTRL, DW1000_REGISTER_OFFSET_AON_CTRL, &ui8t, 1);
   delay(1);
 
-  // The DWM1000 is now sleeping
+  // The DWM1000 is now sleepping
+
+  trxStatus = DW1000_TRX_STATUS_SLEEP;
 }
 
 

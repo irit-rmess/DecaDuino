@@ -46,6 +46,11 @@
 
 #define TIME_UNIT 1/(499.2*128*1000000)
 
+#define DW1000_TRX_STATUS_IDLE 0
+#define DW1000_TRX_STATUS_TX 1
+#define DW1000_TRX_STATUS_RX 2
+#define DW1000_TRX_STATUS_SLEEP 3
+
 #define RANGING_PROTOCOL_TWR 1
 #define RANGING_PROTOCOL_SDS_TWR 2
 #define DEFAULT_RANGING_PROTOCOL RANGING_PROTOCOL_TWR
@@ -158,6 +163,8 @@ class DecaDuino {
     void test(void);
     bool lastTxOK;
     bool hasTxSucceeded(void);
+    uint8_t getTrxStatus(void);
+
     uint64_t lastTxTimestamp;
     uint64_t lastRxTimestamp;
     /*
@@ -211,6 +218,7 @@ class DecaDuino {
     uint8_t *rxData;
     uint16_t *rxDataLen;
     uint8_t rxDataAvailable;
+    uint8_t trxStatus;
 
 #ifdef DECADUINO_DEBUG
     uint8_t debugStr[DEBUG_STR_LEN];
