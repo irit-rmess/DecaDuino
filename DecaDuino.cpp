@@ -15,6 +15,109 @@ DecaDuino::DecaDuino(uint8_t slaveSelectPin, uint8_t interruptPin) {
 }
 
 
+boolean DecaDuino::init(uint32_t shorAddrPANID) {
+
+  uint8_t buf[8];
+  uint16_t ui16t;
+  uint32_t ui32t;
+
+  // Initialise the IRQ and Slave Select pin
+  pinMode(_interruptPin, INPUT);
+  pinMode(_slaveSelectPin, OUTPUT);
+  digitalWrite(_slaveSelectPin, HIGH);
+
+  // Initialise the RX pointers
+  rxDataAvailable = false;
+  rxData = NULL;
+  rxDataLen = NULL;
+
+  // Wait for DW1000 POR (up to 5msec)
+  delay(5);
+
+#ifdef DECADUINO_DEBUG 
+  delay(3000); // delay to see next messages on console for debug
+#endif
+
+  // Reset the DW1000 now
+  resetDW1000();
+
+  // Check the device type
+  if ( readSpiUint32(DW1000_REGISTER_DEV_ID) != 0xdeca0130 ) return false;
+
+  // Load Extended Unique Identifier – the 64-bit IEEE device address - in memory
+  euid = getEuid();
+
+  // Attach interrupt handler
+  if (_interruptPin == DW1000_IRQ0_PIN) {
+    _DecaDuinoInterrupt[DW1000_IRQ0_PIN] = this;
+    attachInterrupt(_interruptPin, DecaDuino::isr0, HIGH);
+  } else if (_interruptPin == DW1000_IRQ1_PIN) {
+    _DecaDuinoInterrupt[DW1000_IRQ1_PIN] = this;
+    attachInterrupt(_interruptPin, DecaDuino::isr1, HIGH);
+  } else if (_interruptPin == DW1000_IRQ2_PIN) {
+    _DecaDuinoInterrupt[DW1000_IRQ2_PIN] = this;
+    attachInterrupt(_interruptPin, DecaDuino::isr2, HIGH);
+  } else return false;
+
+  // --- Configure DW1000 -----------------------------------------------------------------------------------------
+
+  // System Configuration Register
+  ui32t = readSpiUint32(DW1000_REGISTER_SYS_CFG);
+  ui32t |= DW1000_REGISTER_SYS_CFG_RXAUTR_MASK; // RXAUTR: Receiver Auto-Re-enable after a RX failure
+ui32t |= 0x0000003D;//frame filtering
+  writeSpiUint32(DW1000_REGISTER_SYS_CFG,ui32t);
+
+#ifdef DECADUINO_DEBUG 
+  sprintf((char*)debugStr,"SYS_CFG=%08x", ui32t);
+  Serial.println((char*)debugStr);
+#endif
+
+  // System Event Mask Register
+  ui32t = readSpiUint32(DW1000_REGISTER_SYS_MASK);
+  ui32t |= DW1000_REGISTER_SYS_MASK_MRXFCG_MASK; // MRXFCG: interrupt when good frame (FCS OK) received
+  ui32t |= DW1000_REGISTER_SYS_MASK_MTXFRS_MASK;
+  writeSpiUint32(DW1000_REGISTER_SYS_MASK, ui32t);
+
+//set short addr and PANID
+
+ writeSpiUint32(0x03, shorAddrPANID);
+shorAddrPANID = readSpiUint32(0x03);
+ sprintf((char*)debugStr,"PANID=%08x", shorAddrPANID);
+  Serial.println((char*)debugStr);
+
+//uint8_t val[2]={0x7C,0xCD};
+//writeSpi(0x18,val,2);
+
+
+#ifdef DECADUINO_DEBUG 
+  sprintf((char*)debugStr,"SYS_MASK=%08x", ui32t);
+  Serial.println((char*)debugStr);
+#endif
+
+//val[0]=0;
+//val[1]=0;
+
+
+//readSpi(0x18,val,2);
+//sprintf((char*)debugStr,"TX_ANTD=%04x", val);
+//  Serial.println((char*)debugStr);
+
+  //ui16t = 33000;
+  ui16t = 32870;
+  encodeUint16(ui16t, buf);
+  writeSpi(0x18, buf, 2);
+
+
+  // --- End of DW1000 configuration ------------------------------------------------------------------------------
+
+  lastTxOK = false;
+
+  // Return true if everything OK
+  return true;
+
+}//end of init()
+
+
 boolean DecaDuino::init() {
 
   uint8_t buf[8];
@@ -64,6 +167,7 @@ boolean DecaDuino::init() {
   // System Configuration Register
   ui32t = readSpiUint32(DW1000_REGISTER_SYS_CFG);
   ui32t |= DW1000_REGISTER_SYS_CFG_RXAUTR_MASK; // RXAUTR: Receiver Auto-Re-enable after a RX failure
+//ui32t |= 0x0000003D;//frame filtering
   writeSpiUint32(DW1000_REGISTER_SYS_CFG,ui32t);
 
 #ifdef DECADUINO_DEBUG 
@@ -76,6 +180,8 @@ boolean DecaDuino::init() {
   ui32t |= DW1000_REGISTER_SYS_MASK_MRXFCG_MASK; // MRXFCG: interrupt when good frame (FCS OK) received
   ui32t |= DW1000_REGISTER_SYS_MASK_MTXFRS_MASK;
   writeSpiUint32(DW1000_REGISTER_SYS_MASK, ui32t);
+
+
 
 //uint8_t val[2]={0x7C,0xCD};
 //writeSpi(0x18,val,2);
@@ -275,12 +381,12 @@ void DecaDuino::handleInterrupt() {
     return;
 
 #ifdef DECADUINO_DEBUG 
-  Serial.print("\n###isr### ");
+ // Serial.print("\n###isr### ");
   //ui32t = readSpiUint32(DW1000_REGISTER_SYS_MASK);
   //sprintf((char*)debugStr,"SYS_MASK  =%08x", ui32t);
   //Serial.println((char*)debugStr);
-  sprintf((char*)debugStr,"SYS_STATUS=%08x ", sysStatusReg);
-  Serial.print((char*)debugStr);
+ //sprintf((char*)debugStr,"SYS_STATUS=%08x ", sysStatusReg);
+//  Serial.print((char*)debugStr);
 #endif
 
   // Checking RX frame interrupt
@@ -289,14 +395,14 @@ void DecaDuino::handleInterrupt() {
     trxStatus = DW1000_TRX_STATUS_IDLE;
 
 #ifdef DECADUINO_DEBUG 
-    Serial.print("RXDFR ");
+   // Serial.print("RXDFR ");
 #endif
 
     // Good frame
     if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_RXFCG_MASK ) { // RXFCG
 
 #ifdef DECADUINO_DEBUG 
-      Serial.print("RXFCG ");
+      //Serial.print("RXFCG ");
 #endif
 
       if ( rxData == NULL ) {
@@ -311,12 +417,12 @@ void DecaDuino::handleInterrupt() {
         ui32t = (readSpiUint32(DW1000_REGISTER_RX_FINFO) & DW1000_REGISTER_RX_FINFO_RXFLEN_MASK) - 2; // FCS is 2-bytes long. Avoid it in the len.
         *rxDataLen = (uint16_t)ui32t;
 #ifdef DECADUINO_DEBUG 
-        sprintf((char*)debugStr,"length=%dbytes ", *rxDataLen);
-        Serial.print((char*)debugStr);
+        //sprintf((char*)debugStr,"length=%dbytes ", *rxDataLen);
+       // Serial.print((char*)debugStr);
 #endif
         // get frame data
         readSpi(DW1000_REGISTER_RX_BUFFER, rxData, *rxDataLen);
-        rxDataAvailable = true;
+       // rxDataAvailable = true;
 
         if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_LDEDONE_MASK ) {
           encodeUint64(0, buf); // init buffer
@@ -325,15 +431,50 @@ void DecaDuino::handleInterrupt() {
 #ifdef DECADUINO_DEBUG 
           sprintf((char*)debugStr, "\nRX Frame timestamp %08x %08x\n", decodeUint32(&buf[4]), decodeUint32(buf));
           Serial.println((char*)debugStr);
+#endif
           readSpi(0x14, buf, 3);
           ui32t = decodeUint32(buf) & 0x0007FFFF;
           if ( ui32t & 0x00080000 ) ui32t |= 0xFFF80000;		  
-          Serial.print("RXTOFS=0x");
-          Serial.println(ui32t, HEX);
-          ui32t = 0x01F00000/ui32t;
-          Serial.print("clock offset=0x");
-          Serial.println(ui32t, HEX);		  
-#endif
+
+	//***************** Clock offset
+	// Serial.print("RXTOFS=0x");
+			  //Serial.println(ui32t, HEX);
+			  ui32t = 0x01F00000/ui32t;
+	//RD032014
+	double rxtofs, rxttcki;
+	rxttcki=32505856;
+
+	//turn rxtofs to a signed double value
+	if(buf[2] & 0x04){//rxtofs is negative
+	//Serial.println("rxtofs is negative");
+		buf[2] |=0xF8;
+		buf[2]=~buf[2];
+		buf[1]=~buf[1];
+		buf[0]=~buf[0];
+
+	rxtofs=buf[2]*256*256+buf[1]*256+buf[0];
+	
+		rxtofs=rxtofs+1;
+		rxtofs=rxtofs*-1;
+	}else{
+		//Serial.println("rxtofs is positive");
+	rxtofs=buf[2]*256*256+buf[1]*256+buf[0];
+	}
+
+	double offseti=rxtofs*1000000/rxttcki;
+	clkOffset=offseti;
+  rxDataAvailable = true;
+	//  Serial.print("clock offset=");
+	 // Serial.println(ui32t, HEX);		  
+	//Serial.println(offseti);
+
+		 // Serial.print("RXTOFS=0x");
+		//  Serial.println(ui32t, HEX);
+		 // ui32t = 0x01F00000/ui32t;
+		//  Serial.print("clock offset=0x");
+		//  Serial.println(ui32t, HEX);	
+		  
+
         }
       }
       // Clearing the RXFCG bit (it clears the interrupt if enabled)
@@ -362,13 +503,15 @@ void DecaDuino::handleInterrupt() {
     lastTxOK = true;
 
 #ifdef DECADUINO_DEBUG
-    Serial.println("LastTx OK");
+    //Serial.println("LastTx OK");
 #endif
 
     // Read TX timestamp
     encodeUint64(0, buf); // init buffer
     readSpi(0x17, buf, 5);
     lastTxTimestamp = decodeUint64(buf);
+//Serial.print("\nLAST TX ");
+//print(lastTxTimestamp);
 
 #ifdef DECADUINO_DEBUG 
     sprintf((char*)debugStr, "\nTX Frame timestamp %08x %08x\n", decodeUint32(&buf[4]), decodeUint32(buf));
@@ -437,8 +580,14 @@ uint8_t DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
   uint32_t ui32t;
 
 #ifdef DECADUINO_DEBUG 
-  sprintf((char*)debugStr,"Request to send %dbyte(s) ", len);
+ /* sprintf((char*)debugStr,"Request to send %dbyte(s)\n ", len);
+  Serial.print((char*)debugStr);*/
+
+for(int q=0;q<len;q++){
+  sprintf((char*)debugStr," %02X ", buf[q]);
   Serial.print((char*)debugStr);
+
+}
 #endif
 
   trxStatus = DW1000_TRX_STATUS_TX;
@@ -471,6 +620,18 @@ uint8_t DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
   return true;
 }
 
+uint64_t DecaDuino::predictT5(){
+
+	uint64_t t5;
+	uint8_t buf[8];
+
+	encodeUint64(0, buf); // init buffer
+	readSpi(0x06, buf, 5);
+	t5 = decodeUint64(buf);
+
+	return t5;
+}
+
 
 uint8_t DecaDuino::send(uint8_t* buf, uint16_t len) {
 
@@ -493,7 +654,7 @@ void DecaDuino::setRxBuffer(uint8_t* buf, uint16_t *len) {
 void DecaDuino::plmeRxEnableRequest(void) {
 
 #ifdef DECADUINO_DEBUG 
-  sprintf((char*)debugStr,"RX enable request");
+ sprintf((char*)debugStr,"RX enable request");
   Serial.println((char*)debugStr);
 #endif
 
@@ -695,9 +856,19 @@ void DecaDuino::encodeUint32 ( uint32_t from, uint8_t *to ) {
 
 uint64_t DecaDuino::decodeUint64 ( uint8_t *data ) {
 
-  return 0 | (data[7] << 56) | (data[6] << 48) | (data[5] << 40) | (data[4] << 32) | (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0];
+	uint64_t tmp=0;
+	tmp=decodeUint32(&data[4]);// | decodeUint32(data);
+	tmp=tmp<<32;
+	tmp=tmp | decodeUint32(data);
+	
+	return tmp;
+	//  return 0 | (data[7] << 56) | (data[6] << 48) | (data[5] << 40) | (data[4] << 32) | (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0];
 }
 
+uint64_t DecaDuino::decodeUint64_2 ( uint8_t *data ) {
+
+  return 0 |  (data[4] << 32) | (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0];
+}
 
 void DecaDuino::encodeUint64 ( uint64_t from, uint8_t *to ) {
 
@@ -805,3 +976,16 @@ void DecaDuino::wakeRequest(void) {
 void DecaDuino::test(void) {
 
 }
+
+void DecaDuino::print(uint64_t val) {
+uint16_t hi16=(uint16_t)(val >> 32);
+
+
+sprintf((char*)debugStr, "%02X",hi16);
+  Serial.print((char*)debugStr);
+
+sprintf((char*)debugStr, "%08x",val);
+  Serial.println((char*)debugStr);
+}
+
+

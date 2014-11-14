@@ -131,6 +131,7 @@ class DecaDuino {
 
   public:
     DecaDuino(uint8_t slaveSelectPin = DW1000_CS0_PIN, uint8_t interruptPin = DW1000_IRQ0_PIN);
+    boolean init(uint32_t shorAddrPANID);
     boolean init();
     void resetDW1000();
     void dummy();
@@ -220,9 +221,16 @@ class DecaDuino {
     uint8_t rxDataAvailable;
     uint8_t trxStatus;
 
-#ifdef DECADUINO_DEBUG
+uint64_t predictT5();
+
+void print(uint64_t val);
+uint64_t decodeUint64_2 ( uint8_t *data ) ;
+
+double clkOffset;
+
+//#ifdef DECADUINO_DEBUG
     uint8_t debugStr[DEBUG_STR_LEN];
-#endif
+//#endif
   private:
   
   protected:
