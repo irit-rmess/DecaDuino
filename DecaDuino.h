@@ -148,19 +148,23 @@ class DecaDuino {
     void setShortAddress(uint16_t shortAddress);
     uint8_t plmeDataRequest(uint8_t* buf, uint16_t len);
     uint8_t send(uint8_t* buf, uint16_t len);
-    void setRxBuffer(uint8_t* buf, uint16_t *len);
     float rangeNode(uint64_t destination, uint8_t protocol);
     uint8_t twrRequest(uint64_t destination);
     uint8_t sdsTwrRequest(uint64_t destination);
     void rangingEngine(void);
+    void setRxBuffer(uint8_t* buf, uint16_t *len);
+    void setRxBuffer(uint8_t* buf, uint16_t *len, uint16_t max);
     void plmeRxEnableRequest(void);
+    void plmeRxEnableRequest(uint16_t max);
     void plmeRxEnableRequest(uint8_t* buf, uint16_t *len);
+    void plmeRxEnableRequest(uint8_t* buf, uint16_t *len, uint16_t max);
     void plmeRxDisableRequest(void);
     void sleepRequest(void);
     void deepsleepRequest(void);
     void wakeRequest(void);
     uint8_t rxFrameAvailable(void);
     uint8_t rxFrameAvailable(uint8_t* buf, uint16_t *len);
+    uint8_t rxFrameAvailable(uint8_t* buf, uint16_t *len, uint16_t max);
     void test(void);
     bool lastTxOK;
     bool hasTxSucceeded(void);
@@ -218,6 +222,7 @@ class DecaDuino {
     uint64_t euid;
     uint8_t *rxData;
     uint16_t *rxDataLen;
+    uint16_t rxDataLenMax;
     uint8_t rxDataAvailable;
     uint8_t trxStatus;
 

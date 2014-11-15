@@ -421,7 +421,13 @@ void DecaDuino::handleInterrupt() {
        // Serial.print((char*)debugStr);
 #endif
         // get frame data
-        readSpi(DW1000_REGISTER_RX_BUFFER, rxData, *rxDataLen);
+        if ( rxDataLenMax != 0 ) {
+          // Put frame data at the end of the buffer
+          readSpi(DW1000_REGISTER_RX_BUFFER, rxData+rxDataLenMax-*rxDataLen, *rxDataLen);
+        } else {
+          // Put frame data at the begin of the buffer
+          readSpi(DW1000_REGISTER_RX_BUFFER, rxData, *rxDataLen);
+        }
        // rxDataAvailable = true;
 
         if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_LDEDONE_MASK ) {
@@ -648,6 +654,14 @@ void DecaDuino::setRxBuffer(uint8_t* buf, uint16_t *len) {
 
   rxData = buf;
   rxDataLen = len;
+  rxDataLenMax = 0;
+}
+
+
+void DecaDuino::setRxBuffer(uint8_t* buf, uint16_t *len, uint16_t max) {
+
+  setRxBuffer(buf, len);
+  rxDataLenMax = max;
 }
 
 
@@ -665,6 +679,13 @@ void DecaDuino::plmeRxEnableRequest(void) {
 }
 
 
+void DecaDuino::plmeRxEnableRequest(uint16_t max) {
+
+  plmeRxEnableRequest();
+  rxDataLenMax = max;
+}
+
+
 void DecaDuino::plmeRxEnableRequest(uint8_t* buf, uint16_t *len) {
 
 #ifdef DECADUINO_DEBUG 
@@ -674,6 +695,13 @@ void DecaDuino::plmeRxEnableRequest(uint8_t* buf, uint16_t *len) {
 
   setRxBuffer(buf, len);
   plmeRxEnableRequest(); 
+}
+
+
+void DecaDuino::plmeRxEnableRequest(uint8_t* buf, uint16_t *len, uint16_t max) {
+
+  plmeRxEnableRequest(buf, len);
+  rxDataLenMax = max;
 }
 
 
@@ -705,13 +733,24 @@ uint8_t DecaDuino::rxFrameAvailable(void) {
 
 uint8_t DecaDuino::rxFrameAvailable(uint8_t* buf, uint16_t *len) {
 
+  return rxFrameAvailable(buf, len, 0);
+}
+
+
+uint8_t DecaDuino::rxFrameAvailable(uint8_t* buf, uint16_t *len, uint16_t max) {
+
   uint16_t i;
 
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     if ( rxDataAvailable ) {
-      for (i=0; i<*rxDataLen; i++)
-        buf[i] = rxData[i];
-      len = rxDataLen;
+      if ( max == 0 ) {
+        for (i=0; i<*rxDataLen; i++)
+          buf[i] = rxData[i];
+      } else {
+        for (i=0; i<*rxDataLen; i++)
+          buf[i+max-*rxDataLen] = rxData[i];
+      }
+      *len = *rxDataLen;
       rxDataAvailable = false;
       return true;
     }
