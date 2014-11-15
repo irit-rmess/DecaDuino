@@ -934,6 +934,26 @@ void DecaDuino::printUint64 ( uint64_t ui64 ) {
 }
 
 
+void DecaDuino::getSystemTimeCounter ( uint64_t *p ) {
+
+  uint8_t buf[8];
+
+  encodeUint64(0, buf); // init buffer
+  readSpi(DW1000_REGISTER_SYS_TIME, buf, 5);
+  *p = decodeUint64(buf);
+}
+
+
+uint64_t DecaDuino::getSystemTimeCounter ( void ) {
+
+  uint64_t p;
+
+  getSystemTimeCounter(&p);
+
+  return p;
+}
+
+
 uint16_t DecaDuino::getPanId() {
 
   uint8_t buf[2];

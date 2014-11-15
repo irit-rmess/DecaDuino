@@ -78,6 +78,8 @@
 #define DW1000_REGISTER_SYS_CFG		0x04
 #define DW1000_REGISTER_SYS_CFG_RXAUTR_MASK 0x20000000
 
+#define DW1000_REGISTER_SYS_TIME	0x06
+
 #define DW1000_REGISTER_TX_FCTRL	0x08
 #define DW1000_REGISTER_TX_FCTRL_FRAME_LENGTH_MASK 0x000003FF
 
@@ -141,6 +143,23 @@ class DecaDuino {
     void writeSpi(uint8_t address, uint8_t* buf, uint16_t len);
     void writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len);
     void writeSpiUint32(uint8_t address, uint32_t ui32t);
+
+    /**
+    * @brief Get System Time Counter value as a pointer
+    * @return no return
+    * @author Adrien van den Bossche <bossche@irit.fr>
+    * @date 20141115
+    */
+    void getSystemTimeCounter(uint64_t *p);
+
+    /**
+    * @brief Return the System Time Counter value
+    * @return the System Time Counter value as a uint64_t
+    * @author Adrien van den Bossche <bossche@irit.fr>
+    * @date 20141115
+    */
+    uint64_t getSystemTimeCounter(void);
+
     uint16_t getPanId();
     uint16_t getShortAddress();
     uint64_t getEuid();
