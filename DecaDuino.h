@@ -85,8 +85,11 @@
 
 #define DW1000_REGISTER_TX_BUFFER	0x09
 
+#define DW1000_REGISTER_DX_TIME		0x0A
+
 #define DW1000_REGISTER_SYS_CTRL	0x0D
 #define DW1000_REGISTER_SYS_CTRL_TXSTRT_MASK 0x00000002
+#define DW1000_REGISTER_SYS_CTRL_TXDLYS_MASK 0x00000004
 #define DW1000_REGISTER_SYS_CTRL_TRXOFF_MASK 0x00000040
 #define DW1000_REGISTER_SYS_CTRL_RXENAB_MASK 0x00000100
 
@@ -166,7 +169,9 @@ class DecaDuino {
     void setPanId(uint16_t panId);
     void setShortAddress(uint16_t shortAddress);
     uint8_t plmeDataRequest(uint8_t* buf, uint16_t len);
+    uint8_t plmeDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time);
     uint8_t send(uint8_t* buf, uint16_t len);
+    uint8_t send(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time);
     float rangeNode(uint64_t destination, uint8_t protocol);
     uint8_t twrRequest(uint64_t destination);
     uint8_t sdsTwrRequest(uint64_t destination);

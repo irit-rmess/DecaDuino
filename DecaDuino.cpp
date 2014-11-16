@@ -506,7 +506,7 @@ void DecaDuino::handleInterrupt() {
 
     trxStatus = DW1000_TRX_STATUS_IDLE;
 
-    lastTxOK = true;
+    // lastTxOK = true; moved after reading TX timestamp
 
 #ifdef DECADUINO_DEBUG
     //Serial.println("LastTx OK");
@@ -519,6 +519,8 @@ void DecaDuino::handleInterrupt() {
 //Serial.print("\nLAST TX ");
 //print(lastTxTimestamp);
 
+    lastTxOK = true;
+ 
 #ifdef DECADUINO_DEBUG 
     sprintf((char*)debugStr, "\nTX Frame timestamp %08x %08x\n", decodeUint32(&buf[4]), decodeUint32(buf));
     Serial.print((char*)debugStr);
@@ -580,10 +582,16 @@ void DecaDuino::rangingEngine(void) {
   // ToDo
 }
 
-
 uint8_t DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
 
+  plmeDataRequest(buf, len, false, 0);
+}
+
+uint8_t DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time) {
+
   uint32_t ui32t;
+  uint64_t ui64t;
+  uint8_t tempbuf[8];
 
 #ifdef DECADUINO_DEBUG 
  /* sprintf((char*)debugStr,"Request to send %dbyte(s)\n ", len);
@@ -596,9 +604,10 @@ for(int q=0;q<len;q++){
 }
 #endif
 
-  trxStatus = DW1000_TRX_STATUS_TX;
-
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+
+    trxStatus = DW1000_TRX_STATUS_TX;
+
     // copy PSDU in tx buffer
     writeSpi(DW1000_REGISTER_TX_BUFFER, buf, len);
 
@@ -609,9 +618,19 @@ for(int q=0;q<len;q++){
     ui32t = (ui32t & ~DW1000_REGISTER_TX_FCTRL_FRAME_LENGTH_MASK) | len+2; // FCS is 2-bytes long
     writeSpiUint32(DW1000_REGISTER_TX_FCTRL, ui32t);
 
-    // set tx start bit
-    writeSpiUint32(DW1000_REGISTER_SYS_CTRL, DW1000_REGISTER_SYS_CTRL_TXSTRT_MASK);
- 
+    if ( delayed ) { // if delayed transmission
+      // send time
+      encodeUint64 ( time & 0x000000FFFFFFFE00, tempbuf); // time is 5-bytes long, 9 lsb=0
+      writeSpi(DW1000_REGISTER_DX_TIME, tempbuf, 5);
+      
+      // set tx start bit and Transmitter Delayed Sendind bit
+      writeSpiUint32(DW1000_REGISTER_SYS_CTRL, DW1000_REGISTER_SYS_CTRL_TXSTRT_MASK | DW1000_REGISTER_SYS_CTRL_TXDLYS_MASK);
+
+    } else {
+      // set tx start bit
+      writeSpiUint32(DW1000_REGISTER_SYS_CTRL, DW1000_REGISTER_SYS_CTRL_TXSTRT_MASK);
+    }
+
     lastTxOK = false;
   }
 
@@ -626,6 +645,19 @@ for(int q=0;q<len;q++){
   return true;
 }
 
+
+uint8_t DecaDuino::send(uint8_t* buf, uint16_t len) {
+
+  plmeDataRequest(buf, len);
+}
+
+
+uint8_t DecaDuino::send(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time) {
+
+  plmeDataRequest(buf, len, delayed, time);
+}
+
+
 uint64_t DecaDuino::predictT5(){
 
 	uint64_t t5;
@@ -639,10 +671,7 @@ uint64_t DecaDuino::predictT5(){
 }
 
 
-uint8_t DecaDuino::send(uint8_t* buf, uint16_t len) {
 
-  plmeDataRequest(buf, len);
-}
 
 
 void DecaDuino::setRxBuffer(uint8_t* buf, uint16_t *len) {
