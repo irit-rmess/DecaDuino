@@ -1027,6 +1027,61 @@ void DecaDuino::setShortAddress(uint16_t shortAddress) {
   writeSpiSubAddress(DW1000_REGISTER_PANADR, DW1000_REGISTER_PANADR_SHORT_ADDRESS_OFFSET, buf, 2);
 }
 
+
+uint8_t DecaDuino::getTemperatureRaw() {
+
+  uint8_t u8t;
+
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+
+    u8t = 0x80; writeSpiSubAddress(0x28, 0x11, &u8t, 1); // 1. Write Sub-Register 28:11 1byte 0x80
+    u8t = 0x0A; writeSpiSubAddress(0x28, 0x12, &u8t, 1); // 2. Write Sub-Register 28:12 1byte 0x0A
+    u8t = 0x0F; writeSpiSubAddress(0x28, 0x12, &u8t, 1); // 3. Write Sub-Register 28:12 1byte 0x0F
+    u8t = 0x01; writeSpiSubAddress(0x2A, 0x00, &u8t, 1); // 4. Write Register 2A:00 1byte 0x01
+    u8t = 0x00; writeSpiSubAddress(0x2A, 0x00, &u8t, 1); // 5. Write Register 2A:00 1byte 0x00
+    readSpiSubAddress(0x2A, 0x04, &u8t, 1); // 6. Read Register 2A:04 1byte 8 bit Temperature reading
+  }
+
+  return u8t;
+}
+
+
+uint8_t DecaDuino::getVoltageRaw() {
+
+  uint8_t u8t;
+
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    
+    u8t = 0x80; writeSpiSubAddress(0x28, 0x11, &u8t, 1); // 1. Write Sub-Register 28:11 1byte 0x80
+    u8t = 0x0A; writeSpiSubAddress(0x28, 0x12, &u8t, 1); // 2. Write Sub-Register 28:12 1byte 0x0A
+    u8t = 0x0F; writeSpiSubAddress(0x28, 0x12, &u8t, 1); // 3. Write Sub-Register 28:12 1byte 0x0F
+    u8t = 0x01; writeSpiSubAddress(0x2A, 0x00, &u8t, 1); // 4. Write Register 2A:00 1byte 0x01
+    u8t = 0x00; writeSpiSubAddress(0x2A, 0x00, &u8t, 1); // 5. Write Register 2A:00 1byte 0x00
+    readSpiSubAddress(0x2A, 0x03, &u8t, 1); // 6. Read Register 2A:03 1byte 8 bit Voltage reading
+  }
+
+  return u8t;
+}
+
+
+float DecaDuino::getTemperature(void) {
+
+  // Temperature (°C )= (SAR_LTEMP - (OTP_READ(Vtemp @ 23°C )) x 1.14) + 23
+  // Todo: what is OTP_READ(Vtemp @ 23°C ) ?
+
+  return 0;
+}
+
+
+float DecaDuino::getVoltage(void) {
+
+  // Voltage (volts) = (SAR_LVBAT- (OTP_READ(Vmeas @ 3.3 V )) /173) + 3.3
+  // Todo: what is OTP_READ(Vmeas @ 3.3 V ) ?
+
+  return 0;
+}
+
+
 void DecaDuino::sleepRequest(void) {
 
   uint8_t ui8t;

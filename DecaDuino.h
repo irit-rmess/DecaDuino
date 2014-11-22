@@ -193,6 +193,10 @@ class DecaDuino {
     bool lastTxOK;
     bool hasTxSucceeded(void);
     uint8_t getTrxStatus(void);
+    uint8_t getTemperatureRaw(void);
+    float getTemperature(void);
+    uint8_t getVoltageRaw(void);
+    float getVoltage(void);
 
     uint64_t lastTxTimestamp;
     uint64_t lastRxTimestamp;
