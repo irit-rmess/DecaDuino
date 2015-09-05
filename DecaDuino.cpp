@@ -18,7 +18,7 @@ DecaDuino::DecaDuino(uint8_t slaveSelectPin, uint8_t interruptPin) {
 boolean DecaDuino::init() {
 
 	// Call init with 0xFFFF for both Short Address and PanId (no address/panid identification: Promiscuous mode)
-	init(0xFFFFFFFF);
+	return init(0xFFFFFFFF);
 }
 
 boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
