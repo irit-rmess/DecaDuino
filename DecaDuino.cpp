@@ -862,9 +862,10 @@ void DecaDuino::printUint64 ( uint64_t ui64 ) {
 	uint8_t debugStr[18];
 
 	encodeUint64(ui64, buf);
-	
-	sprintf((char*)debugStr, "%08x%08x", decodeUint32(&buf[4]), decodeUint32(buf));
-	Serial.print((char*)debugStr);
+
+	// XXX	
+	//sprintf((char*)debugStr, "%08x%08x", decodeUint32(&buf[4]), decodeUint32(buf));
+	//Serial.print((char*)debugStr);
 }
 
 
@@ -1058,6 +1059,6 @@ void DecaDuino::print(uint64_t val) {
 	sprintf((char*)debugStr, "%02X",hi16);
 	Serial.print((char*)debugStr);
 
-	sprintf((char*)debugStr, "%08x",val);
+	sprintf((char*)debugStr, "%08lx",(uint32_t)(val & 0xFFFFFFFF));
 	Serial.println((char*)debugStr);
 }
