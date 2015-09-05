@@ -255,12 +255,12 @@ class DecaDuino {
 		uint8_t rxDataAvailable;
 		uint8_t trxStatus;
 
-uint64_t predictT5();
+		uint64_t predictT5();
 
-void print(uint64_t val);
-uint64_t decodeUint64_2 ( uint8_t *data ) ;
+		void print(uint64_t val);
+		uint64_t decodeUint64_2 ( uint8_t *data ) ;
 
-double clkOffset;
+		double clkOffset;
 
 //#ifdef DECADUINO_DEBUG
 		uint8_t debugStr[DEBUG_STR_LEN];
