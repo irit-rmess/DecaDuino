@@ -465,8 +465,6 @@ class DecaDuino {
                 */
 		void test(void);
 
-		bool lastTxOK;
-
                 /**
                 * @brief 
                 * @return 
@@ -514,9 +512,6 @@ class DecaDuino {
                 * @date 20141115
                 */
 		float getVoltage(void);
-
-		uint64_t lastTxTimestamp;
-		uint64_t lastRxTimestamp;
 
 		/*
 		* Return a UINT16 based on two UINT8
@@ -571,14 +566,6 @@ class DecaDuino {
                 */
 		void printUint64 ( uint64_t ui64 );
 
-		//uint8_t buf[BUFFER_MAX_LEN];
-		uint64_t euid;
-		uint8_t *rxData;
-		uint16_t *rxDataLen;
-		uint16_t rxDataLenMax;
-		uint8_t rxDataAvailable;
-		uint8_t trxStatus;
-
                 /**
                 * @brief 
                 * @return 
@@ -603,10 +590,19 @@ class DecaDuino {
                 */
 		uint64_t decodeUint64_2 ( uint8_t *data ) ;
 
+		uint64_t euid;
+		uint8_t *rxData;
+		uint16_t *rxDataLen;
+		uint16_t rxDataLenMax;
+		uint8_t rxDataAvailable;
+		uint8_t trxStatus;
+		bool lastTxOK;
+		uint64_t lastTxTimestamp;
+		uint64_t lastRxTimestamp;
 		double clkOffset;
 
-		uint8_t debugStr[DEBUG_STR_LEN];
 	private:
+		uint8_t debugStr[DEBUG_STR_LEN];
 	
 	protected:
 
@@ -634,10 +630,6 @@ class DecaDuino {
                 */
 		static void isr2();
 
-		uint8_t _slaveSelectPin;
-		uint8_t _interruptPin;
-		static DecaDuino* _DecaDuinoInterrupt[];
-
                 /**
                 * @brief 
                 * @return 
@@ -645,6 +637,10 @@ class DecaDuino {
                 * @date 20141115
                 */
 		void handleInterrupt();
+
+		uint8_t _slaveSelectPin;
+		uint8_t _interruptPin;
+		static DecaDuino* _DecaDuinoInterrupt[];
 };
 
 
