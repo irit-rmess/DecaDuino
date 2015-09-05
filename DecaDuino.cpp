@@ -15,7 +15,13 @@ DecaDuino::DecaDuino(uint8_t slaveSelectPin, uint8_t interruptPin) {
 }
 
 
-boolean DecaDuino::init ( uint32_t shorAddrPANID ) {
+boolean DecaDuino::init() {
+
+	// Call init with 0xFFFF for both Short Address and PanId (no address/panid identification: Promiscuous mode)
+	init(0xFFFFFFFF);
+}
+
+boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 
 	uint8_t buf[8];
 	uint16_t ui16t;
@@ -64,7 +70,6 @@ boolean DecaDuino::init ( uint32_t shorAddrPANID ) {
 	// System Configuration Register
 	ui32t = readSpiUint32(DW1000_REGISTER_SYS_CFG);
 	ui32t |= DW1000_REGISTER_SYS_CFG_RXAUTR_MASK; // RXAUTR: Receiver Auto-Re-enable after a RX failure
-	ui32t |= 0x0000003D;//frame filtering
 	writeSpiUint32(DW1000_REGISTER_SYS_CFG,ui32t);
 
 #ifdef DECADUINO_DEBUG 
@@ -78,20 +83,21 @@ boolean DecaDuino::init ( uint32_t shorAddrPANID ) {
 	ui32t |= DW1000_REGISTER_SYS_MASK_MTXFRS_MASK;
 	writeSpiUint32(DW1000_REGISTER_SYS_MASK, ui32t);
 
-	// Set short addr and PANID
-
-	writeSpiUint32(0x03, shorAddrPANID);
-	shorAddrPANID = readSpiUint32(0x03);
-	sprintf((char*)debugStr,"PANID=%08x", shorAddrPANID);
-	Serial.println((char*)debugStr);
-
-	//uint8_t val[2]={0x7C,0xCD};
-	//writeSpi(0x18,val,2);
-
 #ifdef DECADUINO_DEBUG 
 	sprintf((char*)debugStr,"SYS_MASK=%08x", ui32t);
 	Serial.println((char*)debugStr);
 #endif
+
+	// Enable frame filtering on addressing fields if init() is called with a shortAddressAndPanId != 0xFFFFFFFF
+        if ( shortAddressAndPanId != 0xFFFFFFFF ) {
+        	ui32t = readSpiUint32(DW1000_REGISTER_SYS_CFG);
+                ui32t |= 0x0000003D;
+        	writeSpiUint32(DW1000_REGISTER_SYS_CFG,ui32t);
+		setShortAddressAndPanId(shortAddressAndPanId);
+        }
+
+	//uint8_t val[2]={0x7C,0xCD};
+	//writeSpi(0x18,val,2);
 
 	//val[0]=0;
 	//val[1]=0;
@@ -114,99 +120,6 @@ boolean DecaDuino::init ( uint32_t shorAddrPANID ) {
 	return true;
 
 } // End of init()
-
-
-boolean DecaDuino::init() {
-
-	uint8_t buf[8];
-	uint16_t ui16t;
-	uint32_t ui32t;
-
-	// Initialise the IRQ and Slave Select pin
-	pinMode(_interruptPin, INPUT);
-	pinMode(_slaveSelectPin, OUTPUT);
-	digitalWrite(_slaveSelectPin, HIGH);
-
-	// Initialise the RX pointers
-	rxDataAvailable = false;
-	rxData = NULL;
-	rxDataLen = NULL;
-
-	// Wait for DW1000 POR (up to 5msec)
-	delay(5);
-
-#ifdef DECADUINO_DEBUG 
-	delay(3000); // delay to see next messages on console for debug
-#endif
-
-	// Reset the DW1000 now
-	resetDW1000();
-
-	// Check the device type
-	if ( readSpiUint32(DW1000_REGISTER_DEV_ID) != 0xdeca0130 ) return false;
-
-	// Load Extended Unique Identifier – the 64-bit IEEE device address - in memory
-	euid = getEuid();
-
-	// Attach interrupt handler
-	if (_interruptPin == DW1000_IRQ0_PIN) {
-		_DecaDuinoInterrupt[DW1000_IRQ0_PIN] = this;
-		attachInterrupt(_interruptPin, DecaDuino::isr0, HIGH);
-	} else if (_interruptPin == DW1000_IRQ1_PIN) {
-		_DecaDuinoInterrupt[DW1000_IRQ1_PIN] = this;
-		attachInterrupt(_interruptPin, DecaDuino::isr1, HIGH);
-	} else if (_interruptPin == DW1000_IRQ2_PIN) {
-		_DecaDuinoInterrupt[DW1000_IRQ2_PIN] = this;
-		attachInterrupt(_interruptPin, DecaDuino::isr2, HIGH);
-	} else return false;
-
-	// --- Configure DW1000 -----------------------------------------------------------------------------------------
-
-	// System Configuration Register
-	ui32t = readSpiUint32(DW1000_REGISTER_SYS_CFG);
-	ui32t |= DW1000_REGISTER_SYS_CFG_RXAUTR_MASK; // RXAUTR: Receiver Auto-Re-enable after a RX failure
-	//ui32t |= 0x0000003D;//frame filtering
-	writeSpiUint32(DW1000_REGISTER_SYS_CFG,ui32t);
-
-#ifdef DECADUINO_DEBUG 
-	sprintf((char*)debugStr,"SYS_CFG=%08x", ui32t);
-	Serial.println((char*)debugStr);
-#endif
-
-	// System Event Mask Register
-	ui32t = readSpiUint32(DW1000_REGISTER_SYS_MASK);
-	ui32t |= DW1000_REGISTER_SYS_MASK_MRXFCG_MASK; // MRXFCG: interrupt when good frame (FCS OK) received
-	ui32t |= DW1000_REGISTER_SYS_MASK_MTXFRS_MASK;
-	writeSpiUint32(DW1000_REGISTER_SYS_MASK, ui32t);
-
-	//uint8_t val[2]={0x7C,0xCD};
-	//writeSpi(0x18,val,2);
-
-#ifdef DECADUINO_DEBUG 
-	sprintf((char*)debugStr,"SYS_MASK=%08x", ui32t);
-	Serial.println((char*)debugStr);
-#endif
-
-	//val[0]=0;
-	//val[1]=0;
-
-	//readSpi(0x18,val,2);
-	//sprintf((char*)debugStr,"TX_ANTD=%04x", val);
-	//Serial.println((char*)debugStr);
-
-	//ui16t = 33000;
-	ui16t = 32870;
-	encodeUint16(ui16t, buf);
-	writeSpi(0x18, buf, 2);
-
-	// --- End of DW1000 configuration ------------------------------------------------------------------------------
-
-	lastTxOK = false;
-
-	// Return true if everything OK
-	return true;
-
-} //end of init()
 
 
 void DecaDuino::resetDW1000() {

@@ -136,8 +136,23 @@ class DecaDuino {
 
 	public:
 		DecaDuino(uint8_t slaveSelectPin = DW1000_CS0_PIN, uint8_t interruptPin = DW1000_IRQ0_PIN);
-		boolean init(uint32_t shorAddrPANID);
+
+                /**
+                * @brief Init DecaDuino and DWM1000 without addressing fields filtering (Promiscuous mode)
+                * @return Return true if both DecaDuino and DWM1000 have been successfully initialized
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20140701
+                */
 		boolean init();
+
+                /**
+                * @brief Init DecaDuino and DWM1000 with given Short Address and Pan Id
+                * @return Return true if both DecaDuino and DWM1000 have been successfully initialized
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20150905
+                */
+		boolean init(uint32_t shortAddrAndPanId);
+
 		void resetDW1000();
 		void dummy();
 		void readSpi(uint8_t address, uint8_t* buf, uint16_t len);
