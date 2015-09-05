@@ -273,9 +273,7 @@ void DecaDuino::isr2() {
 void DecaDuino::handleInterrupt() {
 
 	uint8_t buf[8];
-	uint16_t i;
 	uint32_t sysStatusReg, ack, ui32t;
-	uint64_t ui64t;
 
 	ack = 0;
 
