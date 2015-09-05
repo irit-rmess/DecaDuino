@@ -99,7 +99,7 @@
 #define DW1000_REGISTER_SYS_MASK_MRXFCG_MASK 0x00004000
 
 #define DW1000_REGISTER_SYS_STATUS	0x0F
-#define DW1000_REGISTER_SYS_STATUS_IRQS_MASK  0x00000001
+#define DW1000_REGISTER_SYS_STATUS_IRQS_MASK	0x00000001
 #define DW1000_REGISTER_SYS_STATUS_TXFRS_MASK 0x00000080
 #define DW1000_REGISTER_SYS_STATUS_LDEDONE_MASK 0x00000400
 #define DW1000_REGISTER_SYS_STATUS_RXDFR_MASK 0x00002000
@@ -134,125 +134,126 @@
 
 class DecaDuino {
 
-  public:
-    DecaDuino(uint8_t slaveSelectPin = DW1000_CS0_PIN, uint8_t interruptPin = DW1000_IRQ0_PIN);
-    boolean init(uint32_t shorAddrPANID);
-    boolean init();
-    void resetDW1000();
-    void dummy();
-    void readSpi(uint8_t address, uint8_t* buf, uint16_t len);
-    void readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len);
-    uint32_t readSpiUint32(uint8_t address);
-    void writeSpi(uint8_t address, uint8_t* buf, uint16_t len);
-    void writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len);
-    void writeSpiUint32(uint8_t address, uint32_t ui32t);
+	public:
+		DecaDuino(uint8_t slaveSelectPin = DW1000_CS0_PIN, uint8_t interruptPin = DW1000_IRQ0_PIN);
+		boolean init(uint32_t shorAddrPANID);
+		boolean init();
+		void resetDW1000();
+		void dummy();
+		void readSpi(uint8_t address, uint8_t* buf, uint16_t len);
+		void readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len);
+		uint32_t readSpiUint32(uint8_t address);
+		void writeSpi(uint8_t address, uint8_t* buf, uint16_t len);
+		void writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len);
+		void writeSpiUint32(uint8_t address, uint32_t ui32t);
 
-    /**
-    * @brief Get System Time Counter value as a pointer
-    * @return no return
-    * @author Adrien van den Bossche <bossche@irit.fr>
-    * @date 20141115
-    */
-    void getSystemTimeCounter(uint64_t *p);
+		/**
+		* @brief Get System Time Counter value as a pointer
+		* @return no return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
+		void getSystemTimeCounter(uint64_t *p);
 
-    /**
-    * @brief Return the System Time Counter value
-    * @return the System Time Counter value as a uint64_t
-    * @author Adrien van den Bossche <bossche@irit.fr>
-    * @date 20141115
-    */
-    uint64_t getSystemTimeCounter(void);
+		/**
+		* @brief Return the System Time Counter value
+		* @return the System Time Counter value as a uint64_t
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
+		uint64_t getSystemTimeCounter(void);
 
-    uint16_t getPanId();
-    uint16_t getShortAddress();
-    uint64_t getEuid();
-    void setPanId(uint16_t panId);
-    void setShortAddress(uint16_t shortAddress);
-    uint8_t plmeDataRequest(uint8_t* buf, uint16_t len);
-    uint8_t plmeDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time);
-    uint8_t send(uint8_t* buf, uint16_t len);
-    uint8_t send(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time);
-    float rangeNode(uint64_t destination, uint8_t protocol);
-    uint8_t twrRequest(uint64_t destination);
-    uint8_t sdsTwrRequest(uint64_t destination);
-    void rangingEngine(void);
-    void setRxBuffer(uint8_t* buf, uint16_t *len);
-    void setRxBuffer(uint8_t* buf, uint16_t *len, uint16_t max);
-    void plmeRxEnableRequest(void);
-    void plmeRxEnableRequest(uint16_t max);
-    void plmeRxEnableRequest(uint8_t* buf, uint16_t *len);
-    void plmeRxEnableRequest(uint8_t* buf, uint16_t *len, uint16_t max);
-    void plmeRxDisableRequest(void);
-    void sleepRequest(void);
-    void deepsleepRequest(void);
-    void wakeRequest(void);
-    uint8_t rxFrameAvailable(void);
-    uint8_t rxFrameAvailable(uint8_t* buf, uint16_t *len);
-    uint8_t rxFrameAvailable(uint8_t* buf, uint16_t *len, uint16_t max);
-    void test(void);
-    bool lastTxOK;
-    bool hasTxSucceeded(void);
-    uint8_t getTrxStatus(void);
-    uint8_t getTemperatureRaw(void);
-    float getTemperature(void);
-    uint8_t getVoltageRaw(void);
-    float getVoltage(void);
+		uint16_t getPanId();
+		uint16_t getShortAddress();
+		uint64_t getEuid();
+		void setPanId(uint16_t panId);
+		void setShortAddress(uint16_t shortAddress);
 
-    uint64_t lastTxTimestamp;
-    uint64_t lastRxTimestamp;
-    /*
-    * Return a UINT16 based on two UINT8
-    * @author Adrien van den Bossche <bossche@irit.fr>
-    * @date 20111123
-    */
-    uint16_t decodeUint16 ( uint8_t *data );
+		uint8_t plmeDataRequest(uint8_t* buf, uint16_t len);
+		uint8_t plmeDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time);
+		uint8_t send(uint8_t* buf, uint16_t len);
+		uint8_t send(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time);
+		float rangeNode(uint64_t destination, uint8_t protocol);
+		uint8_t twrRequest(uint64_t destination);
+		uint8_t sdsTwrRequest(uint64_t destination);
+		void rangingEngine(void);
+		void setRxBuffer(uint8_t* buf, uint16_t *len);
+		void setRxBuffer(uint8_t* buf, uint16_t *len, uint16_t max);
+		void plmeRxEnableRequest(void);
+		void plmeRxEnableRequest(uint16_t max);
+		void plmeRxEnableRequest(uint8_t* buf, uint16_t *len);
+		void plmeRxEnableRequest(uint8_t* buf, uint16_t *len, uint16_t max);
+		void plmeRxDisableRequest(void);
+		void sleepRequest(void);
+		void deepsleepRequest(void);
+		void wakeRequest(void);
+		uint8_t rxFrameAvailable(void);
+		uint8_t rxFrameAvailable(uint8_t* buf, uint16_t *len);
+		uint8_t rxFrameAvailable(uint8_t* buf, uint16_t *len, uint16_t max);
+		void test(void);
+		bool lastTxOK;
+		bool hasTxSucceeded(void);
+		uint8_t getTrxStatus(void);
+		uint8_t getTemperatureRaw(void);
+		float getTemperature(void);
+		uint8_t getVoltageRaw(void);
+		float getVoltage(void);
 
-    /*
-    * Place data from at to address
-    * No return
-    * @author Adrien van den Bossche <bossche@irit.fr>
-    * @date 20111011
-    */
-    void encodeUint16 ( uint16_t from, uint8_t *to );
+		uint64_t lastTxTimestamp;
+		uint64_t lastRxTimestamp;
+		/*
+		* Return a UINT16 based on two UINT8
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20111123
+		*/
+		uint16_t decodeUint16 ( uint8_t *data );
 
-    /*
-    * Return a UINT32 based on four UINT8
-    * @author Adrien van den Bossche <bossche@irit.fr>
-    * @date 20111123
-    */
-    uint32_t decodeUint32 ( uint8_t *data );
+		/*
+		* Place data from at to address
+		* No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20111011
+		*/
+		void encodeUint16 ( uint16_t from, uint8_t *to );
 
-    /*
-    * Place data from at to address
-    * No return
-    * @author Adrien van den Bossche <bossche@irit.fr>
-    * @date 20111011
-    */
-    void encodeUint32 ( uint32_t from, uint8_t *to );
+		/*
+		* Return a UINT32 based on four UINT8
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20111123
+		*/
+		uint32_t decodeUint32 ( uint8_t *data );
 
-    /*
-    * Return a UINT64 based on eight UINT8
-    * @author Adrien van den Bossche <bossche@irit.fr>
-    * @date 20140804
-    */
-    uint64_t decodeUint64 ( uint8_t *data );
+		/*
+		* Place data from at to address
+		* No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20111011
+		*/
+		void encodeUint32 ( uint32_t from, uint8_t *to );
 
-    /*
-    * Place data from at to address
-    * No return
-    * @author Adrien van den Bossche <bossche@irit.fr>
-    * @date 20111011
-    */
-    void encodeUint64 ( uint64_t from, uint8_t *to );
-    void printUint64 ( uint64_t ui64 );
+		/*
+		* Return a UINT64 based on eight UINT8
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20140804
+		*/
+		uint64_t decodeUint64 ( uint8_t *data );
 
-    //uint8_t buf[BUFFER_MAX_LEN];
-    uint64_t euid;
-    uint8_t *rxData;
-    uint16_t *rxDataLen;
-    uint16_t rxDataLenMax;
-    uint8_t rxDataAvailable;
-    uint8_t trxStatus;
+		/*
+		* Place data from at to address
+		* No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20111011
+		*/
+		void encodeUint64 ( uint64_t from, uint8_t *to );
+		void printUint64 ( uint64_t ui64 );
+
+		//uint8_t buf[BUFFER_MAX_LEN];
+		uint64_t euid;
+		uint8_t *rxData;
+		uint16_t *rxDataLen;
+		uint16_t rxDataLenMax;
+		uint8_t rxDataAvailable;
+		uint8_t trxStatus;
 
 uint64_t predictT5();
 
@@ -262,19 +263,19 @@ uint64_t decodeUint64_2 ( uint8_t *data ) ;
 double clkOffset;
 
 //#ifdef DECADUINO_DEBUG
-    uint8_t debugStr[DEBUG_STR_LEN];
+		uint8_t debugStr[DEBUG_STR_LEN];
 //#endif
-  private:
-  
-  protected:
-    static void isr0();
-    static void isr1();
-    static void isr2();
-    uint8_t _slaveSelectPin;
-    uint8_t _interruptPin;
+	private:
+	
+	protected:
+		static void isr0();
+		static void isr1();
+		static void isr2();
+		uint8_t _slaveSelectPin;
+		uint8_t _interruptPin;
 
-    static DecaDuino* _DecaDuinoInterrupt[];
-    void handleInterrupt();
+		static DecaDuino* _DecaDuinoInterrupt[];
+		void handleInterrupt();
 };
 
 
