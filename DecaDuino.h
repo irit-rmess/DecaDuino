@@ -168,7 +168,8 @@ class DecaDuino {
 		uint64_t getEuid();
 		void setPanId(uint16_t panId);
 		void setShortAddress(uint16_t shortAddress);
-
+		void setShortAddressAndPanId(uint16_t shortAddress, uint16_t panId); 
+		int setShortAddressAndPanId(uint32_t shortAddressPanId);
 		uint8_t plmeDataRequest(uint8_t* buf, uint16_t len);
 		uint8_t plmeDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time);
 		uint8_t send(uint8_t* buf, uint16_t len);

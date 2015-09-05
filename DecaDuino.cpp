@@ -1020,6 +1020,32 @@ void DecaDuino::setShortAddress(uint16_t shortAddress) {
 }
 
 
+void DecaDuino::setShortAddressAndPanId(uint16_t shortAddress, uint16_t panId) {
+
+	setPanId(panId);
+	setShortAddress(shortAddress);
+}
+
+
+int DecaDuino::setShortAddressAndPanId(uint32_t shortAddressPanId) {
+
+	uint32_t ret;	
+
+        writeSpiUint32(0x03, shortAddressPanId);
+        ret = readSpiUint32(0x03);
+	if ( ret != shortAddressPanId ) {
+#ifdef DECADUINO_DEBUG
+		Serial.println("Setting Short Address and PanId OK\n");
+#endif
+		return false;
+	} else {
+#ifdef DECADUINO_DEBUG
+		Serial.println("Error while Setting Short Address and PanId\n");
+#endif
+		return true;
+	}
+}
+
 uint8_t DecaDuino::getTemperatureRaw() {
 
 	uint8_t u8t;
