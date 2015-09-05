@@ -153,13 +153,68 @@ class DecaDuino {
                 */
 		boolean init(uint32_t shortAddrAndPanId);
 
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void resetDW1000();
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void dummy();
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void readSpi(uint8_t address, uint8_t* buf, uint16_t len);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		uint32_t readSpiUint32(uint8_t address);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void writeSpi(uint8_t address, uint8_t* buf, uint16_t len);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void writeSpiUint32(uint8_t address, uint32_t ui32t);
 
 		/**
@@ -178,45 +233,291 @@ class DecaDuino {
 		*/
 		uint64_t getSystemTimeCounter(void);
 
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		uint16_t getPanId();
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		uint16_t getShortAddress();
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		uint64_t getEuid();
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void setPanId(uint16_t panId);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void setShortAddress(uint16_t shortAddress);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void setShortAddressAndPanId(uint16_t shortAddress, uint16_t panId); 
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		int setShortAddressAndPanId(uint32_t shortAddressPanId);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		uint8_t plmeDataRequest(uint8_t* buf, uint16_t len);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		uint8_t plmeDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		uint8_t send(uint8_t* buf, uint16_t len);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		uint8_t send(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		float rangeNode(uint64_t destination, uint8_t protocol);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		uint8_t twrRequest(uint64_t destination);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		uint8_t sdsTwrRequest(uint64_t destination);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void rangingEngine(void);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void setRxBuffer(uint8_t* buf, uint16_t *len);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void setRxBuffer(uint8_t* buf, uint16_t *len, uint16_t max);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void plmeRxEnableRequest(void);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void plmeRxEnableRequest(uint16_t max);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void plmeRxEnableRequest(uint8_t* buf, uint16_t *len);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void plmeRxEnableRequest(uint8_t* buf, uint16_t *len, uint16_t max);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void plmeRxDisableRequest(void);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void sleepRequest(void);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void deepsleepRequest(void);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void wakeRequest(void);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		uint8_t rxFrameAvailable(void);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		uint8_t rxFrameAvailable(uint8_t* buf, uint16_t *len);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		uint8_t rxFrameAvailable(uint8_t* buf, uint16_t *len, uint16_t max);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void test(void);
+
 		bool lastTxOK;
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		bool hasTxSucceeded(void);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		uint8_t getTrxStatus(void);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		uint8_t getTemperatureRaw(void);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		float getTemperature(void);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		uint8_t getVoltageRaw(void);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		float getVoltage(void);
 
 		uint64_t lastTxTimestamp;
 		uint64_t lastRxTimestamp;
+
 		/*
 		* Return a UINT16 based on two UINT8
 		* @author Adrien van den Bossche <bossche@irit.fr>
@@ -261,6 +562,13 @@ class DecaDuino {
 		* @date 20111011
 		*/
 		void encodeUint64 ( uint64_t from, uint8_t *to );
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void printUint64 ( uint64_t ui64 );
 
 		//uint8_t buf[BUFFER_MAX_LEN];
@@ -271,26 +579,71 @@ class DecaDuino {
 		uint8_t rxDataAvailable;
 		uint8_t trxStatus;
 
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		uint64_t predictT5();
 
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void print(uint64_t val);
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		uint64_t decodeUint64_2 ( uint8_t *data ) ;
 
 		double clkOffset;
 
-//#ifdef DECADUINO_DEBUG
 		uint8_t debugStr[DEBUG_STR_LEN];
-//#endif
 	private:
 	
 	protected:
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		static void isr0();
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		static void isr1();
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		static void isr2();
+
 		uint8_t _slaveSelectPin;
 		uint8_t _interruptPin;
-
 		static DecaDuino* _DecaDuinoInterrupt[];
+
+                /**
+                * @brief 
+                * @return 
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20141115
+                */
 		void handleInterrupt();
 };
 
