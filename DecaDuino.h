@@ -569,15 +569,39 @@ class DecaDuino {
                 /**
                 * @brief 
                 * @return 
-                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @author Réjane Dalce
                 * @date 20141115
                 */
 		uint64_t predictT5();
 
                 /**
+                * @brief Returns last transmitted frame timestamp based on the DWM1000 System Time Counter at 64GHz
+                * @return Returns last transmitted frame timestamp
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20140905
+                */
+                uint64_t getLastTxTimestamp();
+
+                /**
+                * @brief Returns last received frame timestamp based on the DWM1000 System Time Counter at 64GHz
+                * @return Returns last received frame timestamp
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20140905
+                */
+                uint64_t getLastRxTimestamp();
+
+               /**
+                * @brief Returns last received frame skew (aka Clock Offset) 
+                * @return Returns last received frame skew
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20150905
+                */
+                double getLastRxSkew();
+
+                /**
                 * @brief 
                 * @return 
-                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @author Réjane Dalce
                 * @date 20141115
                 */
 		void print(uint64_t val);
@@ -585,7 +609,7 @@ class DecaDuino {
                 /**
                 * @brief 
                 * @return 
-                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @author Réjane Dalce
                 * @date 20141115
                 */
 		uint64_t decodeUint64_2 ( uint8_t *data ) ;

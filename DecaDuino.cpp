@@ -884,6 +884,23 @@ uint64_t DecaDuino::getSystemTimeCounter ( void ) {
 	return p;
 }
 
+uint64_t DecaDuino::getLastTxTimestamp() {
+
+	return lastTxTimestamp;
+}
+
+
+uint64_t DecaDuino::getLastRxTimestamp() {
+
+	return lastRxTimestamp;
+}
+
+
+double DecaDuino::getLastRxSkew() {
+
+	return clkOffset;
+}
+
 
 uint16_t DecaDuino::getPanId() {
 
