@@ -556,13 +556,13 @@ uint8_t DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, 
 
 uint8_t DecaDuino::send(uint8_t* buf, uint16_t len) {
 
-	plmeDataRequest(buf, len);
+	return plmeDataRequest(buf, len);
 }
 
 
 uint8_t DecaDuino::send(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time) {
 
-	plmeDataRequest(buf, len, delayed, time);
+	return plmeDataRequest(buf, len, delayed, time);
 }
 
 
