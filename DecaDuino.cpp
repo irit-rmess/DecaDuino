@@ -467,18 +467,22 @@ float DecaDuino::rangeNode(uint64_t destination, uint8_t protocol=DEFAULT_RANGIN
 #endif
 			break;
 	}
+
+	return 0.0;
 }
 
 
 uint8_t DecaDuino::twrRequest(uint64_t destination) {
 
 	// ToDo
+	return false;
 }
 
 
 uint8_t DecaDuino::sdsTwrRequest(uint64_t destination) {
 
 	// ToDo
+	return false;
 }
 
 
@@ -489,7 +493,7 @@ void DecaDuino::rangingEngine(void) {
 
 uint8_t DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
 
-	plmeDataRequest(buf, len, false, 0);
+	return plmeDataRequest(buf, len, false, 0);
 }
 
 uint8_t DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time) {
