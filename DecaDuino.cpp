@@ -499,19 +499,17 @@ uint8_t DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
 uint8_t DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time) {
 
 	uint32_t ui32t;
-	uint64_t ui64t;
 	uint8_t tempbuf[8];
 
 #ifdef DECADUINO_DEBUG 
-/*
-	sprintf((char*)debugStr,"Request to send %dbyte(s)\n ", len);
+	uint64_t ui64t;
+	sprintf((char*)debugStr,"Request to send %dbyte(s): |", len);
 	Serial.print((char*)debugStr);
-*/
-
-	for (int q=0;q<len;q++) {
-		sprintf((char*)debugStr," %02X ", buf[q]);
+	for (int i=0;i<len;i++) {
+		sprintf((char*)debugStr,"%02x|", buf[i]);
 		Serial.print((char*)debugStr);
 	}
+	Serial.println();
 #endif
 
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
