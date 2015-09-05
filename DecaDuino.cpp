@@ -641,8 +641,6 @@ void DecaDuino::plmeRxEnableRequest(uint8_t* buf, uint16_t *len, uint16_t max) {
 
 void DecaDuino::plmeRxDisableRequest(void) {
 
-	uint32_t ui32t;
-
 #ifdef DECADUINO_DEBUG 
 	sprintf((char*)debugStr,"RX disable request");
 	Serial.println((char*)debugStr);
@@ -714,7 +712,7 @@ void DecaDuino::readSpi(uint8_t address, uint8_t* buf, uint16_t len) {
 
 void DecaDuino::readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len) {
 
-	uint8_t addr, sub_addr, sub_sub_addr;
+	uint8_t addr, sub_addr;
 
 	addr = 0 | (address & 0x3F) | 0x40; // Mask register address (6bits), preserve MSb at low (Read) and set subaddress present bit (0x40)
 
@@ -764,7 +762,7 @@ void DecaDuino::writeSpi(uint8_t address, uint8_t* buf, uint16_t len) {
 
 void DecaDuino::writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len) {
 
-	uint8_t addr, sub_addr, sub_sub_addr;
+	uint8_t addr, sub_addr;
 
 	addr = 0 | (address & 0x3F) | 0x80 | 0x40; // Mask register address (6bits), set MSb (Write) and set subaddress present bit (0x40)
 
@@ -859,7 +857,6 @@ void DecaDuino::encodeUint64 ( uint64_t from, uint8_t *to ) {
 void DecaDuino::printUint64 ( uint64_t ui64 ) {
 
 	uint8_t buf[8];
-	uint8_t debugStr[18];
 
 	encodeUint64(ui64, buf);
 
