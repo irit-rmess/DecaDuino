@@ -264,7 +264,7 @@ void DecaDuino::handleInterrupt() {
 
 	uint8_t buf[8];
 	uint32_t sysStatusReg, ack, ui32t;
-
+	double rxtofs, rxttcki, offseti;
 	ack = 0;
 
 	// Read System Event Status Register
@@ -336,38 +336,35 @@ void DecaDuino::handleInterrupt() {
 #endif
 					// Get transmitter-receiver skew (clock offset or crystal offset between the local receiver and the remote end transmitter device)
 					readSpi(DW1000_REGISTER_RX_TTCKO, buf, 3);
-					ui32t = decodeUint32(buf) & 0x0007FFFF;
+
+/* Commented by Adrien on 20150906
+					ui32t = decodeUint32(buf) & 0x0007FFFF; // Clock offset is a 19-bit signed integer
 					if ( ui32t & 0x00080000 )
-						ui32t |= 0xFFF80000;			
-
-					//***************** Clock offset
-					// Serial.print("RXTOFS=0x");
-					//Serial.println(ui32t, HEX);
+						ui32t |= 0xFFF80000; // negative value
 					ui32t = 0x01F00000/ui32t;
-					//RD032014
-					double rxtofs, rxttcki;
-					rxttcki=32505856;
+*/
+					// Drien 20150906: should we read rxttcki value in DW1000_REGISTER_RX_TTCKI?
+					rxttcki = 32505856;
 
-					//turn rxtofs to a signed double value
-					if(buf[2] & 0x04){//rxtofs is negative
-					//Serial.println("rxtofs is negative");
-						buf[2] |=0xF8;
-						buf[2]=~buf[2];
-						buf[1]=~buf[1];
-						buf[0]=~buf[0];
+					// Turn rxtofs to a signed double value (RD032014)
+					if (buf[2] & 0x04 ) { // rxtofs is negative
 
-						rxtofs=buf[2]*256*256+buf[1]*256+buf[0];
-	
-						rxtofs=rxtofs+1;
-						rxtofs=rxtofs*-1;
-					}else{
-						//Serial.println("rxtofs is positive");
-						rxtofs=buf[2]*256*256+buf[1]*256+buf[0];
+						buf[2] |=  0xF8;
+						buf[2] =  ~buf[2];
+						buf[1] =  ~buf[1];
+						buf[0] =  ~buf[0];
+						rxtofs =   buf[2] * 256*256 + buf[1] * 256 + buf[0];
+						rxtofs =   rxtofs+1;
+						rxtofs =   rxtofs*-1;
+
+					} else {
+
+						rxtofs = buf[2] * 256*256 + buf[1] * 256 + buf[0];
 					}
 
-					double offseti=rxtofs*1000000/rxttcki;
-					clkOffset=offseti;
+					clkOffset = rxtofs * 1000000 / rxttcki;
 					rxDataAvailable = true;
+
 					// Serial.print("clock offset=");
 					// Serial.println(ui32t, HEX);			
 					// Serial.println(offseti);
@@ -377,10 +374,9 @@ void DecaDuino::handleInterrupt() {
 					// ui32t = 0x01F00000/ui32t;
 					// Serial.print("clock offset=0x");
 					// Serial.println(ui32t, HEX);	
-			
-
 				}
 			}
+
 			// Clearing the RXFCG bit (it clears the interrupt if enabled)
 			ack |= DW1000_REGISTER_SYS_STATUS_RXFCG_MASK;
 		}
