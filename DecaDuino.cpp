@@ -1051,6 +1051,7 @@ void DecaDuino::test(void) {
 
 void DecaDuino::print(uint64_t val) {
 
+/*
 	uint16_t hi16=(uint16_t)(val >> 32);
 
 	sprintf((char*)debugStr, "%02X",hi16);
@@ -1058,4 +1059,6 @@ void DecaDuino::print(uint64_t val) {
 
 	sprintf((char*)debugStr, "%08lx",(uint32_t)(val & 0xFFFFFFFF));
 	Serial.println((char*)debugStr);
+*/
+	printUint64(val);
 }
