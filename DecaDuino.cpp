@@ -96,20 +96,10 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 		setShortAddressAndPanId(shortAddressAndPanId);
         }
 
-	//uint8_t val[2]={0x7C,0xCD};
-	//writeSpi(0x18,val,2);
-
-	//val[0]=0;
-	//val[1]=0;
-
-	//readSpi(0x18,val,2);
-	//sprintf((char*)debugStr,"TX_ANTD=%04x", val);
-	//Serial.println((char*)debugStr);
-
-	//ui16t = 33000;
-	ui16t = 32870;
+	// Antenna delay
+	ui16t = DWM1000_DEFAULT_ANTENNA_DELAY_VALUE;
 	encodeUint16(ui16t, buf);
-	writeSpi(0x18, buf, 2);
+	writeSpi(DW1000_REGISTER_TX_ANTD, buf, 2);
 
 
 	// --- End of DW1000 configuration ------------------------------------------------------------------------------
