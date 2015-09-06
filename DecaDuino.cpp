@@ -325,8 +325,10 @@ void DecaDuino::handleInterrupt() {
 			 	// rxDataAvailable = true;
 
 				if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_LDEDONE_MASK ) {
-					encodeUint64(0, buf); // init buffer
-					readSpi(0x15, buf, 5);
+
+					// Get RX timestamp
+					encodeUint64(0, buf); // init buffer. Drien 20150906: why a buffer initialisation here?
+					readSpi(DW1000_REGISTER_RX_TIME, buf, 5);
 					lastRxTimestamp = decodeUint64(buf);
 #ifdef DECADUINO_DEBUG 
 					sprintf((char*)debugStr, "\nRX Frame timestamp %08x %08x\n", decodeUint32(&buf[4]), decodeUint32(buf));
