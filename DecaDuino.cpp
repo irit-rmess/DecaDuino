@@ -122,38 +122,6 @@ void DecaDuino::resetDW1000() {
 	CORE_PIN13_CONFIG = PORT_PCR_MUX(1); // First reassign pin 13 to Alt1 so that it is not SCK but the LED still works
 	CORE_PIN14_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); // and then reassign pin 14 to SCK
 
-	// Load the LDE algorithm microcode into LDE RAM or disable LDE execution (clear LDERUNE)
-	// Load the LDE algorithm microcode into LDE RAM (procedure p.22 DW1000 User Manual + comment p.21)
-/*
-	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-
-		digitalWrite(_slaveSelectPin, LOW);
-		buf[0] = 0xF6;
-		buf[1] = 0x00;
-		buf[2] = 0x01;
-		buf[3] = 0x03;
-		spi4teensy3::send(buf,4);
-		digitalWrite(_slaveSelectPin, HIGH);
-
-		digitalWrite(_slaveSelectPin, LOW);
-		buf[0] = 0xED;
-		buf[1] = 0x06;
-		buf[2] = 0x00;
-		buf[3] = 0x80;
-		spi4teensy3::send(buf,4);
-		digitalWrite(_slaveSelectPin, HIGH);
-
-		delayMicroseconds(160);
-
-		digitalWrite(_slaveSelectPin, LOW);
-		buf[0] = 0xF6;
-		buf[1] = 0x00;
-		buf[2] = 0x00;
-		buf[3] = 0x02;
-		spi4teensy3::send(buf,4);
-		digitalWrite(_slaveSelectPin, HIGH);
-	}
-*/
 	delay(100);
 
 	// Getting PMSC_CTRL0 register
@@ -186,6 +154,9 @@ void DecaDuino::resetDW1000() {
 	delay(1);
 
 	delay(5);
+
+        // Load the LDE algorithm microcode into LDE RAM or disable LDE execution (clear LDERUNE)
+        // Load the LDE algorithm microcode into LDE RAM (procedure p.22 DW1000 User Manual + comment p.21)
 
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
 
@@ -658,7 +629,9 @@ uint8_t DecaDuino::rxFrameAvailable(uint8_t* buf, uint16_t *len, uint16_t max) {
 	uint16_t i;
 
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+
 		if ( rxDataAvailable ) {
+
 			if ( max == 0 ) {
 				for (i=0; i<*rxDataLen; i++)
 					buf[i] = rxData[i];
@@ -666,6 +639,7 @@ uint8_t DecaDuino::rxFrameAvailable(uint8_t* buf, uint16_t *len, uint16_t max) {
 				for (i=0; i<*rxDataLen; i++)
 					buf[i+max-*rxDataLen] = rxData[i];
 			}
+
 			*len = *rxDataLen;
 			rxDataAvailable = false;
 			return true;
