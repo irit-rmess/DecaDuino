@@ -829,10 +829,11 @@ uint64_t DecaDuino::decodeUint64 ( uint8_t *data ) {
 	//	return 0 | (data[7] << 56) | (data[6] << 48) | (data[5] << 40) | (data[4] << 32) | (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0];
 }
 
+/*
 uint64_t DecaDuino::decodeUint64_2 ( uint8_t *data ) {
 
 	return 0 |	(data[4] << 32) | (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0];
-}
+} */
 
 void DecaDuino::encodeUint64 ( uint64_t from, uint8_t *to ) {
 
