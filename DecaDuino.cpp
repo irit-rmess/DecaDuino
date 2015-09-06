@@ -404,26 +404,17 @@ void DecaDuino::handleInterrupt() {
 
 		trxStatus = DW1000_TRX_STATUS_IDLE;
 
-		// lastTxOK = true; moved after reading TX timestamp
-
-#ifdef DECADUINO_DEBUG
-		//Serial.println("LastTx OK");
-#endif
-
 		// Read TX timestamp
 		encodeUint64(0, buf); // init buffer
-		readSpi(0x17, buf, 5);
+		readSpi(DW1000_REGISTER_TX_TIME, buf, 5);
 		lastTxTimestamp = decodeUint64(buf);
-		// Serial.print("\nLAST TX ");
-		// print(lastTxTimestamp);
 
 		lastTxOK = true;
  
-#ifdef DECADUINO_DEBUG 
-		sprintf((char*)debugStr, "\nTX Frame timestamp %08x %08x\n", decodeUint32(&buf[4]), decodeUint32(buf));
-		Serial.print((char*)debugStr);
+#ifdef DECADUINO_DEBUG
+		Serial.print("TX Frame OK. Tx timestamp=");
+		Serial.println(lastTxTimestamp);
 #endif
-
 		ack |= DW1000_REGISTER_SYS_STATUS_TXFRS_MASK;
 	}
 
