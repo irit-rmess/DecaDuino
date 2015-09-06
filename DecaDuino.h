@@ -170,64 +170,64 @@ class DecaDuino {
 		boolean init(uint32_t shortAddrAndPanId);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Reset the DW1000 chip
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void resetDW1000();
 
                 /**
-                * @brief 
-                * @return 
+                * @brief It is a dummy function to test the class
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void dummy();
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Read len bytes on SPI at address address, and store data in buf
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void readSpi(uint8_t address, uint8_t* buf, uint16_t len);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Read len bytes on SPI at address address/subaddress subaddress, and store data in buf
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Read a word of 4-bytes on SPI at address address
+                * @return The 4 bytes
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		uint32_t readSpiUint32(uint8_t address);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Write len bytes on SPI at address address from buf
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void writeSpi(uint8_t address, uint8_t* buf, uint16_t len);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Write len bytes on SPI at address address/subaddress subaddress from buf
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Write a word of 4-bytes on SPI at address address
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
@@ -235,7 +235,7 @@ class DecaDuino {
 
 		/**
 		* @brief Get System Time Counter value as a pointer
-		* @return no return
+		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
 		*/
@@ -243,95 +243,95 @@ class DecaDuino {
 
 		/**
 		* @brief Return the System Time Counter value
-		* @return the System Time Counter value as a uint64_t
+		* @return The System Time Counter value as a uint64_t
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
 		*/
 		uint64_t getSystemTimeCounter(void);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Get the PanId (Personnal Area Network Identifier) stored in the DW1000's RAM
+                * @return The PanId as an uint16_t value
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		uint16_t getPanId();
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Get the ShortAddress (16-bit network address, aka IEEE short address) stored in the DW1000's RAM
+                * @return The Short Address as an uint16_t value
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		uint16_t getShortAddress();
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Get the Euid (Extended Unique IDentifier) stored in the DW1000's ROM
+                * @return The Identifier as an uint64_t value
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		uint64_t getEuid();
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Set the PanId (Personnal Area Network Identifier) in the DW1000's RAM
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void setPanId(uint16_t panId);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Set the ShortAddress (16-bit network address, aka IEEE short address) in the DW1000's RAM
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void setShortAddress(uint16_t shortAddress);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Set both the ShortAddress and the PanId in the DW1000's RAM
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void setShortAddressAndPanId(uint16_t shortAddress, uint16_t panId); 
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Set both the ShortAddress and the PanId in the DW1000's RAM
+                * @return true if success, false otherwise
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		int setShortAddressAndPanId(uint32_t shortAddressPanId);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Send a frame with a payload of len byte, bytes from buf
+                * @return true if success, false otherwise
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		uint8_t plmeDataRequest(uint8_t* buf, uint16_t len);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Send a frame with a payload of len byte, bytes from buf, with an optionnal delay
+                * @return true if success, false otherwise
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		uint8_t plmeDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Send a frame with a payload of len byte, bytes from buf
+                * @return true if success, false otherwise
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		uint8_t send(uint8_t* buf, uint16_t len);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Send a frame with a payload of len byte, bytes from buf, with an optionnal delay
+                * @return true if success, false otherwise
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
@@ -340,6 +340,7 @@ class DecaDuino {
                 /**
                 * @brief 
                 * @return 
+		* @todo To be implemented
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
@@ -348,6 +349,7 @@ class DecaDuino {
                 /**
                 * @brief 
                 * @return 
+		* @todo To be implemented
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
@@ -356,6 +358,7 @@ class DecaDuino {
                 /**
                 * @brief 
                 * @return 
+		* @todo To be implemented
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
@@ -363,227 +366,224 @@ class DecaDuino {
 
                 /**
                 * @brief 
-                * @return 
+                * @return No return
+		* @todo To be implemented
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void rangingEngine(void);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Set the RX buffer for future frame reception. Received bytes will be stored at the beginning of the buffer.
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void setRxBuffer(uint8_t* buf, uint16_t *len);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Set the RX buffer for future frame reception. Received bytes will be stored at the end of the buffer of max size.
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void setRxBuffer(uint8_t* buf, uint16_t *len, uint16_t max);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Set transceiver mode to receive mode
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void plmeRxEnableRequest(void);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Set transceiver mode to receive mode. Received bytes will be stored at the end of the buffer of max size.
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void plmeRxEnableRequest(uint16_t max);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Set transceiver mode to receive mode and set the RX buffer for future frame reception.
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void plmeRxEnableRequest(uint8_t* buf, uint16_t *len);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Set transceiver mode to receive mode and set the RX buffer for future frame reception. Received bytes will be stored at the end of the buffer of max size.
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void plmeRxEnableRequest(uint8_t* buf, uint16_t *len, uint16_t max);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Set transceiver mode to idle mode.
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void plmeRxDisableRequest(void);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Set transceiver mode to sleep mode.
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void sleepRequest(void);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Set transceiver mode to deep sleep mode.
+                * @return No return
+		* @todo To be implemented
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void deepsleepRequest(void);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Wake the transceiver and go back to idle mode.
+                * @return No return
+		* @todo To be implemented
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void wakeRequest(void);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Returns true of the a frame have been received.
+                * @return Returns true of the a frame have been received, false otherwise.
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		uint8_t rxFrameAvailable(void);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Returns true of the a frame have been received, and copy received bytes and length in buffer buf/length len
+                * @return Returns true of the a frame have been received, false otherwise.
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		uint8_t rxFrameAvailable(uint8_t* buf, uint16_t *len);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Returns true of the a frame have been received, and copy received bytes and length in buffer buf/length len, by the end of the buffer of size max.
+                * @return Returns true of the a frame have been received, false otherwise.
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		uint8_t rxFrameAvailable(uint8_t* buf, uint16_t *len, uint16_t max);
 
                 /**
-                * @brief 
-                * @return 
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
-		void test(void);
-
-                /**
-                * @brief 
-                * @return 
+                * @brief Return true if the last transmission request as been succefully completed
+                * @return true if the last transmission request as been succefully completed
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		bool hasTxSucceeded(void);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Get the DecaDuino transceiver status
+                * @return Returns the DecaDuino transceiver status
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		uint8_t getTrxStatus(void);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Get the DW1000 embedded temperature sensor raw value 
+                * @return The temperature raw value
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		uint8_t getTemperatureRaw(void);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Get the DW1000 embedded temperature sensor value in celsius degrees
+                * @return The temperature value in celsius degrees
+		* @todo To be implemented
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		float getTemperature(void);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Get the DW1000 embedded voltage sensor raw value
+                * @return The voltage raw value
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		uint8_t getVoltageRaw(void);
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Get the DW1000 embedded voltage sensor value in volts
+                * @return The voltage value in volts
+		* @todo To be implemented
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		float getVoltage(void);
 
 		/*
-		* Return a UINT16 based on two UINT8
+		* @brief Return a uint16_t based on two uint8_t
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20111123
 		*/
 		uint16_t decodeUint16 ( uint8_t *data );
 
 		/*
-		* Place data from at to address
-		* No return
+		* @brief Place data from at to address
+		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20111011
 		*/
 		void encodeUint16 ( uint16_t from, uint8_t *to );
 
 		/*
-		* Return a UINT32 based on four UINT8
+		* @brief Return a uint32_t based on four uint8_t
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20111123
 		*/
 		uint32_t decodeUint32 ( uint8_t *data );
 
 		/*
-		* Place data from at to address
-		* No return
+		* @brief Place data from at to address
+		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20111011
 		*/
 		void encodeUint32 ( uint32_t from, uint8_t *to );
 
 		/*
-		* Return a UINT64 based on eight UINT8
+		* @brief Return a UINT64 based on eight uint8_t
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20140804
 		*/
 		uint64_t decodeUint64 ( uint8_t *data );
 
 		/*
-		* Place data from at to address
-		* No return
+		* @brief Place data from at to address
+		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20111011
 		*/
 		void encodeUint64 ( uint64_t from, uint8_t *to );
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Print an uint64_t value on console
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		void printUint64 ( uint64_t ui64 );
 
                 /**
-                * @brief 
+                * @brief Deprecated?
                 * @return 
                 * @author Réjane Dalce
                 * @date 20141115
@@ -615,15 +615,15 @@ class DecaDuino {
                 double getLastRxSkew();
 
                 /**
-                * @brief 
-                * @return 
+                * @brief Deprecated?
+                * @return No return
                 * @author Réjane Dalce
                 * @date 20141115
                 */
 		void print(uint64_t val);
 
                 /**
-                * @brief 
+                * @brief Deprecated?
                 * @return 
                 * @author Réjane Dalce
                 * @date 20141115
@@ -647,32 +647,32 @@ class DecaDuino {
 	protected:
 
                 /**
-                * @brief 
-                * @return 
+                * @brief The first interrupt function
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		static void isr0();
 
                 /**
-                * @brief 
-                * @return 
+                * @brief The second interrupt function
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		static void isr1();
 
                 /**
-                * @brief 
-                * @return 
+                * @brief The third interrupt function
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */
 		static void isr2();
 
                 /**
-                * @brief 
-                * @return 
+                * @brief The global interrupt function
+                * @return No return
                 * @author Adrien van den Bossche <bossche@irit.fr>
                 * @date 20141115
                 */

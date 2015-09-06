@@ -1019,10 +1019,6 @@ void DecaDuino::wakeRequest(void) {
 }
 
 
-void DecaDuino::test(void) {
-
-}
-
 void DecaDuino::print(uint64_t val) {
 
 /*
