@@ -264,7 +264,7 @@ void DecaDuino::handleInterrupt() {
 
 	uint8_t buf[8];
 	uint32_t sysStatusReg, ack, ui32t;
-	double rxtofs, rxttcki, offseti;
+	double rxtofs, rxttcki;
 	ack = 0;
 
 	// Read System Event Status Register
@@ -330,10 +330,7 @@ void DecaDuino::handleInterrupt() {
 					encodeUint64(0, buf); // init buffer. Drien 20150906: why a buffer initialisation here?
 					readSpi(DW1000_REGISTER_RX_TIME, buf, 5);
 					lastRxTimestamp = decodeUint64(buf);
-#ifdef DECADUINO_DEBUG 
-					sprintf((char*)debugStr, "\nRX Frame timestamp %08x %08x\n", decodeUint32(&buf[4]), decodeUint32(buf));
-					Serial.println((char*)debugStr);
-#endif
+
 					// Get transmitter-receiver skew (clock offset or crystal offset between the local receiver and the remote end transmitter device)
 					readSpi(DW1000_REGISTER_RX_TTCKO, buf, 3);
 
@@ -374,6 +371,13 @@ void DecaDuino::handleInterrupt() {
 					// ui32t = 0x01F00000/ui32t;
 					// Serial.print("clock offset=0x");
 					// Serial.println(ui32t, HEX);	
+#ifdef DECADUINO_DEBUG 
+					Serial.print("RX Frame timestamp=");
+					printUint64(lastRxTimestamp);
+					Serial.print(", skew=");
+					Serial.println(clkOffset);
+#endif
+
 				}
 			}
 
