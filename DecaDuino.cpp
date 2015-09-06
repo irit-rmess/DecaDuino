@@ -327,7 +327,7 @@ void DecaDuino::handleInterrupt() {
 				if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_LDEDONE_MASK ) {
 
 					// Get RX timestamp
-					encodeUint64(0, buf); // init buffer. Drien 20150906: why a buffer initialisation here?
+					encodeUint64(0, buf); // init buffer the 64-bit buffer 
 					readSpi(DW1000_REGISTER_RX_TIME, buf, 5);
 					lastRxTimestamp = decodeUint64(buf);
 
@@ -405,7 +405,7 @@ void DecaDuino::handleInterrupt() {
 		trxStatus = DW1000_TRX_STATUS_IDLE;
 
 		// Read TX timestamp
-		encodeUint64(0, buf); // init buffer
+		encodeUint64(0, buf); // // init buffer the 64-bit buffer
 		readSpi(DW1000_REGISTER_TX_TIME, buf, 5);
 		lastTxTimestamp = decodeUint64(buf);
 
@@ -555,8 +555,8 @@ uint64_t DecaDuino::predictT5(){
 	uint64_t t5;
 	uint8_t buf[8];
 
-	encodeUint64(0, buf); // init buffer
-	readSpi(0x06, buf, 5);
+	encodeUint64(0, buf); // init buffer the 64-bit buffer 
+	readSpi(DW1000_REGISTER_SYS_TIME, buf, 5);
 	t5 = decodeUint64(buf);
 
 	return t5;
@@ -853,7 +853,7 @@ void DecaDuino::getSystemTimeCounter ( uint64_t *p ) {
 
 	uint8_t buf[8];
 
-	encodeUint64(0, buf); // init buffer
+	encodeUint64(0, buf); // init buffer the 64-bit buffer
 	readSpi(DW1000_REGISTER_SYS_TIME, buf, 5);
 	*p = decodeUint64(buf);
 }
