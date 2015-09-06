@@ -334,7 +334,8 @@ void DecaDuino::handleInterrupt() {
 					sprintf((char*)debugStr, "\nRX Frame timestamp %08x %08x\n", decodeUint32(&buf[4]), decodeUint32(buf));
 					Serial.println((char*)debugStr);
 #endif
-					readSpi(0x14, buf, 3);
+					// Get transmitter-receiver skew (clock offset or crystal offset between the local receiver and the remote end transmitter device)
+					readSpi(DW1000_REGISTER_RX_TTCKO, buf, 3);
 					ui32t = decodeUint32(buf) & 0x0007FFFF;
 					if ( ui32t & 0x00080000 )
 						ui32t |= 0xFFF80000;			
