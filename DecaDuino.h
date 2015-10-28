@@ -306,6 +306,14 @@ class DecaDuino {
 		int setShortAddressAndPanId(uint32_t shortAddressPanId);
 
                 /**
+                * @brief Return an aligned timestamp to use with plmeDataRequest() delayed
+                * @return the aligned timestamp
+                * @author Adrien van den Bossche <bossche@irit.fr>
+                * @date 20151028
+                */
+		uint64_t alignDelayedTransmission ( uint64_t wantedDelay );
+
+                /**
                 * @brief Send a frame with a payload of len byte, bytes from buf
                 * @return true if success, false otherwise
                 * @author Adrien van den Bossche <bossche@irit.fr>

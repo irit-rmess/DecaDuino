@@ -446,6 +446,13 @@ void DecaDuino::rangingEngine(void) {
 	// ToDo
 }
 
+
+uint64_t DecaDuino::alignDelayedTransmission ( uint64_t wantedDelay ) {
+
+	return ((getSystemTimeCounter() + wantedDelay) & 0xFFFFFFFE00) + DWM1000_DEFAULT_ANTENNA_DELAY_VALUE;
+}
+
+
 uint8_t DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
 
 	return plmeDataRequest(buf, len, false, 0);
@@ -478,12 +485,12 @@ uint8_t DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, 
 		ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
 
 		// set frame length
-		ui32t = (ui32t & ~DW1000_REGISTER_TX_FCTRL_FRAME_LENGTH_MASK) | len+2; // FCS is 2-bytes long
+		ui32t = (ui32t & ~DW1000_REGISTER_TX_FCTRL_FRAME_LENGTH_MASK) | (len+2); // FCS is 2-bytes long
 		writeSpiUint32(DW1000_REGISTER_TX_FCTRL, ui32t);
 
 		if ( delayed ) { // if delayed transmission
 			// send time
-			encodeUint64 ( time & 0x000000FFFFFFFE00, tempbuf); // time is 5-bytes long, 9 lsb=0
+			encodeUint64 ( (time - DWM1000_DEFAULT_ANTENNA_DELAY_VALUE) & 0x000000FFFFFFFE00, tempbuf); // time is 5-bytes long, 9 lsb=0
 			writeSpi(DW1000_REGISTER_DX_TIME, tempbuf, 5);
 			
 			// set tx start bit and Transmitter Delayed Sendind bit
