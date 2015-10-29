@@ -1,5 +1,14 @@
 #include <spi4teensy3.h>
 #include <DecaDuino.h>
+#include "FastLED.h"
+
+#define LED_DATA_PIN 8
+#define NUM_LEDS 60
+
+#define X_CORRECTION 1.0000000
+#define Y_CORRECTION 0.200000000
+
+#define INTERLED_DISTANCE 0.975/59 // 1.65cm between leds
 
 #define AIR_SPEED_OF_LIGHT 229702547.0
 #define DW1000_TIMEBASE 15.65E-12
@@ -42,7 +51,31 @@ uint16_t rxLen;
 int state;
 int timeout;
 
+CRGB leds[NUM_LEDS];
+
+void dist2led(float dist) {
+
+  int ledIndex = dist/(1.0*INTERLED_DISTANCE);
+
+  Serial.printf("dist=%f, ledIndex=%d\n", dist, ledIndex);
+
+  for (int i=0; i<NUM_LEDS; i++)
+    leds[i] = CRGB::Black;
+
+  if ( ledIndex < 0 ) {
+    leds[0] = CRGB::Red;
+  } else if ( ledIndex > 60 ) {
+    leds[NUM_LEDS-1] = CRGB::Red;
+  } else {
+    leds[ledIndex] = CRGB::White;
+  }
+
+  FastLED.show();
+}
+
 void setup() {
+
+  FastLED.addLeds<WS2812B, LED_DATA_PIN, GRB>(leds, NUM_LEDS);
 
   pinMode(13, OUTPUT);
   if (!decaduino.init()){
@@ -56,9 +89,13 @@ void setup() {
   }
   decaduino.setRxBuffer(rxData, &rxLen);
   state=TWR_ENGINE_STATE_INIT;
+
+  FastLED.setBrightness(32);
 }
 
 void loop() {
+
+  float distance;
   
   switch (state) {
   
@@ -68,7 +105,7 @@ void loop() {
       break;
     
     case TWR_ENGINE_STATE_WAIT_NEW_CYCLE :
-      delay(1000);
+      delay(100);
       Serial.println("New SDS_TWR");
       state = TWR_ENGINE_STATE_SEND_START;
       break;
@@ -159,11 +196,13 @@ void loop() {
       t3 = decaduino.decodeUint64(&rxData[9]);
       t6 = decaduino.decodeUint64(&rxData[17]);
       tof = (2*t4 - t1 - 2*t3 + t2 + t6 - t5)/4;
+      distance = tof*COEFF*X_CORRECTION + Y_CORRECTION;
       Serial.print("ToF=");
       Serial.print(tof);
       Serial.print(" d=");
-      Serial.print(tof*COEFF);
+      Serial.print(distance);
       Serial.println();
+      dist2led(distance);
       state = TWR_ENGINE_STATE_INIT;
       break;
        
