@@ -5,6 +5,10 @@
 #define DW1000_TIMEBASE 15.65E-12
 #define COEFF AIR_SPEED_OF_LIGHT*DW1000_TIMEBASE
 
+#define X_CORRECTION 1.0000000
+//#define Y_CORRECTION 0.230000000
+#define Y_CORRECTION 0.000000000
+
 #define TIMEOUT 20
 
 #define TWR_ENGINE_STATE_INIT 1
@@ -59,6 +63,8 @@ void setup() {
 }
 
 void loop() {
+
+  float distance;
   
   switch (state) {
    
@@ -69,6 +75,7 @@ void loop() {
       
     case TWR_ENGINE_STATE_WAIT_NEW_CYCLE:
       delay(1000);
+      //delay(100);
       Serial.println("New TWR");
       state = TWR_ENGINE_STATE_SEND_START;
       break;
@@ -142,10 +149,11 @@ void loop() {
       t2 = decaduino.decodeUint64(&rxData[1]);
       t3 = decaduino.decodeUint64(&rxData[9]);
       tof = (t4 - t1 - (t3 - t2))/2;
+      distance = tof*COEFF*X_CORRECTION + Y_CORRECTION;
       Serial.print("ToF=");
       Serial.print(tof, HEX);
       Serial.print(" d=");
-      Serial.print(tof*COEFF);
+      Serial.print(distance);
       Serial.println();
       state = TWR_ENGINE_STATE_INIT;
       break;
