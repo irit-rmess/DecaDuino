@@ -73,79 +73,77 @@
 
 // DW1000 register map
 
-#define DW1000_REGISTER_DEV_ID 		0x00
+#define DW1000_REGISTER_DEV_ID 				0x00
 
-#define DW1000_REGISTER_EUI 		0x01
+#define DW1000_REGISTER_EUI 				0x01
 
-#define DW1000_REGISTER_PANADR		0x03
-#define DW1000_REGISTER_PANADR_SHORT_ADDRESS_OFFSET 0x00
-#define DW1000_REGISTER_PANADR_PANID_OFFSET 0x02
+#define DW1000_REGISTER_PANADR				0x03
+#define DW1000_REGISTER_PANADR_SHORT_ADDRESS_OFFSET	0x00
+#define DW1000_REGISTER_PANADR_PANID_OFFSET 		0x02
 
-#define DW1000_REGISTER_SYS_CFG		0x04
-#define DW1000_REGISTER_SYS_CFG_RXAUTR_MASK 0x20000000
+#define DW1000_REGISTER_SYS_CFG				0x04
+#define DW1000_REGISTER_SYS_CFG_RXAUTR_MASK 		0x20000000
 
-#define DW1000_REGISTER_SYS_TIME	0x06
+#define DW1000_REGISTER_SYS_TIME			0x06
 
-#define DW1000_REGISTER_TX_FCTRL	0x08
-#define DW1000_REGISTER_TX_FCTRL_FRAME_LENGTH_MASK 0x000003FF
+#define DW1000_REGISTER_TX_FCTRL			0x08
+#define DW1000_REGISTER_TX_FCTRL_FRAME_LENGTH_MASK	0x000003FF
 
-#define DW1000_REGISTER_TX_BUFFER	0x09
+#define DW1000_REGISTER_TX_BUFFER			0x09
 
-#define DW1000_REGISTER_DX_TIME		0x0A
+#define DW1000_REGISTER_DX_TIME				0x0A
 
-#define DW1000_REGISTER_SYS_CTRL	0x0D
-#define DW1000_REGISTER_SYS_CTRL_TXSTRT_MASK 0x00000002
-#define DW1000_REGISTER_SYS_CTRL_TXDLYS_MASK 0x00000004
-#define DW1000_REGISTER_SYS_CTRL_TRXOFF_MASK 0x00000040
-#define DW1000_REGISTER_SYS_CTRL_RXENAB_MASK 0x00000100
+#define DW1000_REGISTER_SYS_CTRL			0x0D
+#define DW1000_REGISTER_SYS_CTRL_TXSTRT_MASK		0x00000002
+#define DW1000_REGISTER_SYS_CTRL_TXDLYS_MASK		0x00000004
+#define DW1000_REGISTER_SYS_CTRL_TRXOFF_MASK		0x00000040
+#define DW1000_REGISTER_SYS_CTRL_RXENAB_MASK		0x00000100
 
-#define DW1000_REGISTER_SYS_MASK	0x0E
-#define DW1000_REGISTER_SYS_MASK_MTXFRS_MASK 0x00000080
-#define DW1000_REGISTER_SYS_MASK_MRXDFR_MASK 0x00002000
-#define DW1000_REGISTER_SYS_MASK_MRXFCG_MASK 0x00004000
+#define DW1000_REGISTER_SYS_MASK			0x0E
+#define DW1000_REGISTER_SYS_MASK_MTXFRS_MASK		0x00000080
+#define DW1000_REGISTER_SYS_MASK_MRXDFR_MASK		0x00002000
+#define DW1000_REGISTER_SYS_MASK_MRXFCG_MASK		0x00004000
 
-#define DW1000_REGISTER_SYS_STATUS	0x0F
-#define DW1000_REGISTER_SYS_STATUS_IRQS_MASK	0x00000001
-#define DW1000_REGISTER_SYS_STATUS_TXFRS_MASK 0x00000080
-#define DW1000_REGISTER_SYS_STATUS_LDEDONE_MASK 0x00000400
-#define DW1000_REGISTER_SYS_STATUS_RXDFR_MASK 0x00002000
-#define DW1000_REGISTER_SYS_STATUS_RXFCG_MASK 0x00004000
-#define DW1000_REGISTER_SYS_STATUS_RXFCE_MASK 0x00008000
+#define DW1000_REGISTER_SYS_STATUS			0x0F
+#define DW1000_REGISTER_SYS_STATUS_IRQS_MASK		0x00000001
+#define DW1000_REGISTER_SYS_STATUS_TXFRS_MASK		0x00000080
+#define DW1000_REGISTER_SYS_STATUS_LDEDONE_MASK 	0x00000400
+#define DW1000_REGISTER_SYS_STATUS_RXDFR_MASK		0x00002000
+#define DW1000_REGISTER_SYS_STATUS_RXFCG_MASK		0x00004000
+#define DW1000_REGISTER_SYS_STATUS_RXFCE_MASK		0x00008000
 
-#define DW1000_REGISTER_RX_FINFO	0x10
-#define DW1000_REGISTER_RX_FINFO_RXFLEN_MASK 0x000003FF
+#define DW1000_REGISTER_RX_FINFO			0x10
+#define DW1000_REGISTER_RX_FINFO_RXFLEN_MASK		0x000003FF
 
-#define DW1000_REGISTER_RX_BUFFER	0x11
+#define DW1000_REGISTER_RX_BUFFER			0x11
 
-#define DW1000_REGISTER_RX_TTCKI	0x13
+#define DW1000_REGISTER_RX_TTCKI			0x13
 
-#define DW1000_REGISTER_RX_TTCKO	0x14
+#define DW1000_REGISTER_RX_TTCKO			0x14
 
-#define DW1000_REGISTER_RX_TIME		0x15
+#define DW1000_REGISTER_RX_TIME				0x15
 
-#define DW1000_REGISTER_TX_TIME		0x17
+#define DW1000_REGISTER_TX_TIME				0x17
 
-#define DW1000_REGISTER_TX_ANTD		0x18
+#define DW1000_REGISTER_TX_ANTD				0x18
 
-#define DW1000_REGISTER_AON_CTRL	0x2C
-#define DW1000_REGISTER_OFFSET_AON_CTRL	0x02
-#define DW1000_REGISTER_AON_CTRL_UPL_CFG_MASK 0x04
+#define DW1000_REGISTER_AON_CTRL			0x2C
+#define DW1000_REGISTER_OFFSET_AON_CTRL			0x02
+#define DW1000_REGISTER_AON_CTRL_UPL_CFG_MASK		0x04
 
-#define DW1000_REGISTER_AON_CFG0	0x2C
-#define DW1000_REGISTER_OFFSET_AON_CFG0	0x06
-#define DW1000_REGISTER_AON_CFG0_SLEEP_EN_MASK 0x01
-#define DW1000_REGISTER_AON_CFG0_WAKE_PIN_MASK 0x02
-#define DW1000_REGISTER_AON_CFG0_WAKE_SPI_MASK 0x04
-#define DW1000_REGISTER_AON_CFG0_WAKE_CNT_MASK 0x08
-#define DW1000_REGISTER_AON_CFG0_LPDIV_EN_MASK 0x10
+#define DW1000_REGISTER_AON_CFG0			0x2C
+#define DW1000_REGISTER_OFFSET_AON_CFG0			0x06
+#define DW1000_REGISTER_AON_CFG0_SLEEP_EN_MASK		0x01
+#define DW1000_REGISTER_AON_CFG0_WAKE_PIN_MASK		0x02
+#define DW1000_REGISTER_AON_CFG0_WAKE_SPI_MASK		0x04
+#define DW1000_REGISTER_AON_CFG0_WAKE_CNT_MASK		0x08
+#define DW1000_REGISTER_AON_CFG0_LPDIV_EN_MASK		0x10
 
-#define DW1000_REGISTER_PMSC_CTRL0	0x36
-#define DW1000_REGISTER_OFFSET_PMSC_CTRL0 0x00
+#define DW1000_REGISTER_PMSC_CTRL0			0x36
+#define DW1000_REGISTER_OFFSET_PMSC_CTRL0		0x00
 
-#define DW1000_REGISTER_PMSC_CTRL1	0x36
-#define DW1000_REGISTER_OFFSET_PMSC_CTRL1 0x04
-
-#define DW1000_REGISTER_
+#define DW1000_REGISTER_PMSC_CTRL1			0x36
+#define DW1000_REGISTER_OFFSET_PMSC_CTRL1		0x04
 
 
 class DecaDuino {
@@ -153,84 +151,84 @@ class DecaDuino {
 	public:
 		DecaDuino(uint8_t slaveSelectPin = DW1000_CS0_PIN, uint8_t interruptPin = DW1000_IRQ0_PIN);
 
-                /**
-                * @brief Init DecaDuino and DWM1000 without addressing fields filtering (Promiscuous mode)
-                * @return Return true if both DecaDuino and DWM1000 have been successfully initialized
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20140701
-                */
+		/**
+		* @brief Init DecaDuino and DWM1000 without addressing fields filtering (Promiscuous mode)
+		* @return Return true if both DecaDuino and DWM1000 have been successfully initialized
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20140701
+		*/
 		boolean init();
 
-                /**
-                * @brief Init DecaDuino and DWM1000 with given Short Address and Pan Id
-                * @return Return true if both DecaDuino and DWM1000 have been successfully initialized
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20150905
-                */
+		/**
+		* @brief Init DecaDuino and DWM1000 with given Short Address and Pan Id
+		* @return Return true if both DecaDuino and DWM1000 have been successfully initialized
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20150905
+		*/
 		boolean init(uint32_t shortAddrAndPanId);
 
-                /**
-                * @brief Reset the DW1000 chip
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Reset the DW1000 chip
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void resetDW1000();
 
-                /**
-                * @brief It is a dummy function to test the class
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief It is a dummy function to test the class
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void dummy();
 
-                /**
-                * @brief Read len bytes on SPI at address address, and store data in buf
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Read len bytes on SPI at address address, and store data in buf
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void readSpi(uint8_t address, uint8_t* buf, uint16_t len);
 
-                /**
-                * @brief Read len bytes on SPI at address address/subaddress subaddress, and store data in buf
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Read len bytes on SPI at address address/subaddress subaddress, and store data in buf
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len);
 
-                /**
-                * @brief Read a word of 4-bytes on SPI at address address
-                * @return The 4 bytes
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Read a word of 4-bytes on SPI at address address
+		* @return The 4 bytes
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		uint32_t readSpiUint32(uint8_t address);
 
-                /**
-                * @brief Write len bytes on SPI at address address from buf
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Write len bytes on SPI at address address from buf
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void writeSpi(uint8_t address, uint8_t* buf, uint16_t len);
 
-                /**
-                * @brief Write len bytes on SPI at address address/subaddress subaddress from buf
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Write len bytes on SPI at address address/subaddress subaddress from buf
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len);
 
-                /**
-                * @brief Write a word of 4-bytes on SPI at address address
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Write a word of 4-bytes on SPI at address address
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void writeSpiUint32(uint8_t address, uint32_t ui32t);
 
 		/**
@@ -249,292 +247,292 @@ class DecaDuino {
 		*/
 		uint64_t getSystemTimeCounter(void);
 
-                /**
-                * @brief Get the PanId (Personnal Area Network Identifier) stored in the DW1000's RAM
-                * @return The PanId as an uint16_t value
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Get the PanId (Personnal Area Network Identifier) stored in the DW1000's RAM
+		* @return The PanId as an uint16_t value
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		uint16_t getPanId();
 
-                /**
-                * @brief Get the ShortAddress (16-bit network address, aka IEEE short address) stored in the DW1000's RAM
-                * @return The Short Address as an uint16_t value
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Get the ShortAddress (16-bit network address, aka IEEE short address) stored in the DW1000's RAM
+		* @return The Short Address as an uint16_t value
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		uint16_t getShortAddress();
 
-                /**
-                * @brief Get the Euid (Extended Unique IDentifier) stored in the DW1000's ROM
-                * @return The Identifier as an uint64_t value
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Get the Euid (Extended Unique IDentifier) stored in the DW1000's ROM
+		* @return The Identifier as an uint64_t value
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		uint64_t getEuid();
 
-                /**
-                * @brief Set the PanId (Personnal Area Network Identifier) in the DW1000's RAM
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Set the PanId (Personnal Area Network Identifier) in the DW1000's RAM
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void setPanId(uint16_t panId);
 
-                /**
-                * @brief Set the ShortAddress (16-bit network address, aka IEEE short address) in the DW1000's RAM
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Set the ShortAddress (16-bit network address, aka IEEE short address) in the DW1000's RAM
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void setShortAddress(uint16_t shortAddress);
 
-                /**
-                * @brief Set both the ShortAddress and the PanId in the DW1000's RAM
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Set both the ShortAddress and the PanId in the DW1000's RAM
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void setShortAddressAndPanId(uint16_t shortAddress, uint16_t panId); 
 
-                /**
-                * @brief Set both the ShortAddress and the PanId in the DW1000's RAM
-                * @return true if success, false otherwise
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Set both the ShortAddress and the PanId in the DW1000's RAM
+		* @return true if success, false otherwise
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		int setShortAddressAndPanId(uint32_t shortAddressPanId);
 
-                /**
-                * @brief Return an aligned timestamp to use with plmeDataRequest() delayed
-                * @return the aligned timestamp
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20151028
-                */
+		/**
+		* @brief Return an aligned timestamp to use with plmeDataRequest() delayed
+		* @return the aligned timestamp
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20151028
+		*/
 		uint64_t alignDelayedTransmission ( uint64_t wantedDelay );
 
-                /**
-                * @brief Send a frame with a payload of len byte, bytes from buf
-                * @return true if success, false otherwise
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Send a frame with a payload of len byte, bytes from buf
+		* @return true if success, false otherwise
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		uint8_t plmeDataRequest(uint8_t* buf, uint16_t len);
 
-                /**
-                * @brief Send a frame with a payload of len byte, bytes from buf, with an optionnal delay
-                * @return true if success, false otherwise
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Send a frame with a payload of len byte, bytes from buf, with an optionnal delay
+		* @return true if success, false otherwise
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		uint8_t plmeDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time);
 
-                /**
-                * @brief Send a frame with a payload of len byte, bytes from buf
-                * @return true if success, false otherwise
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Send a frame with a payload of len byte, bytes from buf
+		* @return true if success, false otherwise
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		uint8_t send(uint8_t* buf, uint16_t len);
 
-                /**
-                * @brief Send a frame with a payload of len byte, bytes from buf, with an optionnal delay
-                * @return true if success, false otherwise
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Send a frame with a payload of len byte, bytes from buf, with an optionnal delay
+		* @return true if success, false otherwise
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		uint8_t send(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time);
 
-                /**
-                * @brief 
-                * @return 
+		/**
+		* @brief 
+		* @return 
 		* @todo To be implemented
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		float rangeNode(uint64_t destination, uint8_t protocol);
 
-                /**
-                * @brief 
-                * @return 
+		/**
+		* @brief 
+		* @return 
 		* @todo To be implemented
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		uint8_t twrRequest(uint64_t destination);
 
-                /**
-                * @brief 
-                * @return 
+		/**
+		* @brief 
+		* @return 
 		* @todo To be implemented
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		uint8_t sdsTwrRequest(uint64_t destination);
 
-                /**
-                * @brief 
-                * @return No return
+		/**
+		* @brief 
+		* @return No return
 		* @todo To be implemented
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void rangingEngine(void);
 
-                /**
-                * @brief Set the RX buffer for future frame reception. Received bytes will be stored at the beginning of the buffer.
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Set the RX buffer for future frame reception. Received bytes will be stored at the beginning of the buffer.
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void setRxBuffer(uint8_t* buf, uint16_t *len);
 
-                /**
-                * @brief Set the RX buffer for future frame reception. Received bytes will be stored at the end of the buffer of max size.
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Set the RX buffer for future frame reception. Received bytes will be stored at the end of the buffer of max size.
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void setRxBuffer(uint8_t* buf, uint16_t *len, uint16_t max);
 
-                /**
-                * @brief Set transceiver mode to receive mode
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Set transceiver mode to receive mode
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void plmeRxEnableRequest(void);
 
-                /**
-                * @brief Set transceiver mode to receive mode. Received bytes will be stored at the end of the buffer of max size.
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Set transceiver mode to receive mode. Received bytes will be stored at the end of the buffer of max size.
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void plmeRxEnableRequest(uint16_t max);
 
-                /**
-                * @brief Set transceiver mode to receive mode and set the RX buffer for future frame reception.
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Set transceiver mode to receive mode and set the RX buffer for future frame reception.
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void plmeRxEnableRequest(uint8_t* buf, uint16_t *len);
 
-                /**
-                * @brief Set transceiver mode to receive mode and set the RX buffer for future frame reception. Received bytes will be stored at the end of the buffer of max size.
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Set transceiver mode to receive mode and set the RX buffer for future frame reception. Received bytes will be stored at the end of the buffer of max size.
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void plmeRxEnableRequest(uint8_t* buf, uint16_t *len, uint16_t max);
 
-                /**
-                * @brief Set transceiver mode to idle mode.
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Set transceiver mode to idle mode.
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void plmeRxDisableRequest(void);
 
-                /**
-                * @brief Set transceiver mode to sleep mode.
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Set transceiver mode to sleep mode.
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void sleepRequest(void);
 
-                /**
-                * @brief Set transceiver mode to deep sleep mode.
-                * @return No return
+		/**
+		* @brief Set transceiver mode to deep sleep mode.
+		* @return No return
 		* @todo To be implemented
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void deepsleepRequest(void);
 
-                /**
-                * @brief Wake the transceiver and go back to idle mode.
-                * @return No return
+		/**
+		* @brief Wake the transceiver and go back to idle mode.
+		* @return No return
 		* @todo To be implemented
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void wakeRequest(void);
 
-                /**
-                * @brief Returns true of the a frame have been received.
-                * @return Returns true of the a frame have been received, false otherwise.
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Returns true of the a frame have been received.
+		* @return Returns true of the a frame have been received, false otherwise.
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		uint8_t rxFrameAvailable(void);
 
-                /**
-                * @brief Returns true of the a frame have been received, and copy received bytes and length in buffer buf/length len
-                * @return Returns true of the a frame have been received, false otherwise.
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Returns true of the a frame have been received, and copy received bytes and length in buffer buf/length len
+		* @return Returns true of the a frame have been received, false otherwise.
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		uint8_t rxFrameAvailable(uint8_t* buf, uint16_t *len);
 
-                /**
-                * @brief Returns true of the a frame have been received, and copy received bytes and length in buffer buf/length len, by the end of the buffer of size max.
-                * @return Returns true of the a frame have been received, false otherwise.
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Returns true of the a frame have been received, and copy received bytes and length in buffer buf/length len, by the end of the buffer of size max.
+		* @return Returns true of the a frame have been received, false otherwise.
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		uint8_t rxFrameAvailable(uint8_t* buf, uint16_t *len, uint16_t max);
 
-                /**
-                * @brief Return true if the last transmission request as been succefully completed
-                * @return true if the last transmission request as been succefully completed
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Return true if the last transmission request as been succefully completed
+		* @return true if the last transmission request as been succefully completed
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		bool hasTxSucceeded(void);
 
-                /**
-                * @brief Get the DecaDuino transceiver status
-                * @return Returns the DecaDuino transceiver status
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Get the DecaDuino transceiver status
+		* @return Returns the DecaDuino transceiver status
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		uint8_t getTrxStatus(void);
 
-                /**
-                * @brief Get the DW1000 embedded temperature sensor raw value 
-                * @return The temperature raw value
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Get the DW1000 embedded temperature sensor raw value 
+		* @return The temperature raw value
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		uint8_t getTemperatureRaw(void);
 
-                /**
-                * @brief Get the DW1000 embedded temperature sensor value in celsius degrees
-                * @return The temperature value in celsius degrees
+		/**
+		* @brief Get the DW1000 embedded temperature sensor value in celsius degrees
+		* @return The temperature value in celsius degrees
 		* @todo To be implemented
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		float getTemperature(void);
 
-                /**
-                * @brief Get the DW1000 embedded voltage sensor raw value
-                * @return The voltage raw value
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Get the DW1000 embedded voltage sensor raw value
+		* @return The voltage raw value
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		uint8_t getVoltageRaw(void);
 
-                /**
-                * @brief Get the DW1000 embedded voltage sensor value in volts
-                * @return The voltage value in volts
+		/**
+		* @brief Get the DW1000 embedded voltage sensor value in volts
+		* @return The voltage value in volts
 		* @todo To be implemented
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		float getVoltage(void);
 
 		/*
@@ -582,60 +580,60 @@ class DecaDuino {
 		*/
 		void encodeUint64 ( uint64_t from, uint8_t *to );
 
-                /**
-                * @brief Print an uint64_t value on console
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief Print an uint64_t value on console
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void printUint64 ( uint64_t ui64 );
 
-                /**
-                * @brief Deprecated?
-                * @return 
-                * @author Réjane Dalce
-                * @date 20141115
-                */
+		/**
+		* @brief Deprecated?
+		* @return 
+		* @author Réjane Dalce
+		* @date 20141115
+		*/
 		uint64_t predictT5();
 
-                /**
-                * @brief Returns last transmitted frame timestamp based on the DWM1000 System Time Counter at 64GHz
-                * @return Returns last transmitted frame timestamp
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20140905
-                */
-                uint64_t getLastTxTimestamp();
+		/**
+		* @brief Returns last transmitted frame timestamp based on the DWM1000 System Time Counter at 64GHz
+		* @return Returns last transmitted frame timestamp
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20140905
+		*/
+		uint64_t getLastTxTimestamp();
 
-                /**
-                * @brief Returns last received frame timestamp based on the DWM1000 System Time Counter at 64GHz
-                * @return Returns last received frame timestamp
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20140905
-                */
-                uint64_t getLastRxTimestamp();
+		/**
+		* @brief Returns last received frame timestamp based on the DWM1000 System Time Counter at 64GHz
+		* @return Returns last received frame timestamp
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20140905
+		*/
+		uint64_t getLastRxTimestamp();
 
-               /**
-                * @brief Returns last received frame skew (aka Clock Offset) 
-                * @return Returns last received frame skew
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20150905
-                */
-                double getLastRxSkew();
+	       /**
+		* @brief Returns last received frame skew (aka Clock Offset) 
+		* @return Returns last received frame skew
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20150905
+		*/
+		double getLastRxSkew();
 
-                /**
-                * @brief Deprecated?
-                * @return No return
-                * @author Réjane Dalce
-                * @date 20141115
-                */
+		/**
+		* @brief Deprecated?
+		* @return No return
+		* @author Réjane Dalce
+		* @date 20141115
+		*/
 		void print(uint64_t val);
 
-                /**
-                * @brief Deprecated?
-                * @return 
-                * @author Réjane Dalce
-                * @date 20141115
-                */
+		/**
+		* @brief Deprecated?
+		* @return 
+		* @author Réjane Dalce
+		* @date 20141115
+		*/
 		uint64_t decodeUint64_2 ( uint8_t *data ) ;
 
 		uint64_t euid;
@@ -654,36 +652,36 @@ class DecaDuino {
 	
 	protected:
 
-                /**
-                * @brief The first interrupt function
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief The first interrupt function
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		static void isr0();
 
-                /**
-                * @brief The second interrupt function
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief The second interrupt function
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		static void isr1();
 
-                /**
-                * @brief The third interrupt function
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief The third interrupt function
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		static void isr2();
 
-                /**
-                * @brief The global interrupt function
-                * @return No return
-                * @author Adrien van den Bossche <bossche@irit.fr>
-                * @date 20141115
-                */
+		/**
+		* @brief The global interrupt function
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
 		void handleInterrupt();
 
 		uint8_t _slaveSelectPin;
