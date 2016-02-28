@@ -188,7 +188,6 @@ void DecaDuino::resetDW1000() {
 	}
 
 	// Initialise the SPI port
-	//spi4teensy3::init(1,0,0); // Normal speed SPICLK after performing DW1000 reset
 	spi4teensy3::init(2,0,0); // Normal speed SPICLK after performing DW1000 reset
 	CORE_PIN13_CONFIG = PORT_PCR_MUX(1); // First reassign pin 13 to Alt1 so that it is not SCK but the LED still works
 	CORE_PIN14_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); // and then reassign pin 14 to SCK
@@ -404,49 +403,6 @@ bool DecaDuino::hasTxSucceeded() {
 }
 
 
-float DecaDuino::rangeNode(uint64_t destination, uint8_t protocol=DEFAULT_RANGING_PROTOCOL) {
-
-	switch(protocol) {
-
-		case RANGING_PROTOCOL_TWR:
-			twrRequest(destination);
-			break;
-
-		case RANGING_PROTOCOL_SDS_TWR:
-			sdsTwrRequest(destination);
-			break;
-
-		default:
-#ifdef DECADUINO_DEBUG 
-			Serial.println("rangeNode(): unknown ranging protocol");
-#endif
-			break;
-	}
-
-	return 0.0;
-}
-
-
-uint8_t DecaDuino::twrRequest(uint64_t destination) {
-
-	// ToDo
-	return false;
-}
-
-
-uint8_t DecaDuino::sdsTwrRequest(uint64_t destination) {
-
-	// ToDo
-	return false;
-}
-
-
-void DecaDuino::rangingEngine(void) {
-
-	// ToDo
-}
-
-
 uint64_t DecaDuino::alignDelayedTransmission ( uint64_t wantedDelay ) {
 
 	return ((getSystemTimeCounter() + wantedDelay) & 0xFFFFFFFE00) + DWM1000_DEFAULT_ANTENNA_DELAY_VALUE;
@@ -525,19 +481,6 @@ uint8_t DecaDuino::send(uint8_t* buf, uint16_t len) {
 uint8_t DecaDuino::send(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time) {
 
 	return plmeDataRequest(buf, len, delayed, time);
-}
-
-
-uint64_t DecaDuino::predictT5(){
-
-	uint64_t t5;
-	uint8_t buf[8];
-
-	encodeUint64(0, buf); // init buffer the 64-bit buffer 
-	readSpi(DW1000_REGISTER_SYS_TIME, buf, 5);
-	t5 = decodeUint64(buf);
-
-	return t5;
 }
 
 
@@ -800,11 +743,6 @@ uint64_t DecaDuino::decodeUint64 ( uint8_t *data ) {
 	return tmp;
 }
 
-/*
-uint64_t DecaDuino::decodeUint64_2 ( uint8_t *data ) {
-
-	return 0 |	(data[4] << 32) | (data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0];
-} */
 
 void DecaDuino::encodeUint64 ( uint64_t from, uint8_t *to ) {
 
@@ -937,6 +875,35 @@ int DecaDuino::setShortAddressAndPanId(uint32_t shortAddressPanId) {
 		return true;
 	}
 }
+
+
+uint8_t DecaDuino::getChannel(void) {
+
+	uint8_t buf;
+ 
+ 	readSpiSubAddress(DW1000_REGISTER_CHANNEL_CONTROL, 0, &buf, 1);
+ 	return buf;
+}
+
+ 
+bool DecaDuino::setChannel(uint8_t channel) {
+
+ 	uint32_t ui32t;
+
+ 	if ( ( channel != 6 ) && ( channel <= 7 ) && ( channel >= 1 ) ) {
+
+ 		channel =  channel + (channel << 4);
+ 		ui32t = readSpiUint32(DW1000_REGISTER_CHANNEL_CONTROL);
+ 		ui32t = ui32t & 0xFFFFFF00;
+ 		ui32t |= channel; // set rx and tx channel 
+ 		writeSpiUint32(DW1000_REGISTER_CHANNEL_CONTROL, ui32t);
+ 		if ( getChannel() == channel )
+ 			return true;
+ 	}
+
+ 	return false;
+}
+
 
 uint8_t DecaDuino::getTemperatureRaw() {
 

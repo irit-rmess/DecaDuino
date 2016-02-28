@@ -304,6 +304,22 @@ class DecaDuino {
 		int setShortAddressAndPanId(uint32_t shortAddressPanId);
 
 		/**
+		* @brief Returns the radio channels configured
+		* @return A byte which MSB is the X channel and the LSB is the X channel
+		* @author Réjane Dalce
+		* @date 20160109
+		*/
+ 		uint8_t getChannel(void);
+ 
+ 		/*
+		* @brief Sets the radio channels for TX and RX
+		* @return Indicates whether configuration went well or not
+		* @author Réjane Dalce
+		* @date 20160109
+		*/
+ 		bool setChannel(uint8_t channel);
+
+		/**
 		* @brief Return an aligned timestamp to use with plmeDataRequest() delayed
 		* @return the aligned timestamp
 		* @author Adrien van den Bossche <bossche@irit.fr>
@@ -342,42 +358,6 @@ class DecaDuino {
 		* @date 20141115
 		*/
 		uint8_t send(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time);
-
-		/**
-		* @brief 
-		* @return 
-		* @todo To be implemented
-		* @author Adrien van den Bossche <bossche@irit.fr>
-		* @date 20141115
-		*/
-		float rangeNode(uint64_t destination, uint8_t protocol);
-
-		/**
-		* @brief 
-		* @return 
-		* @todo To be implemented
-		* @author Adrien van den Bossche <bossche@irit.fr>
-		* @date 20141115
-		*/
-		uint8_t twrRequest(uint64_t destination);
-
-		/**
-		* @brief 
-		* @return 
-		* @todo To be implemented
-		* @author Adrien van den Bossche <bossche@irit.fr>
-		* @date 20141115
-		*/
-		uint8_t sdsTwrRequest(uint64_t destination);
-
-		/**
-		* @brief 
-		* @return No return
-		* @todo To be implemented
-		* @author Adrien van den Bossche <bossche@irit.fr>
-		* @date 20141115
-		*/
-		void rangingEngine(void);
 
 		/**
 		* @brief Set the RX buffer for future frame reception. Received bytes will be stored at the beginning of the buffer.
@@ -589,14 +569,6 @@ class DecaDuino {
 		void printUint64 ( uint64_t ui64 );
 
 		/**
-		* @brief Deprecated?
-		* @return 
-		* @author Réjane Dalce
-		* @date 20141115
-		*/
-		uint64_t predictT5();
-
-		/**
 		* @brief Returns last transmitted frame timestamp based on the DWM1000 System Time Counter at 64GHz
 		* @return Returns last transmitted frame timestamp
 		* @author Adrien van den Bossche <bossche@irit.fr>
@@ -627,14 +599,6 @@ class DecaDuino {
 		* @date 20141115
 		*/
 		void print(uint64_t val);
-
-		/**
-		* @brief Deprecated?
-		* @return 
-		* @author Réjane Dalce
-		* @date 20141115
-		*/
-		uint64_t decodeUint64_2 ( uint8_t *data ) ;
 
 		uint64_t euid;
 		uint8_t *rxData;
@@ -688,6 +652,5 @@ class DecaDuino {
 		uint8_t _interruptPin;
 		static DecaDuino* _DecaDuinoInterrupt[];
 };
-
 
 #endif
