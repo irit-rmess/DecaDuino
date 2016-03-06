@@ -1,4 +1,5 @@
-DecaDuino library for Arduino
+DecaDuino
+=========
 
 DecaDuino is an Arduino library which provides a driver for the DecaWave DW1000
 transceiver, and modules based on this transceiver, such as DecaWave DWM1000. 
