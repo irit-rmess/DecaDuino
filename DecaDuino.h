@@ -5,13 +5,13 @@
 //  
 /// \mainpage DecaDuino library for Arduino
 /// 
-/// (get the latest version of this documentation here: https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/)
+/// Get the latest version of this documentation here: https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/
 /// 
-/// DecaDuino is an Arduino library which provides a driver for the DecaWave DW1000 transceiver, and modules based on this transceiver, such as DecaWave DWM1000. Since the DecaWave DW1000/DWM1000 is based on a Ultra Wide Band (UWB) Physical layer, DecaDuino can be used as an open framework for wireless Time-of-Flight (ToF) ranging systems.
+/// DecaDuino is an Arduino library which provides a driver for the DecaWave DW1000 transceiver and modules based on this transceiver, such as DecaWave DWM1000. Since the DW1000 is based on a Ultra Wide Band (UWB) Physical layer, in addition to wireless communication, DecaDuino supports Time-of-Flight (ToF) ranging and can be used as an open framework for protocol evaluation.
 ///
 /// DecaDuino is a <i>Physical-layer Service Access Point (PHY-SAP)</i>. It provides the two conventional <i>Physical-Data</i> (PD) and <i>Physical Layer Management Entity</i> (PLME) SAPs which enable MAC-level protocols to send/receive data and configure the transceiver (channel, transmission rate, preamble parameters...). Since this framework was designed to aid in the implementation of Time-of-Flight based ranging protocols, DecaDuino also provides access to the DW1000's Physical-level high precision timer (64GHz/40bit) which enables precise message timestamping at both transmission (t_TX) and reception (t_RX). Finally, DecaDuino implements DW1000's advanced synchronization/timestamping functionalities such as delayed transmission and receiver skew evaluation, which are required for efficient centimetre-level ranging protocols using Time-of-Flight.
 ///
-/// DecaDuino comes with several Arduino examples implementing the most popular ranging protocols such as <i>Two-Way Ranging</i> (TWR) and <i>Symetrical Double Sided Two-Way Ranging</i> (SDS-TWR).
+/// DecaDuino comes with several Arduino examples implementing the most popular ranging protocols such as <i>Two-Way Ranging</i> (TWR) and <i>Symetrical Double-Sided Two-Way Ranging</i> (SDS-TWR).
 ///
 /// \image html DecaDuinoStack.png
 ///
@@ -23,22 +23,22 @@
 /// 
 /// \par Installation
 /// 
-/// DecaDuino depends on the spi4teensy3 library. Download spi4teensy3 and DecaDuino, unzip the files into the libraries sub-directory and relaunch the Arduino environment; you should see the library in the Sketch->Import Library menu, and example codes in File->Examples->DecaDuino.
+/// DecaDuino depends on the <a href='https://github.com/xxxajk/spi4teensy3'>spi4teensy3 library</a>. Download spi4teensy3 and DecaDuino, unzip the files into the libraries sub-directory and relaunch the Arduino environment; you should see the library in the Sketch->Import Library menu, and example codes in File->Examples->DecaDuino.
 ///
 /// \par Usage
 /// 
-/// To use the DecaDuino library, you must have the following
+/// Remember to import the Decaduino library in your sketches:
 /// \code
 /// #include <spi4teensy3.h>
 /// #include <DecaDuino.h>
 /// \endcode
-/// at the top of your Arduino sketch. Please see the examples in the File->Examples->DecaDuino menu in the Arduino IDE.
+/// For more details, please checkout the examples in the File->Examples->DecaDuino menu in the Arduino IDE.
 ///
 /// \par Communication and users forum
 ///
 /// \par Demonstrations 
 ///
-/// In <a href='https://www.irit.fr/~Adrien.Van-Den-Bossche/DecaWiNo/20150914-DecaWiNo-SDS-TWR-RGB-strip-low_res.mp4'>this video</a>, a fixed node running DecaDuino execute a ranging session every 100ms with another node, using the TWR protocol. Once the distance to the other node is estimated, the fixed node represents the distance by driving a RGB LED strip: the corresponding LED, matching with the estimated distance, is powered up in blue. Note that the video’s strip length is 1m and the leds are spaced by 1.65cm. Using a LED strip gives a direct and real-time feedback of the ranging precision using DecaDuino.
+/// In <a href='https://www.irit.fr/~Adrien.Van-Den-Bossche/DecaWiNo/20150914-DecaWiNo-SDS-TWR-RGB-strip-low_res.mp4'>this video</a>, a fixed node running DecaDuino executes a ranging session every 100ms with another node, using the TWR protocol. Once the distance to the other node is estimated, the fixed node represents the distance by driving an RGB LED strip: the LED corresponding to the estimated distance is powered up in blue. Note that the strip used in the video is 1m-long and the leds are spaced by 1.65cm. Using a LED strip gives a direct and real-time feedback of the ranging precision and accuracy using DecaDuino.
 /// \image html TWR_led_strip.jpg
 /// 
 /// \par Revision History
@@ -51,7 +51,7 @@
 /// 
 /// \par Licence
 ///
-/// DecaDuino use is subject to licensing, GPL_V3 (http://www.gnu.org/copyleft/gpl.html) or Commercial. Please contact Adrien van den Bossche <vandenbo@irit.fr> for Commercial Licensing.
+/// DecaDuino's use is subject to licensing, GPL_V3 (http://www.gnu.org/copyleft/gpl.html) or Commercial. Please contact Adrien van den Bossche <vandenbo@irit.fr> for Commercial Licensing.
 ///
 /// \page Hardware
 /// 
@@ -61,20 +61,20 @@
 /// 
 /// \par Wiring
 /// 
-/// An example of wiring between Teensy 3.2 and DWM1000 module is given here.
+/// A wiring example between Teensy 3.2 and DWM1000 module is given here.
 /// 
 /// \image html Wiring.png
 /// 
 /// Notes:
-/// - In the reception state, the DWM1000 consumes 110mA+ which is more than the Teensy 3.1 can provide. You may add a DC-DC converter on the board to supply VDD 3.3V to the DWM1000. The Teensy 3.2 resolves this issue thanks to an internal DC-DC converter that can provide 250mA+ on the 3.3V pin. 
-/// - On the Teensy 3.2/3.1, the default SPI clock pin (SCK) is the pin 13, which the same pin than the onboard LED. We recommand to use an alternative SPI clock pin (SCK_, pin 14) on the Teensy, which is done by the following instruction:
+/// - In the reception state, the DWM1000 consumes 110mA+ which is more than the Teensy 3.1 can provide. You may add a DC-DC converter on the board to supply VDD 3.3V to the DWM1000. The Teensy 3.2 solves this issue as it embeds an DC-DC converter that can provide 250mA+ on the 3.3V pin. 
+/// - On the Teensy 3.2/3.1, the default SPI clock pin (SCK) is the pin 13, which the same pin than the onboard LED. We recommend using an alternative SPI clock pin (SCK_, pin 14) on the Teensy. This configuration can be achieved using the following instruction:
 /// \code
 /// SPI.setSCK(14);
 /// \endcode
 /// 
 /// \par Hardware examples
 ///
-/// - DecaWiNo: <i>Deca-Wireless Node</i>. The DecaWiNo is the first DecaDuino-compliant hardware maded at IRIT. It includes a PJRC Teensy 3.1, a DecaWave DWM1000 module, a MCP1825 3.3V DC-DC converter and a 5mm RGB LED.
+/// - DecaWiNo: <i>Deca-Wireless Node</i>. The DecaWiNo is the first DecaDuino-compliant hardware built in our facility (IRIT). It includes a PJRC Teensy 3.1, a DecaWave DWM1000 module, a MCP1825 3.3V DC-DC converter and a 5mm RGB LED.
 ///
 /// \image html DecaWiNo.jpg
 
@@ -193,22 +193,25 @@ class DecaDuino {
 	public:
 		/**
 		* @brief DecaDuino Constructor
+		* @param slaveSelectPin The slaveSelect pin number
+		* @param interruptPin The interrupt pin number
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20140701
 		*/
 		DecaDuino(uint8_t slaveSelectPin = DW1000_CS0_PIN, uint8_t interruptPin = DW1000_IRQ0_PIN);
 
 		/**
-		* @brief Init DecaDuino and DWM1000 without addressing fields filtering (Promiscuous mode)
-		* @return Return true if both DecaDuino and DWM1000 have been successfully initialized
+		* @brief Initializes DecaDuino and DWM1000 without addressing fields filtering (Promiscuous mode)
+		* @return true if both DecaDuino and DWM1000 have been successfully initialized
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20140701
 		*/
 		boolean init();
 
 		/**
-		* @brief Init DecaDuino and DWM1000 with given Short Address and Pan Id
-		* @return Return true if both DecaDuino and DWM1000 have been successfully initialized
+		* @brief Initializes DecaDuino and DWM1000 with given Short Address and Pan Id
+		* @param shortAddrAndPanId The 16-bit short address and 16-bit Pan Id as a 32-bit integer where short address in on the LSB.
+		* @return true if both DecaDuino and DWM1000 have been successfully initialized
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20150905
 		*/
@@ -223,15 +226,10 @@ class DecaDuino {
 		void resetDW1000();
 
 		/**
-		* @brief It is a dummy function to test the class
-		* @return No return
-		* @author Adrien van den Bossche <bossche@irit.fr>
-		* @date 20141115
-		*/
-		void dummy();
-
-		/**
-		* @brief Read len bytes on SPI at address address, and store data in buf
+		* @brief Reads len bytes on SPI at given address, and store data in buf
+		* @param address The address
+		* @param buf The buffer
+		* @param len The buffer length
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -239,7 +237,11 @@ class DecaDuino {
 		void readSpi(uint8_t address, uint8_t* buf, uint16_t len);
 
 		/**
-		* @brief Read len bytes on SPI at address address/subaddress subaddress, and store data in buf
+		* @brief Reads len bytes on SPI at given address/subaddress, and store data in buf
+		* @param address The address
+		* @param subAddress The subAddress
+		* @param buf The buffer
+		* @param len The buffer length
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -247,7 +249,8 @@ class DecaDuino {
 		void readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len);
 
 		/**
-		* @brief Read a word of 4-bytes on SPI at address address
+		* @brief Reads a 4-byte word on SPI at given address
+		* @param address The Address
 		* @return The 4 bytes
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -255,7 +258,10 @@ class DecaDuino {
 		uint32_t readSpiUint32(uint8_t address);
 
 		/**
-		* @brief Write len bytes on SPI at address address from buf
+		* @brief Writes len bytes on SPI at given address from buf
+		* @param address
+		* @param buf
+		* @param len
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -263,7 +269,11 @@ class DecaDuino {
 		void writeSpi(uint8_t address, uint8_t* buf, uint16_t len);
 
 		/**
-		* @brief Write len bytes on SPI at address address/subaddress subaddress from buf
+		* @brief Writes len bytes on SPI at given address/subaddress from buf
+		* @param 
+		* @param 
+		* @param 
+		* @param 
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -271,7 +281,9 @@ class DecaDuino {
 		void writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len);
 
 		/**
-		* @brief Write a word of 4-bytes on SPI at address address
+		* @brief Writes a 4-byte word on SPI at given address
+		* @param 
+		* @param 
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -279,7 +291,8 @@ class DecaDuino {
 		void writeSpiUint32(uint8_t address, uint32_t ui32t);
 
 		/**
-		* @brief Get System Time Counter value as a pointer
+		* @brief Stores the System Time Counter value in the variable referenced by the pointer passed as an input parameter
+		* @param 
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -287,7 +300,7 @@ class DecaDuino {
 		void getSystemTimeCounter(uint64_t *p);
 
 		/**
-		* @brief Return the System Time Counter value
+		* @brief Returns the System Time Counter value
 		* @return The System Time Counter value as a uint64_t
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -295,7 +308,7 @@ class DecaDuino {
 		uint64_t getSystemTimeCounter(void);
 
 		/**
-		* @brief Get the PanId (Personnal Area Network Identifier) stored in the DW1000's RAM
+		* @brief Gets the PanId (Personnal Area Network Identifier) stored in the DW1000's RAM
 		* @return The PanId as an uint16_t value
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -303,7 +316,7 @@ class DecaDuino {
 		uint16_t getPanId();
 
 		/**
-		* @brief Get the ShortAddress (16-bit network address, aka IEEE short address) stored in the DW1000's RAM
+		* @brief Gets the ShortAddress (16-bit network address, aka IEEE short address) stored in the DW1000's RAM
 		* @return The Short Address as an uint16_t value
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -311,7 +324,7 @@ class DecaDuino {
 		uint16_t getShortAddress();
 
 		/**
-		* @brief Get the Euid (Extended Unique IDentifier) stored in the DW1000's ROM
+		* @brief Gets the Euid (Extended Unique IDentifier) stored in the DW1000's ROM
 		* @return The Identifier as an uint64_t value
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -319,7 +332,8 @@ class DecaDuino {
 		uint64_t getEuid();
 
 		/**
-		* @brief Set the PanId (Personnal Area Network Identifier) in the DW1000's RAM
+		* @brief Sets the PanId (Personnal Area Network Identifier) in the DW1000's RAM
+		* @param 
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -327,7 +341,8 @@ class DecaDuino {
 		void setPanId(uint16_t panId);
 
 		/**
-		* @brief Set the ShortAddress (16-bit network address, aka IEEE short address) in the DW1000's RAM
+		* @brief Sets the ShortAddress (16-bit network address, aka IEEE short address) in the DW1000's RAM
+		* @param 
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -335,7 +350,9 @@ class DecaDuino {
 		void setShortAddress(uint16_t shortAddress);
 
 		/**
-		* @brief Set both the ShortAddress and the PanId in the DW1000's RAM
+		* @brief Sets both the ShortAddress and the PanId in the DW1000's RAM
+		* @param 
+		* @param 
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -343,7 +360,8 @@ class DecaDuino {
 		void setShortAddressAndPanId(uint16_t shortAddress, uint16_t panId); 
 
 		/**
-		* @brief Set both the ShortAddress and the PanId in the DW1000's RAM
+		* @brief Sets both the ShortAddress and the PanId in the DW1000's RAM
+		* @param 
 		* @return true if success, false otherwise
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -351,7 +369,7 @@ class DecaDuino {
 		int setShortAddressAndPanId(uint32_t shortAddressPanId);
 
 		/**
-		* @brief Returns the radio channels configured
+		* @brief Returns the currently configured radio channels configured
 		* @return A byte which MSB is the X channel and the LSB is the X channel
 		* @author Réjane Dalce
 		* @date 20160109
@@ -360,6 +378,7 @@ class DecaDuino {
  
  		/**
 		* @brief Sets the radio channels for TX and RX
+		* @param 
 		* @return Indicates whether configuration went well or not
 		* @author Réjane Dalce
 		* @date 20160109
@@ -367,7 +386,8 @@ class DecaDuino {
  		bool setChannel(uint8_t channel);
 
 		/**
-		* @brief Return an aligned timestamp to use with pdDataRequest() delayed
+		* @brief Returns an aligned timestamp to use with pdDataRequest() in case of delayed transmissions
+		* @param 
 		* @return the aligned timestamp
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20151028
@@ -375,7 +395,9 @@ class DecaDuino {
 		uint64_t alignDelayedTransmission ( uint64_t wantedDelay );
 
 		/**
-		* @brief Send a frame with a payload of len byte, bytes from buf
+		* @brief Sends a len-byte frame from buf
+		* @param 
+		* @param 
 		* @return true if success, false otherwise
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -383,7 +405,11 @@ class DecaDuino {
 		uint8_t pdDataRequest(uint8_t* buf, uint16_t len);
 
 		/**
-		* @brief Send a frame with a payload of len byte, bytes from buf, with an optionnal delay
+		* @brief Sends a len-byte frame from buf with an optionnal delay
+		* @param 
+		* @param 
+		* @param 
+		* @param 
 		* @return true if success, false otherwise
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -391,7 +417,9 @@ class DecaDuino {
 		uint8_t pdDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time);
 
 		/**
-		* @brief Send a frame with a payload of len byte, bytes from buf
+		* @brief Sends a len-byte frame from buf
+		* @param 
+		* @param 
 		* @return true if success, false otherwise
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -399,7 +427,11 @@ class DecaDuino {
 		uint8_t send(uint8_t* buf, uint16_t len);
 
 		/**
-		* @brief Send a frame with a payload of len byte, bytes from buf, with an optionnal delay
+		* @brief Sends a len-byte frame from buf with an optionnal delay
+		* @param 
+		* @param 
+		* @param 
+		* @param 
 		* @return true if success, false otherwise
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -407,7 +439,9 @@ class DecaDuino {
 		uint8_t send(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time);
 
 		/**
-		* @brief Set the RX buffer for future frame reception. Received bytes will be stored at the beginning of the buffer.
+		* @brief Sets the RX buffer for future frame reception. Received bytes will be stored at the beginning of the buffer.
+		* @param 
+		* @param 
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -415,7 +449,10 @@ class DecaDuino {
 		void setRxBuffer(uint8_t* buf, uint16_t *len);
 
 		/**
-		* @brief Set the RX buffer for future frame reception. Received bytes will be stored at the end of the buffer of max size.
+		* @brief Sets the RX buffer for future frame reception. Received bytes will be stored at the end of the buffer of max size.
+		* @param 
+		* @param 
+		* @param 
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -423,7 +460,7 @@ class DecaDuino {
 		void setRxBuffer(uint8_t* buf, uint16_t *len, uint16_t max);
 
 		/**
-		* @brief Set transceiver mode to receive mode
+		* @brief Sets transceiver mode to receive mode
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -431,7 +468,8 @@ class DecaDuino {
 		void plmeRxEnableRequest(void);
 
 		/**
-		* @brief Set transceiver mode to receive mode. Received bytes will be stored at the end of the buffer of max size.
+		* @brief Sets transceiver mode to receive mode. Received bytes will be stored at the end of the buffer of max size.
+		* @param 
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -439,7 +477,9 @@ class DecaDuino {
 		void plmeRxEnableRequest(uint16_t max);
 
 		/**
-		* @brief Set transceiver mode to receive mode and set the RX buffer for future frame reception.
+		* @brief Sets transceiver mode to receive mode and set the RX buffer for future frame reception.
+		* @param 
+		* @param 
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -447,7 +487,10 @@ class DecaDuino {
 		void plmeRxEnableRequest(uint8_t* buf, uint16_t *len);
 
 		/**
-		* @brief Set transceiver mode to receive mode and set the RX buffer for future frame reception. Received bytes will be stored at the end of the buffer of max size.
+		* @brief Sets transceiver mode to receive mode and set the RX buffer for future frame reception. Received bytes will be stored at the end of the buffer of max size.
+		* @param 
+		* @param 
+		* @param 
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -455,7 +498,7 @@ class DecaDuino {
 		void plmeRxEnableRequest(uint8_t* buf, uint16_t *len, uint16_t max);
 
 		/**
-		* @brief Set transceiver mode to idle mode.
+		* @brief Sets transceiver mode to idle mode.
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -463,7 +506,7 @@ class DecaDuino {
 		void plmeRxDisableRequest(void);
 
 		/**
-		* @brief Set transceiver mode to sleep mode.
+		* @brief Sets transceiver mode to sleep mode.
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -471,65 +514,70 @@ class DecaDuino {
 		void sleepRequest(void);
 
 		/**
-		* @brief Set transceiver mode to deep sleep mode.
+		* @brief Sets transceiver mode to deep sleep mode.
 		* @return No return
-		* @todo To be implemented
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
+		* @todo To be implemented
 		*/
 		void deepsleepRequest(void);
 
 		/**
-		* @brief Wake the transceiver and go back to idle mode.
+		* @brief Wakes the transceiver and go back to idle mode.
 		* @return No return
-		* @todo To be implemented
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
+		* @todo To be implemented
 		*/
 		void wakeRequest(void);
 
 		/**
 		* @brief Returns true of the a frame have been received.
-		* @return Returns true of the a frame have been received, false otherwise.
+		* @return true if a frame has been received, false otherwise.
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
 		*/
 		uint8_t rxFrameAvailable(void);
 
 		/**
-		* @brief Returns true of the a frame have been received, and copy received bytes and length in buffer buf/length len
-		* @return Returns true of the a frame have been received, false otherwise.
+		* @brief Returns true of the a frame have been received, copy received bytes in buf and store message length in len. 
+		* @param 
+		* @param 
+		* @return true if a frame has been received, false otherwise.
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
 		*/
 		uint8_t rxFrameAvailable(uint8_t* buf, uint16_t *len);
 
 		/**
-		* @brief Returns true of the a frame have been received, and copy received bytes and length in buffer buf/length len, by the end of the buffer of size max.
-		* @return Returns true of the a frame have been received, false otherwise.
+		* @brief Returns true of the a frame have been received, copy received bytes in buf and store message length in len. The received bytes shall be copied toward the end of the buffer of size max.
+		* @param 
+		* @param 
+		* @param 
+		* @return true if a frame has been received, false otherwise.
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
 		*/
 		uint8_t rxFrameAvailable(uint8_t* buf, uint16_t *len, uint16_t max);
 
 		/**
-		* @brief Return true if the last transmission request as been succefully completed
-		* @return true if the last transmission request as been succefully completed
+		* @brief Returns true if the last transmission request as been succefully completed
+		* @return true if the last transmission request has been succefully completed
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
 		*/
 		bool hasTxSucceeded(void);
 
 		/**
-		* @brief Get the DecaDuino transceiver status
-		* @return Returns the DecaDuino transceiver status
+		* @brief Gets the DecaDuino transceiver status
+		* @return the DecaDuino transceiver status
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
 		*/
 		uint8_t getTrxStatus(void);
 
 		/**
-		* @brief Get the DW1000 embedded temperature sensor raw value 
+		* @brief Gets the raw value from the DW1000's embedded temperature sensor
 		* @return The temperature raw value
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -537,16 +585,15 @@ class DecaDuino {
 		uint8_t getTemperatureRaw(void);
 
 		/**
-		* @brief Get the DW1000 embedded temperature sensor value in celsius degrees
+		* @brief Gets the temperature value in celsius degrees from the DW1000's embedded temperature sensor
 		* @return The temperature value in celsius degrees
-		* @todo To be implemented
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
 		*/
 		float getTemperature(void);
 
 		/**
-		* @brief Get the DW1000 embedded voltage sensor raw value
+		* @brief Gets the raw value from the DW1000's embedded voltage sensor
 		* @return The voltage raw value
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -554,23 +601,26 @@ class DecaDuino {
 		uint8_t getVoltageRaw(void);
 
 		/**
-		* @brief Get the DW1000 embedded voltage sensor value in volts
+		* @brief Gets the voltage value in volts from the DW1000's embedded voltage sensor
 		* @return The voltage value in volts
-		* @todo To be implemented
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
 		*/
 		float getVoltage(void);
 
 		/**
-		* @brief Return a uint16_t based on two uint8_t
+		* @brief Builds an uint16 value from two uint8 values
+		* @param 
+		* @return The decoded uint16_t
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20111123
 		*/
 		uint16_t decodeUint16 ( uint8_t *data );
 
 		/**
-		* @brief Place data from at to address
+		* @brief Formats an uint16 value as a list of uint8 values
+		* @param 
+		* @param 
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20111011
@@ -578,14 +628,18 @@ class DecaDuino {
 		void encodeUint16 ( uint16_t from, uint8_t *to );
 
 		/**
-		* @brief Return a uint32_t based on four uint8_t
+		* @brief Builds an uint32 value from four uint8 values
+		* @param 
+		* @return The decoded uint32_t
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20111123
 		*/
 		uint32_t decodeUint32 ( uint8_t *data );
 
 		/**
-		* @brief Place data from at to address
+		* @brief Formats an uint32 value as a list of uint8 values
+		* @param 
+		* @param 
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20111011
@@ -593,14 +647,18 @@ class DecaDuino {
 		void encodeUint32 ( uint32_t from, uint8_t *to );
 
 		/**
-		* @brief Return a UINT64 based on eight uint8_t
+		* @brief Builds an uint64 value from eight uint8 values
+		* @param 
+		* @return The decoded uint64_t
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20140804
 		*/
 		uint64_t decodeUint64 ( uint8_t *data );
 
 		/**
-		* @brief Place data from at to address
+		* @brief Formats an uint64 value as a list of uint8 values
+		* @param 
+		* @param 
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20111011
@@ -608,7 +666,8 @@ class DecaDuino {
 		void encodeUint64 ( uint64_t from, uint8_t *to );
 
 		/**
-		* @brief Print an uint64_t value on console
+		* @brief Prints an uint64_t value on console
+		* @param 
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -617,7 +676,7 @@ class DecaDuino {
 
 		/**
 		* @brief Returns last transmitted frame timestamp based on the DWM1000 System Time Counter at 64GHz
-		* @return Returns last transmitted frame timestamp
+		* @return Last transmitted frame timestamp
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20140905
 		*/
@@ -625,15 +684,15 @@ class DecaDuino {
 
 		/**
 		* @brief Returns last received frame timestamp based on the DWM1000 System Time Counter at 64GHz
-		* @return Returns last received frame timestamp
+		* @return Last received frame timestamp
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20140905
 		*/
 		uint64_t getLastRxTimestamp();
 
 	       /**
-		* @brief Returns last received frame skew (aka Clock Offset) 
-		* @return Returns last received frame skew
+		* @brief Returns last received frame's clock skew, also designated as clock offset in the Decawave documentation
+		* @return Last received frame's clock skew
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20150905
 		*/
