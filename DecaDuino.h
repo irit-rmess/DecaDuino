@@ -1,29 +1,29 @@
 // DecaDuino.h
 // 
-// A DecaWave DW1000 driver for Arduino
+// Another DecaWave DW1000 driver for Arduino
 // See the README file in this directory for documentation
 //  
 /// \mainpage DecaDuino library for Arduino
 /// 
 /// (get the latest version of this documentation here: https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/)
 /// 
-/// DecaDuino is an Arduino library which provides a driver for the DecaWave DW1000/DWM1000 transceiver. Since the DecaWave DW1000/DWM1000 transceiver is based on a Ultra Wide Band (UWB) Physical layer, DecaDuino can be used as an open framework for wireless Time-of-Flight (ToF) ranging systems.
+/// DecaDuino is an Arduino library which provides a driver for the DecaWave DW1000 transceiver, and modules based on this transceiver, such as DecaWave DWM1000. Since the DecaWave DW1000/DWM1000 is based on a Ultra Wide Band (UWB) Physical layer, DecaDuino can be used as an open framework for wireless Time-of-Flight (ToF) ranging systems.
 ///
-/// DecaDuino is a <i>Physical-layer Service Access Point (PHY-SAP)</i>. It provides the two conventional Physical-Data (PD) and Physical Layer Management Entity (PLME) SAPs which enable MAC-level protocols to send/receive data and configure the transceiver (channel, transmission rate, preamble parameters...). Since this framework was designed to aid in the implementation of Time-of-Flight based ranging protocols, DecaDuino also provides access to the DW1000's Physical-level high precision timer (64GHz/40bit) which enables precise message timestamping at both transmission (t_TX) and reception (t_RX). Finally, DecaDuino implements DW1000's advanced synchronization/timestamping functionalities such as delayed transmission and receiver skew evaluation, which are required for efficient centimetre-level ranging protocols using Time-of-Flight.
+/// DecaDuino is a <i>Physical-layer Service Access Point (PHY-SAP)</i>. It provides the two conventional <i>Physical-Data</i> (PD) and <i>Physical Layer Management Entity</i> (PLME) SAPs which enable MAC-level protocols to send/receive data and configure the transceiver (channel, transmission rate, preamble parameters...). Since this framework was designed to aid in the implementation of Time-of-Flight based ranging protocols, DecaDuino also provides access to the DW1000's Physical-level high precision timer (64GHz/40bit) which enables precise message timestamping at both transmission (t_TX) and reception (t_RX). Finally, DecaDuino implements DW1000's advanced synchronization/timestamping functionalities such as delayed transmission and receiver skew evaluation, which are required for efficient centimetre-level ranging protocols using Time-of-Flight.
 ///
-/// DecaDuino comes with several examples implementing the most popular ranging protocols such as <i>Two-Way Ranging</i> (TWR) and <i>Symetrical Double Sided Two-Way Ranging</i> (SDS-TWR).
+/// DecaDuino comes with several Arduino examples implementing the most popular ranging protocols such as <i>Two-Way Ranging</i> (TWR) and <i>Symetrical Double Sided Two-Way Ranging</i> (SDS-TWR).
 ///
 /// \image html DecaDuinoStack.png
 ///
-/// DecaDuino has been written by Adrien van den Bossche and Réjane Dalcé at the Institut de Recherche en Informatique de Toulouse (IRIT), France. 
+/// DecaDuino has been written by Adrien van den Bossche and Réjane Dalcé at the <a href='http://www.irit.fr'>Institut de Recherche en Informatique de Toulouse</a> (IRIT), France. 
 ///
 /// \par Download
 ///
-/// Get the lastest version of the library <a href=https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/download/DecaDuino-lastest.zip>here</a>.
+/// Get the lastest version of the library <a href='https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/download/DecaDuino-lastest.zip'>here</a>.
 /// 
 /// \par Installation
 /// 
-/// DecaDuino depends on the spi4teensy3 SPI library. Download spi4teensy3 and DecaDuino, unzip the files into the libraries sub-directory of your Arduino application directory. Then launch the Arduino environment; you should see the library in the Sketch->Import Library menu, and example codes in File->Examples.
+/// DecaDuino depends on the spi4teensy3 library. Download spi4teensy3 and DecaDuino, unzip the files into the libraries sub-directory and relaunch the Arduino environment; you should see the library in the Sketch->Import Library menu, and example codes in File->Examples->DecaDuino.
 ///
 /// \par Usage
 /// 
@@ -32,7 +32,7 @@
 /// #include <spi4teensy3.h>
 /// #include <DecaDuino.h>
 /// \endcode
-/// at the top of your Arduino sketch. Please see the examples in the File->Examples menu in the Arduino IDE.
+/// at the top of your Arduino sketch. Please see the examples in the File->Examples->DecaDuino menu in the Arduino IDE.
 ///
 /// \par Communication and users forum
 ///
@@ -83,14 +83,14 @@
 #include "Arduino.h"
 #include <spi4teensy3.h>
 
-//#define DECADUINO_DEBUG
+#define DECADUINO_DEBUG
 
 #define DW1000_IRQ0_PIN 9
 #define DW1000_IRQ1_PIN 0
 #define DW1000_IRQ2_PIN 1
 #define DW1000_CS0_PIN 10
-#define DW1000_CS1_PIN 10 // ToDo: check Teensy3.1 other SlaveSelect pins
-#define DW1000_CS2_PIN 10 // ToDo: check Teensy3.1 other SlaveSelect pins
+#define DW1000_CS1_PIN 10 ///@todo Check Teensy3.1 other SlaveSelect pins
+#define DW1000_CS2_PIN 10 ///@todo Check Teensy3.1 other SlaveSelect pins
 #define MAX_NB_DW1000_FOR_INTERRUPTS 32
 #define DEBUG_STR_LEN 256
 
@@ -652,14 +652,6 @@ class DecaDuino {
 		* @date 20150905
 		*/
 		double getLastRxSkew();
-
-		/**
-		* @brief Deprecated?
-		* @return No return
-		* @author Réjane Dalce
-		* @date 20141115
-		*/
-		void print(uint64_t val);
 
 		uint64_t euid;
 		uint8_t *rxData;

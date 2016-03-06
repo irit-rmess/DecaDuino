@@ -1,6 +1,6 @@
 // DecaDuino.cpp
 //
-// DecaWave DW1000 driver for Arduino
+// Another DecaWave DW1000 driver for Arduino
 // See the README file in this directory for documentation
 
 #include "DecaDuino.h"
@@ -73,7 +73,7 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 	writeSpiUint32(DW1000_REGISTER_SYS_CFG,ui32t);
 
 #ifdef DECADUINO_DEBUG 
-	sprintf((char*)debugStr,"SYS_CFG=%08x", ui32t);
+	sprintf((char*)debugStr,"SYS_CFG=%08lx", ui32t);
 	Serial.println((char*)debugStr);
 #endif
 
@@ -84,7 +84,7 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 	writeSpiUint32(DW1000_REGISTER_SYS_MASK, ui32t);
 
 #ifdef DECADUINO_DEBUG 
-	sprintf((char*)debugStr,"SYS_MASK=%08x", ui32t);
+	sprintf((char*)debugStr,"SYS_MASK=%08lx", ui32t);
 	Serial.println((char*)debugStr);
 #endif
 
@@ -128,7 +128,7 @@ void DecaDuino::resetDW1000() {
 	ui32t = readSpiUint32(DW1000_REGISTER_PMSC_CTRL0);
 
 #ifdef DECADUINO_DEBUG 
-	sprintf((char*)debugStr,"PMSC_CTRL0=%08x", ui32t);
+	sprintf((char*)debugStr,"PMSC_CTRL0=%08lx", ui32t);
 	Serial.println((char*)debugStr);
 #endif
 
@@ -143,7 +143,7 @@ void DecaDuino::resetDW1000() {
 	delay(1);
 
 #ifdef DECADUINO_DEBUG 
-	sprintf((char*)debugStr,"PMSC_CTRL0=%08x", ui32t);
+	sprintf((char*)debugStr,"PMSC_CTRL0=%08lx", ui32t);
 	Serial.println((char*)debugStr);
 #endif
 
@@ -195,7 +195,7 @@ void DecaDuino::resetDW1000() {
 
 #ifdef DECADUINO_DEBUG 
 	ui32t = readSpiUint32(DW1000_REGISTER_PMSC_CTRL0);
-	sprintf((char*)debugStr,"PMSC_CTRL0=%08x", ui32t);
+	sprintf((char*)debugStr,"PMSC_CTRL0=%08lx", ui32t);
 	Serial.println((char*)debugStr);
 #endif
 
@@ -383,7 +383,7 @@ void DecaDuino::handleInterrupt() {
  
 #ifdef DECADUINO_DEBUG
 		Serial.print("TX Frame OK. Tx timestamp=");
-		Serial.println(lastTxTimestamp);
+		printUint64(lastTxTimestamp);
 #endif
 		ack |= DW1000_REGISTER_SYS_STATUS_TXFRS_MASK;
 	}
@@ -420,7 +420,6 @@ uint8_t DecaDuino::pdDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, ui
 	uint8_t tempbuf[8];
 
 #ifdef DECADUINO_DEBUG 
-	uint64_t ui64t;
 	sprintf((char*)debugStr,"Request to send %dbyte(s): |", len);
 	Serial.print((char*)debugStr);
 	for (int i=0;i<len;i++) {
@@ -487,7 +486,7 @@ uint8_t DecaDuino::send(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t ti
 void DecaDuino::setRxBuffer(uint8_t* buf, uint16_t *len) {
 
 #ifdef DECADUINO_DEBUG 
-	sprintf((char*)debugStr,"Setting RX buffer address to 0x%08x", buf);
+	sprintf((char*)debugStr,"Setting RX buffer address to 0x%08lx", (uint32_t)buf);
 	Serial.println((char*)debugStr);
 #endif
 
@@ -992,17 +991,3 @@ void DecaDuino::wakeRequest(void) {
 
 }
 
-
-void DecaDuino::print(uint64_t val) {
-
-/*
-	uint16_t hi16=(uint16_t)(val >> 32);
-
-	sprintf((char*)debugStr, "%02X",hi16);
-	Serial.print((char*)debugStr);
-
-	sprintf((char*)debugStr, "%08lx",(uint32_t)(val & 0xFFFFFFFF));
-	Serial.println((char*)debugStr);
-*/
-	printUint64(val);
-}
