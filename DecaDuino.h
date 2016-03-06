@@ -19,7 +19,7 @@
 ///
 /// \par Download
 ///
-/// Get the lastest version of the library <a href='https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/download/DecaDuino-lastest.zip'>here</a>.
+/// Get the lastest version of the library <a href='https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/download/decaduino-lastest.zip'>here</a>.
 /// 
 /// \par Installation
 /// 
@@ -38,7 +38,8 @@
 ///
 /// \par Demonstrations 
 ///
-/// In the following video, a fixed node running DecaDuino execute a ranging session every 100ms with another node, using the TWR protocol. Once the distance to the other node is estimated, the fixed node represents the distance by driving a RGB LED strip: the corresponding LED, matching with the estimated distance, is powered up in blue. Note that the video’s strip length is 1m and the leds are spaced by 1.65cm. Using a LED strip gives a direct and real-time feedback of the ranging precision using DecaDuino.
+/// In <a href='https://www.irit.fr/~Adrien.Van-Den-Bossche/DecaWiNo/20150914-DecaWiNo-SDS-TWR-RGB-strip-low_res.mp4'>this video</a>, a fixed node running DecaDuino execute a ranging session every 100ms with another node, using the TWR protocol. Once the distance to the other node is estimated, the fixed node represents the distance by driving a RGB LED strip: the corresponding LED, matching with the estimated distance, is powered up in blue. Note that the video’s strip length is 1m and the leds are spaced by 1.65cm. Using a LED strip gives a direct and real-time feedback of the ranging precision using DecaDuino.
+/// \image html TWR_led_strip.jpg
 /// 
 /// \par Revision History
 /// 
@@ -83,7 +84,7 @@
 #include "Arduino.h"
 #include <spi4teensy3.h>
 
-#define DECADUINO_DEBUG
+//#define DECADUINO_DEBUG
 
 #define DW1000_IRQ0_PIN 9
 #define DW1000_IRQ1_PIN 0
@@ -107,21 +108,6 @@
 #define DW1000_TRX_STATUS_RX 2
 #define DW1000_TRX_STATUS_SLEEP 3
 
-#define RANGING_PROTOCOL_TWR 1
-#define RANGING_PROTOCOL_SDS_TWR 2
-#define DEFAULT_RANGING_PROTOCOL RANGING_PROTOCOL_TWR
-
-#define MSG_TYPE_SDSTWR_EMPTY 0
-#define MSG_TYPE_SDSTWR_START 1
-#define MSG_TYPE_SDSTWR_ACKREQ 2
-#define MSG_TYPE_SDSTWR_ACK 3
-#define MSG_TYPE_SDSTWR_DATA_REPLY 4
-
-#define RX_RANGING_INIT_STATE 1
-#define RX_RANGING_WAITING_FOR_START_STATE 2
-#define RX_RANGING_SENDING_ACKREQ_STATE 3
-#define RX_RANGING_WAITING_FOR_ACK_STATE 4
-#define RX_RANGING_SENDING_DATA_REPLY_STATE 5
 
 // DW1000 register map
 
