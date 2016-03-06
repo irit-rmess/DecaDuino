@@ -82,7 +82,7 @@ void loop() {
       t3_predicted = decaduino.alignDelayedTransmission(TRANSMITION_DELAY);
       decaduino.encodeUint64(t2, &txData[1]);
       decaduino.encodeUint64(t3_predicted, &txData[9]);
-      decaduino.plmeDataRequest(txData, 17, true, t3_predicted);
+      decaduino.pdDataRequest(txData, 17, true, t3_predicted);
       state = TWR_ENGINE_STATE_WAIT_SENT;
       break;
 

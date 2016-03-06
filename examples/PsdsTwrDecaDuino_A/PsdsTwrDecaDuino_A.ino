@@ -137,7 +137,7 @@ void loop() {
       txData[7] =0x25;
       txData[8] =0x00;
       txData[9] = TWR_MSG_TYPE_START;
-      decaduino.plmeDataRequest(txData, 10);
+      decaduino.pdDataRequest(txData, 10);
       state = TWR_ENGINE_STATE_WAIT_START_SENT;
       seqnum++;
       break;
@@ -217,7 +217,7 @@ void loop() {
       txData[7] =0x25;
       txData[8] =0x00;
       txData[9]= TWR_MSG_TYPE_DATAREQ;
-      decaduino.plmeDataRequest(txData, 10);
+      decaduino.pdDataRequest(txData, 10);
       state = TWR_ENGINE_STATE_WAIT_ACK_SENT;
       //Serial.println("ready to send datareq");
             seqnum++;

@@ -25,7 +25,7 @@ void loop() {
   digitalWrite(13, HIGH);
   for (i=0; i<FRAME_LEN; i++)
     txData[i] = i;
-  decaduino.plmeDataRequest(txData, FRAME_LEN);
+  decaduino.pdDataRequest(txData, FRAME_LEN);
   delay(1);
   digitalWrite(13, LOW);
   delay(1000);

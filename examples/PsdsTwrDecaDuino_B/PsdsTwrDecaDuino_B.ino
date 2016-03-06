@@ -110,7 +110,7 @@ void loop() {
         txData[7] =(uint16_t)addrPANID;//0x23;
         txData[8] =0x00;
         txData[9]= TWR_MSG_TYPE_ACK_REQ;
-       decaduino.plmeDataRequest(txData, 10);
+       decaduino.pdDataRequest(txData, 10);
        state = TWR_ENGINE_STATE_WAIT_SENT;
              seqnum++;
        break;
@@ -160,7 +160,7 @@ void loop() {
              decaduino.encodeUint64(t2, &txData[10]);
              decaduino.encodeUint64(t3, &txData[19]);
              decaduino.encodeUint64(t6, &txData[27]);
-             decaduino.plmeDataRequest(txData, 35);
+             decaduino.pdDataRequest(txData, 35);
              state = TWR_ENGINE_STATE_INIT;  
           seqnum++;         
            } else state = TWR_ENGINE_STATE_RX_ON_FOR_ACK;
@@ -198,7 +198,7 @@ void loop() {
 //       decaduino.encodeUint64(t2, &txData[1]);
 //       decaduino.encodeUint64(t3, &txData[9]);
 //       decaduino.encodeUint64(t6, &txData[17]);
-//       decaduino.plmeDataRequest(txData, 25);
+//       decaduino.pdDataRequest(txData, 25);
 //       state = TWR_ENGINE_STATE_INIT;
 //       break;
        

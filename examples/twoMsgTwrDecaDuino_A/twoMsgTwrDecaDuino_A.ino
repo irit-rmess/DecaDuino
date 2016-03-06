@@ -79,7 +79,7 @@ void loop() {
     case TWR_ENGINE_STATE_SEND_START:
       txData[0] = TWR_MSG_TYPE_START;
       t1_predicted = decaduino.alignDelayedTransmission(TRANSMITION_DELAY);
-      decaduino.plmeDataRequest(txData, 1, true, t1_predicted);
+      decaduino.pdDataRequest(txData, 1, true, t1_predicted);
       state = TWR_ENGINE_STATE_WAIT_SEND_START;
       break;
 

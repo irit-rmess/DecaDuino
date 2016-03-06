@@ -409,12 +409,12 @@ uint64_t DecaDuino::alignDelayedTransmission ( uint64_t wantedDelay ) {
 }
 
 
-uint8_t DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len) {
+uint8_t DecaDuino::pdDataRequest(uint8_t* buf, uint16_t len) {
 
-	return plmeDataRequest(buf, len, false, 0);
+	return pdDataRequest(buf, len, false, 0);
 }
 
-uint8_t DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time) {
+uint8_t DecaDuino::pdDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time) {
 
 	uint32_t ui32t;
 	uint8_t tempbuf[8];
@@ -474,13 +474,13 @@ uint8_t DecaDuino::plmeDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, 
 
 uint8_t DecaDuino::send(uint8_t* buf, uint16_t len) {
 
-	return plmeDataRequest(buf, len);
+	return pdDataRequest(buf, len);
 }
 
 
 uint8_t DecaDuino::send(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time) {
 
-	return plmeDataRequest(buf, len, delayed, time);
+	return pdDataRequest(buf, len, delayed, time);
 }
 
 

@@ -77,7 +77,7 @@ void loop() {
 
     case TWR_ENGINE_STATE_SEND_ACK:
       txData[0] = TWR_MSG_TYPE_ACK;
-      decaduino.plmeDataRequest(txData, 1);
+      decaduino.pdDataRequest(txData, 1);
       state = TWR_ENGINE_STATE_WAIT_SENT;
       break;
 
@@ -100,7 +100,7 @@ void loop() {
       txData[0] = TWR_MSG_TYPE_DATA_REPLY;
       decaduino.encodeUint64(t2, &txData[1]);
       decaduino.encodeUint64(t3, &txData[9]);
-      decaduino.plmeDataRequest(txData, 17);
+      decaduino.pdDataRequest(txData, 17);
       state = TWR_ENGINE_STATE_INIT;
       break;
  

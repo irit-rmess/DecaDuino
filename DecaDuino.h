@@ -27,14 +27,12 @@
 ///
 /// \par Usage
 /// 
-/// To use the DecaDuino library, you must have
+/// To use the DecaDuino library, you must have the following
 /// \code
 /// #include <spi4teensy3.h>
 /// #include <DecaDuino.h>
 /// \endcode
-/// At the top of your sketch.
-/// 
-/// Please see the examples in the File->Examples menu in the Arduino IDE.
+/// at the top of your Arduino sketch. Please see the examples in the File->Examples menu in the Arduino IDE.
 ///
 /// \par Communication and users forum
 ///
@@ -207,6 +205,11 @@
 class DecaDuino {
 
 	public:
+		/**
+		* @brief DecaDuino Constructor
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20140701
+		*/
 		DecaDuino(uint8_t slaveSelectPin = DW1000_CS0_PIN, uint8_t interruptPin = DW1000_IRQ0_PIN);
 
 		/**
@@ -369,7 +372,7 @@ class DecaDuino {
 		*/
  		uint8_t getChannel(void);
  
- 		/*
+ 		/**
 		* @brief Sets the radio channels for TX and RX
 		* @return Indicates whether configuration went well or not
 		* @author Réjane Dalce
@@ -378,7 +381,7 @@ class DecaDuino {
  		bool setChannel(uint8_t channel);
 
 		/**
-		* @brief Return an aligned timestamp to use with plmeDataRequest() delayed
+		* @brief Return an aligned timestamp to use with pdDataRequest() delayed
 		* @return the aligned timestamp
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20151028
@@ -391,7 +394,7 @@ class DecaDuino {
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
 		*/
-		uint8_t plmeDataRequest(uint8_t* buf, uint16_t len);
+		uint8_t pdDataRequest(uint8_t* buf, uint16_t len);
 
 		/**
 		* @brief Send a frame with a payload of len byte, bytes from buf, with an optionnal delay
@@ -399,7 +402,7 @@ class DecaDuino {
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
 		*/
-		uint8_t plmeDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time);
+		uint8_t pdDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time);
 
 		/**
 		* @brief Send a frame with a payload of len byte, bytes from buf
@@ -573,14 +576,14 @@ class DecaDuino {
 		*/
 		float getVoltage(void);
 
-		/*
+		/**
 		* @brief Return a uint16_t based on two uint8_t
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20111123
 		*/
 		uint16_t decodeUint16 ( uint8_t *data );
 
-		/*
+		/**
 		* @brief Place data from at to address
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
@@ -588,14 +591,14 @@ class DecaDuino {
 		*/
 		void encodeUint16 ( uint16_t from, uint8_t *to );
 
-		/*
+		/**
 		* @brief Return a uint32_t based on four uint8_t
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20111123
 		*/
 		uint32_t decodeUint32 ( uint8_t *data );
 
-		/*
+		/**
 		* @brief Place data from at to address
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
@@ -603,14 +606,14 @@ class DecaDuino {
 		*/
 		void encodeUint32 ( uint32_t from, uint8_t *to );
 
-		/*
+		/**
 		* @brief Return a UINT64 based on eight uint8_t
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20140804
 		*/
 		uint64_t decodeUint64 ( uint8_t *data );
 
-		/*
+		/**
 		* @brief Place data from at to address
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
