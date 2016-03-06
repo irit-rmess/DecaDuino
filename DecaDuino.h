@@ -1,29 +1,83 @@
 // DecaDuino.h
-//
-// DecaWave DW1000 driver for Arduino
-// See the README file in this directory fdor documentation
 // 
+// A DecaWave DW1000 driver for Arduino
+// See the README file in this directory for documentation
+//  
 /// \mainpage DecaDuino library for Arduino
+/// 
+/// (get the latest version of this documentation here: https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/)
+/// 
+/// DecaDuino is an Arduino library which provides a driver for the DecaWave DW1000/DWM1000 transceiver. Since the DecaWave DW1000/DWM1000 transceiver is based on a Ultra Wide Band (UWB) Physical layer, DecaDuino can be used as an open framework for wireless Time-of-Flight (ToF) ranging systems.
 ///
-/// This is the main page
+/// DecaDuino is a <i>Physical-layer Service Access Point (PHY-SAP)</i>. It provides the two conventional Physical-Data (PD) and Physical Layer Management Entity (PLME) SAPs which enable MAC-level protocols to send/receive data and configure the transceiver (channel, transmission rate, preamble parameters...). Since this framework was designed to aid in the implementation of Time-of-Flight based ranging protocols, DecaDuino also provides access to the DW1000's Physical-level high precision timer (64GHz/40bit) which enables precise message timestamping at both transmission (t_TX) and reception (t_RX). Finally, DecaDuino implements DW1000's advanced synchronization/timestamping functionalities such as delayed transmission and receiver skew evaluation, which are required for efficient centimetre-level ranging protocols using Time-of-Flight.
 ///
-/// \par Supported Hardware
+/// DecaDuino comes with several examples implementing the most popular ranging protocols such as <i>Two-Way Ranging</i> (TWR) and <i>Symetrical Double Sided Two-Way Ranging</i> (SDS-TWR).
 ///
+/// \image html DecaDuinoStack.png
+///
+/// DecaDuino has been written by Adrien van den Bossche and Réjane Dalcé at the Institut de Recherche en Informatique de Toulouse (IRIT), France. 
+///
+/// \par Download
+///
+/// Get the lastest version of the library <a href=https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/download/DecaDuino-lastest.zip>here</a>.
+/// 
 /// \par Installation
-/// To install, unzip the library into the libraries sub-directory of your
-/// Arduino application directory. Then launch the Arduino environment; you
-/// should see the library in the Sketch->Import Library menu, and example
-/// code in
+/// 
+/// DecaDuino depends on the spi4teensy3 SPI library. Download spi4teensy3 and DecaDuino, unzip the files into the libraries sub-directory of your Arduino application directory. Then launch the Arduino environment; you should see the library in the Sketch->Import Library menu, and example codes in File->Examples.
 ///
-/// \par Revision History
-/// \version 1.0 Original release
+/// \par Usage
 /// 
 /// To use the DecaDuino library, you must have
 /// \code
+/// #include <spi4teensy3.h>
 /// #include <DecaDuino.h>
 /// \endcode
 /// At the top of your sketch.
 /// 
+/// Please see the examples in the File->Examples menu in the Arduino IDE.
+///
+/// \par Communication and users forum
+///
+/// \par Demonstrations 
+///
+/// In the following video, a fixed node running DecaDuino execute a ranging session every 100ms with another node, using the TWR protocol. Once the distance to the other node is estimated, the fixed node represents the distance by driving a RGB LED strip: the corresponding LED, matching with the estimated distance, is powered up in blue. Note that the video’s strip length is 1m and the leds are spaced by 1.65cm. Using a LED strip gives a direct and real-time feedback of the ranging precision using DecaDuino.
+/// 
+/// \par Revision History
+/// 
+/// \version 1.0 (15/03/2016) Initial release
+/// 
+/// \par Academic Publications
+///
+/// - Adrien Van den Bossche, Rejane Dalce, Nezo Ibrahim Fofana, Thierry Val, <i>DecaDuino: An Open Framework for Wireless Time-of-Flight Ranging Systems</i>, IFIP Wireless Days (WD 2016) conference, Toulouse, 23/03/2016-25/03/2016
+/// 
+/// \par Licence
+///
+/// DecaDuino use is subject to licensing, GPL_V3 (http://www.gnu.org/copyleft/gpl.html) or Commercial. Please contact Adrien van den Bossche <vandenbo@irit.fr> for Commercial Licensing.
+///
+/// \page Hardware
+/// 
+/// \par Supported Hardware
+///
+/// DecaDuino supports PJRC Teensy 3.2/3.1 MCU and DecaWave DM1000 chip and DWM1000 module. 
+/// 
+/// \par Wiring
+/// 
+/// An example of wiring between Teensy 3.2 and DWM1000 module is given here.
+/// 
+/// \image html Wiring.png
+/// 
+/// Notes:
+/// - In the reception state, the DWM1000 consumes 110mA+ which is more than the Teensy 3.1 can provide. You may add a DC-DC converter on the board to supply VDD 3.3V to the DWM1000. The Teensy 3.2 resolves this issue thanks to an internal DC-DC converter that can provide 250mA+ on the 3.3V pin. 
+/// - On the Teensy 3.2/3.1, the default SPI clock pin (SCK) is the pin 13, which the same pin than the onboard LED. We recommand to use an alternative SPI clock pin (SCK_, pin 14) on the Teensy, which is done by the following instruction:
+/// \code
+/// SPI.setSCK(14);
+/// \endcode
+/// 
+/// \par Hardware examples
+///
+/// - DecaWiNo: <i>Deca-Wireless Node</i>. The DecaWiNo is the first DecaDuino-compliant hardware maded at IRIT. It includes a PJRC Teensy 3.1, a DecaWave DWM1000 module, a MCP1825 3.3V DC-DC converter and a 5mm RGB LED.
+///
+/// \image html DecaWiNo.jpg
 
 #ifndef DecaDuino_h
 #define DecaDuino_h
@@ -126,6 +180,10 @@
 #define DW1000_REGISTER_TX_TIME				0x17
 
 #define DW1000_REGISTER_TX_ANTD				0x18
+
+#define DW1000_REGISTER_CHANNEL_CONTROL			0x1F
+#define DW1000_REGISTER_CHANNEL_CONTROL_TX_CHANNEL_MASK	0x0000000F
+#define DW1000_REGISTER_CHANNEL_CONTROL_RX_CHANNEL_MASK	0x000000F0
 
 #define DW1000_REGISTER_AON_CTRL			0x2C
 #define DW1000_REGISTER_OFFSET_AON_CTRL			0x02
