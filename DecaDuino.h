@@ -227,9 +227,9 @@ class DecaDuino {
 
 		/**
 		* @brief Reads len bytes on SPI at given address, and store data in buf
-		* @param address The address
-		* @param buf The buffer
-		* @param len The buffer length
+		* @param address The source address
+                * @param buf The address of the buffer
+                * @param len The message length
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -238,10 +238,10 @@ class DecaDuino {
 
 		/**
 		* @brief Reads len bytes on SPI at given address/subaddress, and store data in buf
-		* @param address The address
-		* @param subAddress The subAddress
-		* @param buf The buffer
-		* @param len The buffer length
+		* @param address The source address
+		* @param subAddress The source subAddress
+                * @param buf The address of the buffer
+                * @param len The message length
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -250,7 +250,7 @@ class DecaDuino {
 
 		/**
 		* @brief Reads a 4-byte word on SPI at given address
-		* @param address The Address
+		* @param address The source address
 		* @return The 4 bytes
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -259,9 +259,9 @@ class DecaDuino {
 
 		/**
 		* @brief Writes len bytes on SPI at given address from buf
-		* @param address
-		* @param buf
-		* @param len
+		* @param address The destination address
+                * @param buf The address of the buffer
+                * @param len The message length
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -270,10 +270,10 @@ class DecaDuino {
 
 		/**
 		* @brief Writes len bytes on SPI at given address/subaddress from buf
-		* @param 
-		* @param 
-		* @param 
-		* @param 
+		* @param address The destination address
+		* @param address The destination sub-address
+                * @param buf The address of the buffer
+                * @param len The message length
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -282,8 +282,8 @@ class DecaDuino {
 
 		/**
 		* @brief Writes a 4-byte word on SPI at given address
-		* @param 
-		* @param 
+		* @param address The destination address
+		* @param ui32t The 4-byte word to write on SPI
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -292,7 +292,7 @@ class DecaDuino {
 
 		/**
 		* @brief Stores the System Time Counter value in the variable referenced by the pointer passed as an input parameter
-		* @param 
+		* @param p The address of the uint64_t variable
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -333,7 +333,7 @@ class DecaDuino {
 
 		/**
 		* @brief Sets the PanId (Personnal Area Network Identifier) in the DW1000's RAM
-		* @param 
+		* @param panId The 16-bit PANID (PAN Identifier)
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -342,7 +342,7 @@ class DecaDuino {
 
 		/**
 		* @brief Sets the ShortAddress (16-bit network address, aka IEEE short address) in the DW1000's RAM
-		* @param 
+		* @param shortAddress The 16-bit short address
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -351,8 +351,8 @@ class DecaDuino {
 
 		/**
 		* @brief Sets both the ShortAddress and the PanId in the DW1000's RAM
-		* @param 
-		* @param 
+		* @param shortAddress The 16-bit short address
+		* @param panId The 16-bit PANID (PAN Identifier)
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -361,7 +361,7 @@ class DecaDuino {
 
 		/**
 		* @brief Sets both the ShortAddress and the PanId in the DW1000's RAM
-		* @param 
+		* @param shortAddressPanId The 16-bit short address and 16-bit Pan Id as a 32-bit integer where short address in on the LSB.
 		* @return true if success, false otherwise
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -378,7 +378,7 @@ class DecaDuino {
  
  		/**
 		* @brief Sets the radio channels for TX and RX
-		* @param 
+		* @param channel The channel number to set
 		* @return Indicates whether configuration went well or not
 		* @author Réjane Dalce
 		* @date 20160109
@@ -387,7 +387,7 @@ class DecaDuino {
 
 		/**
 		* @brief Returns an aligned timestamp to use with pdDataRequest() in case of delayed transmissions
-		* @param 
+		* @param wantedDelay The required delay to align the delayed transmission
 		* @return the aligned timestamp
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20151028
@@ -396,8 +396,8 @@ class DecaDuino {
 
 		/**
 		* @brief Sends a len-byte frame from buf
-		* @param 
-		* @param 
+		* @param buf The address of the buffer
+                * @param len The message length
 		* @return true if success, false otherwise
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -406,10 +406,10 @@ class DecaDuino {
 
 		/**
 		* @brief Sends a len-byte frame from buf with an optionnal delay
-		* @param 
-		* @param 
-		* @param 
-		* @param 
+		* @param buf The address of the buffer
+		* @param len The message length
+		* @param delayed The delayed flag (true or false)
+		* @param time The time to send, based on the DWM1000 System Time Counter at 64GHz
 		* @return true if success, false otherwise
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -418,8 +418,8 @@ class DecaDuino {
 
 		/**
 		* @brief Sends a len-byte frame from buf
-		* @param 
-		* @param 
+		* @param buf The address of the buffer
+		* @param len The message length
 		* @return true if success, false otherwise
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -428,10 +428,10 @@ class DecaDuino {
 
 		/**
 		* @brief Sends a len-byte frame from buf with an optionnal delay
-		* @param 
-		* @param 
-		* @param 
-		* @param 
+		* @param buf The address of the buffer
+		* @param len The message length
+		* @param delayed The delayed flag (true or false)
+		* @param time The time to send, based on the DWM1000 System Time Counter at 64GHz
 		* @return true if success, false otherwise
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -440,8 +440,8 @@ class DecaDuino {
 
 		/**
 		* @brief Sets the RX buffer for future frame reception. Received bytes will be stored at the beginning of the buffer.
-		* @param 
-		* @param 
+		* @param buf The address of the buffer
+		* @param len The address of the message length
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -450,9 +450,9 @@ class DecaDuino {
 
 		/**
 		* @brief Sets the RX buffer for future frame reception. Received bytes will be stored at the end of the buffer of max size.
-		* @param 
-		* @param 
-		* @param 
+		* @param buf The address of the buffer
+		* @param len The address of the message length
+		* @param max The buffer size
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -469,7 +469,7 @@ class DecaDuino {
 
 		/**
 		* @brief Sets transceiver mode to receive mode. Received bytes will be stored at the end of the buffer of max size.
-		* @param 
+		* @param max The buffer size
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -478,8 +478,8 @@ class DecaDuino {
 
 		/**
 		* @brief Sets transceiver mode to receive mode and set the RX buffer for future frame reception.
-		* @param 
-		* @param 
+		* @param buf The address of the buffer
+		* @param len The address of the message length
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -488,9 +488,9 @@ class DecaDuino {
 
 		/**
 		* @brief Sets transceiver mode to receive mode and set the RX buffer for future frame reception. Received bytes will be stored at the end of the buffer of max size.
-		* @param 
-		* @param 
-		* @param 
+		* @param buf The address of the buffer
+		* @param len The address of the message length
+		* @param max The buffer size 
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -541,8 +541,8 @@ class DecaDuino {
 
 		/**
 		* @brief Returns true of the a frame have been received, copy received bytes in buf and store message length in len. 
-		* @param 
-		* @param 
+		* @param buf The address of the buffer
+		* @param len The address of the message length
 		* @return true if a frame has been received, false otherwise.
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -551,9 +551,9 @@ class DecaDuino {
 
 		/**
 		* @brief Returns true of the a frame have been received, copy received bytes in buf and store message length in len. The received bytes shall be copied toward the end of the buffer of size max.
-		* @param 
-		* @param 
-		* @param 
+		* @param buf The address of the buffer
+		* @param len The address of the message length
+		* @param max The buffer size 
 		* @return true if a frame has been received, false otherwise.
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -589,6 +589,7 @@ class DecaDuino {
 		* @return The temperature value in celsius degrees
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
+		* @todo To be implemented
 		*/
 		float getTemperature(void);
 
@@ -605,12 +606,13 @@ class DecaDuino {
 		* @return The voltage value in volts
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
+		* @todo To be implemented
 		*/
 		float getVoltage(void);
 
 		/**
 		* @brief Builds an uint16 value from two uint8 values
-		* @param 
+		* @param data The address of the uint8_t buffer
 		* @return The decoded uint16_t
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20111123
@@ -619,8 +621,8 @@ class DecaDuino {
 
 		/**
 		* @brief Formats an uint16 value as a list of uint8 values
-		* @param 
-		* @param 
+		* @param from The uint16_t value
+		* @param to The address of the uint8_t buffer
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20111011
@@ -629,7 +631,7 @@ class DecaDuino {
 
 		/**
 		* @brief Builds an uint32 value from four uint8 values
-		* @param 
+		* @param data The address of the uint8_t buffer
 		* @return The decoded uint32_t
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20111123
@@ -638,8 +640,8 @@ class DecaDuino {
 
 		/**
 		* @brief Formats an uint32 value as a list of uint8 values
-		* @param 
-		* @param 
+		* @param from The uint32_t value
+		* @param to The address of the uint8_t buffer
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20111011
@@ -648,7 +650,7 @@ class DecaDuino {
 
 		/**
 		* @brief Builds an uint64 value from eight uint8 values
-		* @param 
+		* @param data The address of the uint8_t buffer
 		* @return The decoded uint64_t
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20140804
@@ -657,8 +659,8 @@ class DecaDuino {
 
 		/**
 		* @brief Formats an uint64 value as a list of uint8 values
-		* @param 
-		* @param 
+		* @param from The uint64_t value
+		* @param to The address of the uint8_t buffer
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20111011
@@ -667,7 +669,7 @@ class DecaDuino {
 
 		/**
 		* @brief Prints an uint64_t value on console
-		* @param 
+		* @param ui64 The uint64_t value
 		* @return No return
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
