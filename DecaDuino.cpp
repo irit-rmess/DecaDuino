@@ -904,6 +904,98 @@ bool DecaDuino::setChannel(uint8_t channel) {
 }
 
 
+int DecaDuino::getPreambleLength(void) {
+
+	uint32_t ui32t;
+	uint32_t mask;
+	int plength;
+	mask = 0x003C0000; // bits 21, 20, 19 and 18 from DW1000_REGISTER_TX_FCTRL
+	ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
+	ui32t = ui32t & mask;
+	ui32t = ui32t >> 18;
+	// Preamble length selection (Table 15, Page 73 from DW1000 User Manual)
+	switch(ui32t){
+		case 0x00000001:
+			plength = 64;
+			break;
+		case 0x00000005:
+			plength = 128;
+			break;
+		case 0x00000009:
+			plength = 256;
+			break;
+		case 0x0000000D:
+			plength = 512;
+			break;
+		case 0x00000002:
+			plength = 1024;
+			break;
+		case 0x00000006:
+			plength = 1536;
+			break;
+		case 0x0000000A:
+			plength = 2048;
+			break;
+		case 0x00000003:
+			plength = 4096;
+			break;
+		default:
+			plength = 128;
+			break;
+	}
+
+#ifdef DECADUINO_DEBUG
+	sprintf((char*)debugStr,"TX_FCTRL=%08x\n", ui32t);
+	Serial.print((char*)debugStr);
+#endif
+
+	return plength;
+}
+
+
+bool DecaDuino::setPreambleLength (int plength) {
+
+	uint32_t ui32t;
+	uint32_t mask;
+	switch(plength){
+		case 64:
+			mask = 0x00040000;
+			break;
+		case 128:
+			mask = 0x00140000;
+			break;
+		case 256:
+			mask = 0x00240000;
+			break;
+		case 512:
+			mask = 0x00340000;
+			break;
+		case 1024:
+			mask = 0x00080000;
+			break;
+		case 1536:
+			mask = 0x00180000;
+			break;
+		case 2048:
+			mask = 0x00280000;
+			break;
+		case 4096:
+			mask = 0x000C0000;
+			break;
+		default:
+			return false;			
+	}
+	ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
+	ui32t = ui32t & 0xFFC3FFFF; // bits 21, 20, 19, 18 to zero
+	ui32t |= mask;
+	writeSpiUint32(DW1000_REGISTER_TX_FCTRL, ui32t);
+	return true;		
+}
+
+
+
+
+
 uint8_t DecaDuino::getTemperatureRaw() {
 
 	uint8_t u8t;

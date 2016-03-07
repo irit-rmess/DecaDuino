@@ -378,12 +378,29 @@ class DecaDuino {
  
  		/**
 		* @brief Sets the radio channels for TX and RX
-		* @param channel The channel number to set
+		* @param channel The channel number to set. Valid values are: 1, 2, 3, 4, 5, 7. 
 		* @return Indicates whether configuration went well or not
 		* @author Réjane Dalce
 		* @date 20160109
 		*/
  		bool setChannel(uint8_t channel);
+
+                /**
+                * @brief Returns the preamble length
+                * @return A byte representing the preamble length
+                * @author François Despaux
+                * @date 20160217
+                */
+		int getPreambleLength(void);
+
+                /**
+                * @brief Sets the preamble length
+		* @param plength The preamble length to set. Valid values are: 64, 128, 256, 512, 1024, 1536, 2048, 4096.
+                * @return Indicates whether configuration went well or not
+                * @author François Despaux
+                * @date 20160217
+                */
+		bool setPreambleLength(int plength);
 
 		/**
 		* @brief Returns an aligned timestamp to use with pdDataRequest() in case of delayed transmissions
