@@ -378,7 +378,7 @@ class DecaDuino {
 
 		/**
 		* @brief Returns the currently configured radio channel configured
-		* @return The channel value as a unigned byte
+		* @return The channel value as a unsigned byte
 		* @author Réjane Dalce
 		* @date 20160109
 		*/
