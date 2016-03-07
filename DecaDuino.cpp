@@ -876,12 +876,18 @@ int DecaDuino::setShortAddressAndPanId(uint32_t shortAddressPanId) {
 }
 
 
-uint8_t DecaDuino::getChannel(void) {
+uint8_t DecaDuino::getChannelRaw(void) {
 
 	uint8_t buf;
  
  	readSpiSubAddress(DW1000_REGISTER_CHANNEL_CONTROL, 0, &buf, 1);
  	return buf;
+}
+
+ 
+uint8_t DecaDuino::getChannel(void) {
+
+	return getChannelRaw() & 0x0F;
 }
 
  
@@ -896,7 +902,7 @@ bool DecaDuino::setChannel(uint8_t channel) {
  		ui32t = ui32t & 0xFFFFFF00;
  		ui32t |= channel; // set rx and tx channel 
  		writeSpiUint32(DW1000_REGISTER_CHANNEL_CONTROL, ui32t);
- 		if ( getChannel() == channel )
+ 		if ( getChannelRaw() == channel )
  			return true;
  	}
 

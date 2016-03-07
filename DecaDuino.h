@@ -374,6 +374,14 @@ class DecaDuino {
 		* @author Réjane Dalce
 		* @date 20160109
 		*/
+ 		uint8_t getChannelRaw(void);
+
+		/**
+		* @brief Returns the currently configured radio channel configured
+		* @return The channel value as a unigned byte
+		* @author Réjane Dalce
+		* @date 20160109
+		*/
  		uint8_t getChannel(void);
  
  		/**
