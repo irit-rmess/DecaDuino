@@ -394,6 +394,22 @@ class DecaDuino {
 		* @date 20161003
 		*/
 		uint8_t getRxPrf(void);
+
+		/**
+		* @brief Returns the currently configured Tx Preamble Code
+		* @return The Preamble Code value as an unsigned byte
+		* @author Réjane Dalce
+		* @date 20161003
+		*/
+		uint8_t getTxPcode(void);
+ 
+		/**
+		* @brief Returns the currently configured Rx Preamble Code
+		* @return The Preamble Code value as an unsigned byte
+		* @author Réjane Dalce
+		* @date 20161003
+		*/
+		uint8_t getRxPcode(void);
  
  		/**
 		* @brief Sets the radio channels for TX and RX
@@ -405,13 +421,31 @@ class DecaDuino {
  		bool setChannel(uint8_t channel);
 
  		/**
-		* @brief Sets the configured Pulse Repetition Frequency
+		* @brief Sets the Pulse Repetition Frequency
 		* @param prf The PRF value to set. Valid values are: 1, 2.
 		* @return Indicates whether configuration went well or not
 		* @author Réjane Dalce
 		* @date 20160310
 		*/
 		bool setRxPrf(uint8_t prf);
+
+ 		/**
+		* @brief Sets the Tx Preamble Code
+		* @param pcode The Preamble Code to set. Valid values are: 1-20.
+		* @return Indicates whether configuration went well or not
+		* @author Réjane Dalce
+		* @date 20160310
+		*/
+		bool setTxPcode(uint8_t pcode);
+
+ 		/**
+		* @brief Sets the Rx Preamble Code
+		* @param pcode The Preamble Code to set. Valid values are: 1-20.
+		* @return Indicates whether configuration went well or not
+		* @author Réjane Dalce
+		* @date 20160310
+		*/
+		bool setRxPcode(uint8_t pcode);
 
                 /**
                 * @brief Returns the preamble length

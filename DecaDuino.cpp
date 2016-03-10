@@ -901,6 +901,26 @@ uint8_t DecaDuino::getRxPrf(void) {
 }
 
 
+uint8_t DecaDuino::getTxPcode(void) {
+
+ 	uint32_t ui32t;
+
+	ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
+        ui32t = ( ui32t & DW1000_REGISTER_CHAN_CTRL_TX_PCODE_MASK) >> 22;
+        return (uint8_t)ui32t;
+}
+
+
+uint8_t DecaDuino::getRxPcode(void) {
+
+ 	uint32_t ui32t;
+
+	ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
+        ui32t = ( ui32t & DW1000_REGISTER_CHAN_CTRL_RX_PCODE_MASK) >> 27;
+        return (uint8_t)ui32t;
+}
+
+
 bool DecaDuino::setChannel(uint8_t channel) {
 
  	uint32_t ui32t;
@@ -929,6 +949,38 @@ bool DecaDuino::setRxPrf(uint8_t prf) {
 		ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
                 ui32t = ui32t & (~DW1000_REGISTER_CHAN_CTRL_RXPRF_MASK);
                 ui32t |= prf << 18; 
+                writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
+		return true;
+
+	} else return false;
+}
+
+
+bool DecaDuino::setTxPcode(uint8_t pcode) {
+
+        uint32_t ui32t;
+
+ 	if ( ( pcode > 0 ) && ( pcode <= 20 ) ) {
+
+		ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
+                ui32t = ui32t & (~DW1000_REGISTER_CHAN_CTRL_TX_PCODE_MASK);
+                ui32t |= pcode << 22; 
+                writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
+		return true;
+
+	} else return false;
+}
+
+
+bool DecaDuino::setRxPcode(uint8_t pcode) {
+
+        uint32_t ui32t;
+
+ 	if ( ( pcode > 0 ) && ( pcode <= 20 ) ) {
+
+		ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
+                ui32t = ui32t & (~DW1000_REGISTER_CHAN_CTRL_RX_PCODE_MASK);
+                ui32t |= pcode << 27; 
                 writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
 		return true;
 
