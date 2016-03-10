@@ -880,7 +880,7 @@ uint8_t DecaDuino::getChannelRaw(void) {
 
 	uint8_t buf;
  
- 	readSpiSubAddress(DW1000_REGISTER_CHANNEL_CONTROL, 0, &buf, 1);
+ 	readSpiSubAddress(DW1000_REGISTER_CHAN_CTRL, 0, &buf, 1);
  	return buf;
 }
 
@@ -890,7 +890,17 @@ uint8_t DecaDuino::getChannel(void) {
 	return getChannelRaw() & 0x0F;
 }
 
- 
+
+uint8_t DecaDuino::getRxPrf(void) {
+
+ 	uint32_t ui32t;
+
+	ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
+        ui32t = ( ui32t & DW1000_REGISTER_CHAN_CTRL_RXPRF_MASK) >> 18;
+        return (uint8_t)ui32t;
+}
+
+
 bool DecaDuino::setChannel(uint8_t channel) {
 
  	uint32_t ui32t;
@@ -898,15 +908,31 @@ bool DecaDuino::setChannel(uint8_t channel) {
  	if ( ( channel != 6 ) && ( channel <= 7 ) && ( channel >= 1 ) ) {
 
  		channel =  channel + (channel << 4);
- 		ui32t = readSpiUint32(DW1000_REGISTER_CHANNEL_CONTROL);
+ 		ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
  		ui32t = ui32t & 0xFFFFFF00;
  		ui32t |= channel; // set rx and tx channel 
- 		writeSpiUint32(DW1000_REGISTER_CHANNEL_CONTROL, ui32t);
+ 		writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
  		if ( getChannelRaw() == channel )
  			return true;
  	}
 
  	return false;
+}
+
+
+bool DecaDuino::setRxPrf(uint8_t prf) {
+
+        uint32_t ui32t;
+
+	if ( ( prf == 1 ) || ( prf == 2 ) ) {
+
+		ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
+                ui32t = ui32t & (~DW1000_REGISTER_CHAN_CTRL_RXPRF_MASK);
+                ui32t |= prf << 18; 
+                writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
+		return true;
+
+	} else return false;
 }
 
 

@@ -19,11 +19,11 @@
 ///
 /// \par Download
 ///
-/// Get the lastest version of the library <a href='https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/download/decaduino-lastest.zip'>here</a>.
+/// Get the lastest version of the library <a href='https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/download/decaduino-lastest.zip'>here</a>. Previous versions are also available on <a href='https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/download/'>this page</a>.
 /// 
 /// \par Installation
 /// 
-/// DecaDuino depends on the <a href='https://github.com/xxxajk/spi4teensy3'>spi4teensy3 library</a>. Download spi4teensy3 and DecaDuino, unzip the files into the libraries sub-directory and relaunch the Arduino environment; you should see the library in the Sketch->Import Library menu, and example codes in File->Examples->DecaDuino.
+/// DecaDuino supports the PJRC Teensy 3.2/3.1/3.0. Please install the <a href='http://www.pjrc.com/teensy/teensyduino.html'>Teensyduino add-on</a> first. DecaDuino depends on the <a href='https://github.com/xxxajk/spi4teensy3'>spi4teensy3 library</a>. Download spi4teensy3 and DecaDuino, unzip the files into the libraries sub-directory and relaunch the Arduino environment; you should see the library in the Sketch->Import Library menu, and example codes in File->Examples->DecaDuino.
 ///
 /// \par Usage
 /// 
@@ -57,7 +57,7 @@
 /// 
 /// \par Supported Hardware
 ///
-/// DecaDuino supports PJRC Teensy 3.2/3.1 MCU and DecaWave DM1000 chip and DWM1000 module. 
+/// DecaDuino supports PJRC Teensy 3.2/3.1/3.0 MCU and DecaWave DM1000 chip and DWM1000 module. 
 /// 
 /// \par Wiring
 /// 
@@ -165,9 +165,12 @@
 
 #define DW1000_REGISTER_TX_ANTD				0x18
 
-#define DW1000_REGISTER_CHANNEL_CONTROL			0x1F
-#define DW1000_REGISTER_CHANNEL_CONTROL_TX_CHANNEL_MASK	0x0000000F
-#define DW1000_REGISTER_CHANNEL_CONTROL_RX_CHANNEL_MASK	0x000000F0
+#define DW1000_REGISTER_CHAN_CTRL			0x1F
+#define DW1000_REGISTER_CHAN_CTRL_TX_CHAN_MASK		0x0000000F
+#define DW1000_REGISTER_CHAN_CTRL_RX_CHAN_MASK		0x000000F0
+#define DW1000_REGISTER_CHAN_CTRL_RXPRF_MASK		0x000C0000
+#define DW1000_REGISTER_CHAN_CTRL_TX_PCODE_MASK		0x07C00000
+#define DW1000_REGISTER_CHAN_CTRL_RX_PCODE_MASK		0xF8000000
 
 #define DW1000_REGISTER_AON_CTRL			0x2C
 #define DW1000_REGISTER_OFFSET_AON_CTRL			0x02
@@ -369,7 +372,7 @@ class DecaDuino {
 		int setShortAddressAndPanId(uint32_t shortAddressPanId);
 
 		/**
-		* @brief Returns the currently configured radio channels configured
+		* @brief Returns the currently configured radio channels 
 		* @return A byte which MSB is the X channel and the LSB is the X channel
 		* @author Réjane Dalce
 		* @date 20160109
@@ -377,12 +380,20 @@ class DecaDuino {
  		uint8_t getChannelRaw(void);
 
 		/**
-		* @brief Returns the currently configured radio channel configured
-		* @return The channel value as a unsigned byte
+		* @brief Returns the currently configured radio channel
+		* @return The channel value as an unsigned byte
 		* @author Réjane Dalce
 		* @date 20160109
 		*/
  		uint8_t getChannel(void);
+
+		/**
+		* @brief Returns the currently configured Pulse Repetition Frequency
+		* @return The PRF value as an unsigned byte
+		* @author Réjane Dalce
+		* @date 20161003
+		*/
+		uint8_t getRxPrf(void);
  
  		/**
 		* @brief Sets the radio channels for TX and RX
@@ -392,6 +403,15 @@ class DecaDuino {
 		* @date 20160109
 		*/
  		bool setChannel(uint8_t channel);
+
+ 		/**
+		* @brief Sets the configured Pulse Repetition Frequency
+		* @param prf The PRF value to set. Valid values are: 1, 2.
+		* @return Indicates whether configuration went well or not
+		* @author Réjane Dalce
+		* @date 20160310
+		*/
+		bool setRxPrf(uint8_t prf);
 
                 /**
                 * @brief Returns the preamble length
