@@ -82,7 +82,6 @@
 #define DecaDuino_h
 
 #include "Arduino.h"
-#include <spi4teensy3.h>
 
 //#define DECADUINO_DEBUG
 
@@ -227,71 +226,6 @@ class DecaDuino {
 		* @date 20141115
 		*/
 		void resetDW1000();
-
-		/**
-		* @brief Reads len bytes on SPI at given address, and store data in buf
-		* @param address The source address
-                * @param buf The address of the buffer
-                * @param len The message length
-		* @return No return
-		* @author Adrien van den Bossche <bossche@irit.fr>
-		* @date 20141115
-		*/
-		void readSpi(uint8_t address, uint8_t* buf, uint16_t len);
-
-		/**
-		* @brief Reads len bytes on SPI at given address/subaddress, and store data in buf
-		* @param address The source address
-		* @param subAddress The source subAddress
-                * @param buf The address of the buffer
-                * @param len The message length
-		* @return No return
-		* @author Adrien van den Bossche <bossche@irit.fr>
-		* @date 20141115
-		*/
-		void readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len);
-
-		/**
-		* @brief Reads a 4-byte word on SPI at given address
-		* @param address The source address
-		* @return The 4 bytes
-		* @author Adrien van den Bossche <bossche@irit.fr>
-		* @date 20141115
-		*/
-		uint32_t readSpiUint32(uint8_t address);
-
-		/**
-		* @brief Writes len bytes on SPI at given address from buf
-		* @param address The destination address
-                * @param buf The address of the buffer
-                * @param len The message length
-		* @return No return
-		* @author Adrien van den Bossche <bossche@irit.fr>
-		* @date 20141115
-		*/
-		void writeSpi(uint8_t address, uint8_t* buf, uint16_t len);
-
-		/**
-		* @brief Writes len bytes on SPI at given address/subaddress from buf
-		* @param address The destination address
-		* @param address The destination sub-address
-                * @param buf The address of the buffer
-                * @param len The message length
-		* @return No return
-		* @author Adrien van den Bossche <bossche@irit.fr>
-		* @date 20141115
-		*/
-		void writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len);
-
-		/**
-		* @brief Writes a 4-byte word on SPI at given address
-		* @param address The destination address
-		* @param ui32t The 4-byte word to write on SPI
-		* @return No return
-		* @author Adrien van den Bossche <bossche@irit.fr>
-		* @date 20141115
-		*/
-		void writeSpiUint32(uint8_t address, uint32_t ui32t);
 
 		/**
 		* @brief Stores the System Time Counter value in the variable referenced by the pointer passed as an input parameter
@@ -447,21 +381,21 @@ class DecaDuino {
 		*/
 		bool setRxPcode(uint8_t pcode);
 
-                /**
-                * @brief Returns the preamble length
-                * @return A byte representing the preamble length
-                * @author François Despaux
-                * @date 20160217
-                */
+		/**
+		* @brief Returns the preamble length
+		* @return A byte representing the preamble length
+		* @author François Despaux
+		* @date 20160217
+		*/
 		int getPreambleLength(void);
 
-                /**
-                * @brief Sets the preamble length
+		/**
+		* @brief Sets the preamble length
 		* @param plength The preamble length to set. Valid values are: 64, 128, 256, 512, 1024, 1536, 2048, 4096.
-                * @return Indicates whether configuration went well or not
-                * @author François Despaux
-                * @date 20160217
-                */
+		* @return Indicates whether configuration went well or not
+		* @author François Despaux
+		* @date 20160217
+		*/
 		bool setPreambleLength(int plength);
 
 		/**
@@ -476,7 +410,7 @@ class DecaDuino {
 		/**
 		* @brief Sends a len-byte frame from buf
 		* @param buf The address of the buffer
-                * @param len The message length
+		* @param len The message length
 		* @return true if success, false otherwise
 		* @author Adrien van den Bossche <bossche@irit.fr>
 		* @date 20141115
@@ -779,6 +713,7 @@ class DecaDuino {
 		*/
 		double getLastRxSkew();
 
+		SPISettings currentSPISettings;
 		uint64_t euid;
 		uint8_t *rxData;
 		uint16_t *rxDataLen;
@@ -790,8 +725,79 @@ class DecaDuino {
 		uint64_t lastRxTimestamp;
 		double clkOffset;
 
+
 	private:
+
+		/**
+		* @brief Reads len bytes on SPI at given address, and store data in buf
+		* @param address The source address
+		* @param buf The address of the buffer
+		* @param len The message length
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
+		void readSpi(uint8_t address, uint8_t* buf, uint16_t len);
+
+		/**
+		* @brief Reads len bytes on SPI at given address/subaddress, and store data in buf
+		* @param address The source address
+		* @param subAddress The source subAddress
+		* @param buf The address of the buffer
+		* @param len The message length
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
+		void readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len);
+
+		/**
+		* @brief Reads a 4-byte word on SPI at given address
+		* @param address The source address
+		* @return The 4 bytes
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
+		uint32_t readSpiUint32(uint8_t address);
+
+		/**
+		* @brief Writes len bytes on SPI at given address from buf
+		* @param address The destination address
+		* @param buf The address of the buffer
+		* @param len The message length
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
+		void writeSpi(uint8_t address, uint8_t* buf, uint16_t len);
+
+		/**
+		* @brief Writes len bytes on SPI at given address/subaddress from buf
+		* @param address The destination address
+		* @param address The destination sub-address
+		* @param buf The address of the buffer
+		* @param len The message length
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
+		void writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t* buf, uint16_t len);
+
+		/**
+		* @brief Writes a 4-byte word on SPI at given address
+		* @param address The destination address
+		* @param ui32t The 4-byte word to write on SPI
+		* @return No return
+		* @author Adrien van den Bossche <bossche@irit.fr>
+		* @date 20141115
+		*/
+		void writeSpiUint32(uint8_t address, uint32_t ui32t);
+
 		uint8_t debugStr[DEBUG_STR_LEN];
+		void spi_send ( uint8_t u8 );
+		void spi_send ( uint16_t u16 );
+		void spi_send ( uint8_t* buf, uint16_t len );
+		void spi_receive ( uint8_t* buf, uint16_t len );
 	
 	protected:
 

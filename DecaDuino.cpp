@@ -3,6 +3,7 @@
 // Another DecaWave DW1000 driver for Arduino
 // See the README file in this directory for documentation
 
+#include <SPI.h>
 #include "DecaDuino.h"
 #include <util/atomic.h>
 
@@ -31,6 +32,7 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 	pinMode(_interruptPin, INPUT);
 	pinMode(_slaveSelectPin, OUTPUT);
 	digitalWrite(_slaveSelectPin, HIGH);
+	SPI.begin();
 
 	// Initialise the RX pointers
 	rxDataAvailable = false;
@@ -42,6 +44,7 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 
 #ifdef DECADUINO_DEBUG 
 	delay(3000); // delay to see next messages on console for debug
+	Serial.println("DecaDuino Debug is active!");
 #endif
 
 	// Reset the DW1000 now
@@ -118,9 +121,7 @@ void DecaDuino::resetDW1000() {
 	uint32_t ui32t;
 
 	// Initialise the SPI port
-	spi4teensy3::init(4,0,0); // Low speed SPICLK for performing DW1000 reset
-	CORE_PIN13_CONFIG = PORT_PCR_MUX(1); // First reassign pin 13 to Alt1 so that it is not SCK but the LED still works
-	CORE_PIN14_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); // and then reassign pin 14 to SCK
+	currentSPISettings = SPISettings(500000, MSBFIRST, SPI_MODE0);
 
 	delay(100);
 
@@ -151,7 +152,6 @@ void DecaDuino::resetDW1000() {
 	ui32t |= 0xF0000000;
 	ui32t &= 0xFFFFFFFC;
 	writeSpiUint32(DW1000_REGISTER_PMSC_CTRL0, ui32t);
-	delay(1);
 
 	delay(5);
 
@@ -160,37 +160,41 @@ void DecaDuino::resetDW1000() {
 
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
 
+		SPI.beginTransaction(currentSPISettings);
 		digitalWrite(_slaveSelectPin, LOW);
 		buf[0] = 0xF6;
 		buf[1] = 0x00;
 		buf[2] = 0x01;
 		buf[3] = 0x03;
-		spi4teensy3::send(buf,4);
+		spi_send(buf,4);
 		digitalWrite(_slaveSelectPin, HIGH);
+		SPI.endTransaction();
 
+		SPI.beginTransaction(currentSPISettings);
 		digitalWrite(_slaveSelectPin, LOW);
 		buf[0] = 0xED;
 		buf[1] = 0x06;
 		buf[2] = 0x00;
 		buf[3] = 0x80;
-		spi4teensy3::send(buf,4);
+		spi_send(buf,4);
 		digitalWrite(_slaveSelectPin, HIGH);
+		SPI.endTransaction();
 
 		delayMicroseconds(160);
 
+		SPI.beginTransaction(currentSPISettings);
 		digitalWrite(_slaveSelectPin, LOW);
 		buf[0] = 0xF6;
 		buf[1] = 0x00;
 		buf[2] = 0x00;
 		buf[3] = 0x02;
-		spi4teensy3::send(buf,4);
+		spi_send(buf,4);
 		digitalWrite(_slaveSelectPin, HIGH);
+		SPI.endTransaction(); 
 	}
 
 	// Initialise the SPI port
-	spi4teensy3::init(2,0,0); // Normal speed SPICLK after performing DW1000 reset
-	CORE_PIN13_CONFIG = PORT_PCR_MUX(1); // First reassign pin 13 to Alt1 so that it is not SCK but the LED still works
-	CORE_PIN14_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); // and then reassign pin 14 to SCK
+	currentSPISettings = SPISettings(6000000, MSBFIRST, SPI_MODE0);
 	delay(1);
 
 #ifdef DECADUINO_DEBUG 
@@ -604,15 +608,47 @@ uint8_t DecaDuino::getTrxStatus(void) {
 }
 
 
+void DecaDuino::spi_send ( uint8_t u8 ) {
+
+	SPI.transfer(u8);
+}
+
+
+void DecaDuino::spi_send ( uint16_t u16 ) {
+
+	SPI.transfer16(u16);
+}
+
+
+void DecaDuino::spi_send ( uint8_t* buf, uint16_t len ) {
+
+	int i;
+
+	for (i=0; i<len; i++)
+		SPI.transfer(buf[i]);
+}
+
+
+void DecaDuino::spi_receive ( uint8_t* buf, uint16_t len ) {
+
+	int i;
+
+	for (i=0; i<len; i++)
+                buf[i] = SPI.transfer(0);
+}
+
+
 void DecaDuino::readSpi(uint8_t address, uint8_t* buf, uint16_t len) {
 
 	uint8_t addr = 0 | (address & 0x3F) ; // Mask register address (6bits) and preserve MSb at low (Read) and no subaddress
 
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+		SPI.beginTransaction(currentSPISettings);
 		digitalWrite(_slaveSelectPin, LOW);
-		spi4teensy3::send(addr);
-		spi4teensy3::receive(buf,len);
+		spi_send(addr);
+		spi_receive(buf,len);
 		digitalWrite(_slaveSelectPin, HIGH);
+		SPI.endTransaction();
 	}
 }
 
@@ -630,11 +666,13 @@ void DecaDuino::readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t*
 		sub_addr = 0 | (subAddress & 0x7F); // Mask register address (6bits)
 
 		ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+			SPI.beginTransaction(currentSPISettings);
 			digitalWrite(_slaveSelectPin, LOW);
-			spi4teensy3::send(addr);
-			spi4teensy3::send(sub_addr);
-			spi4teensy3::receive(buf,len);
+			spi_send(addr);
+			spi_send(sub_addr);
+			spi_receive(buf,len);
 			digitalWrite(_slaveSelectPin, HIGH); 
+			SPI.endTransaction();
 		}
 
 	} else {
@@ -659,10 +697,12 @@ void DecaDuino::writeSpi(uint8_t address, uint8_t* buf, uint16_t len) {
 	uint8_t addr = 0 | (address & 0x3F) | 0x80; // Mask register address (6bits) and set MSb (Write) and no subaddress
 
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+		SPI.beginTransaction(currentSPISettings);
 		digitalWrite(_slaveSelectPin, LOW);
-		spi4teensy3::send(addr);
-		spi4teensy3::send(buf,len);
+		spi_send(addr);
+		spi_send(buf,len);
 		digitalWrite(_slaveSelectPin, HIGH);
+		SPI.endTransaction();
 	}
 }
 
@@ -680,11 +720,13 @@ void DecaDuino::writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t
 		sub_addr = 0 | (subAddress & 0x7F); // Mask register address (6bits)
 
 		ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+			SPI.beginTransaction(currentSPISettings);
 			digitalWrite(_slaveSelectPin, LOW);
-			spi4teensy3::send(addr);
-			spi4teensy3::send(sub_addr);
-			spi4teensy3::send(buf,len);
+			spi_send(addr);
+			spi_send(sub_addr);
+			spi_send(buf,len);
 			digitalWrite(_slaveSelectPin, HIGH);
+			SPI.endTransaction();
 		}
 
 	} else {
