@@ -73,7 +73,7 @@ double offsetPPM_drep;
 };
 
 uint16_t hi16=0;
-    double tmp=0;
+double tmp=0;
 
 uint64_t test=0x0000000F24586219;
 
@@ -84,6 +84,7 @@ int mindex;
 void setup() {
 
   pinMode(13, OUTPUT);
+  SPI.setSCK(14);
   if (!decaduino.init(addrPANID)){
     Serial.print("decaduino init failled");
     while(1){

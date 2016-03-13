@@ -9,6 +9,7 @@ uint16_t rxLen;
 void setup() {
 
   pinMode(13, OUTPUT);
+  SPI.setSCK(14);
   if (!decaduino.init()){
     Serial.print("decaduino init failled");
     while(1){

@@ -3,7 +3,7 @@
 #include "FastLED.h"
 
 #define LED_DATA_PIN 8
-#define NUM_LEDS 60
+#define NUM_LEDS 240
 
 #define X_CORRECTION 1.0000000
 #define Y_CORRECTION 0.200000000
@@ -78,6 +78,7 @@ void setup() {
   FastLED.addLeds<WS2812B, LED_DATA_PIN, GRB>(leds, NUM_LEDS);
 
   pinMode(13, OUTPUT);
+  SPI.setSCK(14);
   if (!decaduino.init()){
     Serial.print("decaduino init failled");
     while(1){

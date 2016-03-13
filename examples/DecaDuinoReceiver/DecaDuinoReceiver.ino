@@ -12,6 +12,7 @@ int rxFrames;
 void setup() {
 
   pinMode(13, OUTPUT);
+  SPI.setSCK(14);
   if ( !decaduino.init() ) {
     Serial.println("decaduino init failed");
     digitalWrite(13, HIGH);   

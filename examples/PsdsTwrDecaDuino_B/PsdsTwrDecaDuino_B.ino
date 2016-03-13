@@ -46,6 +46,7 @@ int dtim;
 void setup() {
 
   pinMode(13, OUTPUT);
+  SPI.setSCK(14);
   if (!decaduino.init(addrPANID)){
    Serial.print("decaduino init failled");
    while(1){
