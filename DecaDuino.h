@@ -9,6 +9,8 @@
 /// 
 /// DecaDuino is an Arduino library which provides a driver for the DecaWave DW1000 transceiver and modules based on this transceiver, such as DecaWave DWM1000. Since the DW1000 is based on a Ultra Wide Band (UWB) Physical layer, in addition to wireless communication, DecaDuino supports Time-of-Flight (ToF) ranging and can be used as an open framework for protocol evaluation.
 ///
+/// DecaDuino supports the PJRC Teensy 3.2/3.1/3.0. Others Arduinos have not been tested yet. Please report any successfull operation on various Arduinos to the contact address indicated in the "Contact, communication and users forum" section of this documentation.
+///
 /// DecaDuino is a <i>Physical-layer Service Access Point (PHY-SAP)</i>. It provides the two conventional <i>Physical-Data</i> (PD) and <i>Physical Layer Management Entity</i> (PLME) SAPs which enable MAC-level protocols to send/receive data and configure the transceiver (channel, transmission rate, preamble parameters...). Since this framework was designed to aid in the implementation of Time-of-Flight based ranging protocols, DecaDuino also provides access to the DW1000's Physical-level high precision timer (64GHz/40bit) which enables precise message timestamping at both transmission (t_TX) and reception (t_RX). Finally, DecaDuino implements DW1000's advanced synchronization/timestamping functionalities such as delayed transmission and receiver skew evaluation, which are required for efficient centimetre-level ranging protocols using Time-of-Flight.
 ///
 /// DecaDuino comes with several Arduino examples implementing the most popular ranging protocols such as <i>Two-Way Ranging</i> (TWR) and <i>Symetrical Double-Sided Two-Way Ranging</i> (SDS-TWR).
@@ -19,11 +21,11 @@
 ///
 /// \par Download
 ///
-/// Get the lastest version of the library <a href='https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/download/decaduino-lastest.zip'>here</a>. Previous versions are also available on <a href='https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/download/'>this page</a>.
+/// Get the lastest version of the library <a href='https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/download/decaduino-lastest.zip'>here</a>. Previous versions are also available in the "Revision History" section of this documentation..
 /// 
 /// \par Installation
 /// 
-/// DecaDuino supports the PJRC Teensy 3.2/3.1/3.0. Please install the <a href='http://www.pjrc.com/teensy/teensyduino.html'>Teensyduino add-on</a> first. DecaDuino depends on the <a href='https://github.com/xxxajk/spi4teensy3'>spi4teensy3 library</a>. Download spi4teensy3 and DecaDuino, unzip the files into the libraries sub-directory and relaunch the Arduino environment; you should see the library in the Sketch->Import Library menu, and example codes in File->Examples->DecaDuino.
+/// To use DecaDuino on a PJRC Teensy 3.2/3.1/3.0, install the <a href='http://www.pjrc.com/teensy/teensyduino.html'>Teensyduino add-on</a> first. Then, download DecaDuino, unzip the files into the libraries sub-directory and relaunch the Arduino environment; you should see the library in the Sketch->Import Library menu, and example codes in File->Examples->DecaDuino.
 ///
 /// \par Usage
 /// 
@@ -34,9 +36,9 @@
 /// \endcode
 /// For more details, please checkout the examples in the File->Examples->DecaDuino menu in the Arduino IDE.
 ///
-/// \par Communication and users forum
+/// \par Contact, communication and users forum
 /// 
-/// Please contact Adrien van den Bossche <vandenbo at irit.fr> for any question concerning DecaDuino. 
+/// Please contact <a href='mailto:vandenbo_nospam@irit.fr?subject=[DecaDuino] '>Adrien van den Bossche</a> (remove _nospam) for any question concerning DecaDuino. 
 ///
 /// \par Demonstrations 
 ///
@@ -45,7 +47,7 @@
 /// 
 /// \par Revision History
 /// 
-/// \version 1.0 (15/03/2016) Initial release
+/// \version <a href='https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/download/decaduino-1.0.zip'>1.0 (19/03/2016) Initial release</a>
 /// 
 /// \par Academic Publications
 ///
@@ -53,13 +55,15 @@
 /// 
 /// \par Licence
 ///
-/// DecaDuino's use is subject to licensing, GPL_V3 (http://www.gnu.org/copyleft/gpl.html) or Commercial. Please contact Adrien van den Bossche <vandenbo at irit.fr> for Commercial Licensing.
+/// DecaDuino's use is subject to licensing, GPL_V3 (http://www.gnu.org/copyleft/gpl.html) or Commercial. Please contact <a href='mailto:vandenbo_nospam@irit.fr?subject=[DecaDuino] '>Adrien van den Bossche</a> (remove _nospam) for Commercial Licensing.
 ///
 /// \page Hardware
 /// 
 /// \par Supported Hardware
 ///
 /// DecaDuino supports PJRC Teensy 3.2/3.1/3.0 MCU and DecaWave DM1000 chip and DWM1000 module. 
+///
+/// Please report any successfull operation on various Arduinos to the contact address indicated in the "Contact, communication and users forum" section of this documentation.
 /// 
 /// \par Wiring
 /// 
