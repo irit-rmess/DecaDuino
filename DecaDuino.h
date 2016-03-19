@@ -27,9 +27,9 @@
 ///
 /// \par Usage
 /// 
-/// Remember to import the Decaduino library in your sketches:
+/// Remember to import the SPI and Decaduino libraries in your sketches:
 /// \code
-/// #include <spi4teensy3.h>
+/// #include <SPI.h>
 /// #include <DecaDuino.h>
 /// \endcode
 /// For more details, please checkout the examples in the File->Examples->DecaDuino menu in the Arduino IDE.

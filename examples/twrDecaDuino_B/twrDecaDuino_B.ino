@@ -1,4 +1,4 @@
-#include <spi4teensy3.h>
+#include <SPI.h>
 #include <DecaDuino.h>
 
 #define FRAME_LEN 64

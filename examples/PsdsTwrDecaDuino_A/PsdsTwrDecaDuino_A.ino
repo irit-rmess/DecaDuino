@@ -1,4 +1,4 @@
-#include <spi4teensy3.h>
+#include <SPI.h>
 #include <DecaDuino.h>
 
 #define AIR_SPEED_OF_LIGHT 299792458//229702547.0
