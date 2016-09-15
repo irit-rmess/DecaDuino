@@ -1,5 +1,11 @@
+#define ENABLE_CALIBRATION_FROM_EEPROM
+
 #include <SPI.h>
 #include <DecaDuino.h>
+#ifdef ENABLE_CALIBRATION_FROM_EEPROM
+#include <EEPROM.h>
+uint16_t antennaDelay;
+#endif
 
 #define AIR_SPEED_OF_LIGHT 229702547.0
 #define DW1000_TIMEBASE 15.65E-12
@@ -44,19 +50,37 @@ int timeout;
 
 void setup() {
 
+  uint8_t buf[2];
+
   pinMode(13, OUTPUT);
   SPI.setSCK(14);
-  if (!decaduino.init()){
-    Serial.print("decaduino init failled");
-    while(1){
+  if ( !decaduino.init() ) {
+    Serial.println("decaduino init failed");
+    while(1) {
       digitalWrite(13, HIGH);
       delay(50);
       digitalWrite(13, LOW);
       delay(50);
     }
   }
+
+#ifdef ENABLE_CALIBRATION_FROM_EEPROM
+
+  // Gets antenna delay from the end of EEPROM. The two last bytes are used for DecaWiNo label, 
+  // so use n-2 and n-3 to store the antenna delay (16bit value)
+  buf[0] = EEPROM.read(EEPROM.length()-4);
+  buf[1] = EEPROM.read(EEPROM.length()-3);
+  antennaDelay = decaduino.decodeUint16(buf);
+
+  if ( antennaDelay == 0xffff ) {
+    Serial.println("Unvalid antenna delay value found in EEPROM. Using default value.");
+  } else decaduino.setAntennaDelay(antennaDelay);
+
+#endif
+
+  // Set RX buffer
   decaduino.setRxBuffer(rxData, &rxLen);
-  state=TWR_ENGINE_STATE_INIT;
+  state = TWR_ENGINE_STATE_INIT;
 }
 
 void loop() {
