@@ -99,11 +99,8 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 		setShortAddressAndPanId(shortAddressAndPanId);
         }
 
-	// Antenna delay
-	ui16t = DWM1000_DEFAULT_ANTENNA_DELAY_VALUE;
-	encodeUint16(ui16t, buf);
-	writeSpi(DW1000_REGISTER_TX_ANTD, buf, 2);
-
+	// Set default antenna delay value
+	setAntennaDelay(DWM1000_DEFAULT_ANTENNA_DELAY_VALUE);
 
 	// --- End of DW1000 configuration ------------------------------------------------------------------------------
 
@@ -409,7 +406,7 @@ bool DecaDuino::hasTxSucceeded() {
 
 uint64_t DecaDuino::alignDelayedTransmission ( uint64_t wantedDelay ) {
 
-	return ((getSystemTimeCounter() + wantedDelay) & 0xFFFFFFFE00) + DWM1000_DEFAULT_ANTENNA_DELAY_VALUE;
+	return ((getSystemTimeCounter() + wantedDelay) & 0xFFFFFFFE00) + getAntennaDelay();
 }
 
 
@@ -449,7 +446,7 @@ uint8_t DecaDuino::pdDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, ui
 
 		if ( delayed ) { // if delayed transmission
 			// send time
-			encodeUint64 ( (time - DWM1000_DEFAULT_ANTENNA_DELAY_VALUE) & 0x000000FFFFFFFE00, tempbuf); // time is 5-bytes long, 9 lsb=0
+			encodeUint64 ( (time - getAntennaDelay() ) & 0x000000FFFFFFFE00, tempbuf); // time is 5-bytes long, 9 lsb=0
 			writeSpi(DW1000_REGISTER_DX_TIME, tempbuf, 5);
 			
 			// set tx start bit and Transmitter Delayed Sendind bit
@@ -1119,6 +1116,35 @@ bool DecaDuino::setPreambleLength (int plength) {
 }
 
 
+uint16_t DecaDuino::getAntennaDelay() {
+
+	return antennaDelay;
+}
+
+
+void DecaDuino::setAntennaDelay(uint16_t newAntennaDelay) {
+
+	setAntennaDelayReg(newAntennaDelay);
+	antennaDelay = newAntennaDelay;
+}
+
+
+uint16_t DecaDuino::getAntennaDelayReg(){
+
+	uint8_t buf[2];
+
+	readSpi(DW1000_REGISTER_TX_ANTD, buf, 2);
+	return decodeUint16(buf);
+}
+
+
+void DecaDuino::setAntennaDelayReg(uint16_t newAntennaDelay) {
+
+	uint8_t buf[2];
+
+	encodeUint16(newAntennaDelay, buf);
+	writeSpi(DW1000_REGISTER_TX_ANTD, buf, 2);
+}
 
 
 

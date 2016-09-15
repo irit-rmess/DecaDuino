@@ -9,7 +9,7 @@
 /// 
 /// DecaDuino is an Arduino library which provides a driver for the DecaWave DW1000 transceiver and modules based on this transceiver, such as DecaWave DWM1000. Since the DW1000 is based on a Ultra Wide Band (UWB) Physical layer, in addition to wireless communication, DecaDuino supports Time-of-Flight (ToF) ranging and can be used as an open framework for protocol evaluation.
 ///
-/// DecaDuino supports the PJRC Teensy 3.2/3.1/3.0. Others Arduino boards have not been tested yet. User feedback on the topic will be greatly appreciated. For this purpose, please use the contact address indicated in the "Contact, communication and users forum" section of this documentation.
+/// DecaDuino supports the PJRC Teensy 3.2/3.1/3.0. Others Arduino boards have not been tested yet. User feedback on the topic will be greatly appreciated. For this purpose, please use the contact address indicated in the "Contact, feedback and users forum" section of this documentation.
 ///
 /// DecaDuino is a <i>Physical-layer Service Access Point (PHY-SAP)</i>. It provides the two conventional <i>Physical-Data</i> (PD) and <i>Physical Layer Management Entity</i> (PLME) SAPs which enable MAC-level protocols to send/receive data and configure the transceiver (channel, transmission rate, preamble parameters...). Since this framework was designed to aid in the implementation of Time-of-Flight based ranging protocols, DecaDuino also provides access to the DW1000's Physical-level high precision timer (64GHz/40bit) which enables precise message timestamping at both transmission (t_TX) and reception (t_RX). Finally, DecaDuino implements DW1000's advanced synchronization/timestamping functionalities such as delayed transmission and receiver skew evaluation, which are required for efficient centimetre-level ranging protocols using Time-of-Flight.
 ///
@@ -63,7 +63,7 @@
 ///
 /// DecaDuino supports PJRC Teensy 3.2/3.1/3.0 MCU and DecaWave DM1000 chip and DWM1000 module. 
 ///
-/// Please report any successfull operation on various Arduinos to the contact address indicated in the "Contact, feedback and users forum" section of this documentation.
+/// Please report any successfull operation on others Arduino boards by using the contact address indicated in the "Contact, feedback and users forum" section of this documentation.
 /// 
 /// \par Wiring
 /// 
@@ -711,7 +711,7 @@ class DecaDuino {
 		*/
 		uint64_t getLastRxTimestamp();
 
-	       /**
+		/**
 		* @brief Returns last received frame's clock skew, also designated as clock offset in the Decawave documentation
 		* @return Last received frame's clock skew
 		* @author Adrien van den Bossche
@@ -719,16 +719,75 @@ class DecaDuino {
 		*/
 		double getLastRxSkew();
 
+		/**
+		* @brief Returns current antenna delay value
+		* @return The current antenna delay value
+		* @author Adrien van den Bossche
+		* @date 20160915
+		*/
+		uint16_t getAntennaDelay();
+
+		/**
+		* @brief Sets the current antenna delay value
+		* @param antennaDelay The antenna delay value
+		* @return No return
+		* @author Adrien van den Bossche
+		* @date 20160915
+		*/
+		void setAntennaDelay(uint16_t newAntennaDelay);
+
+		/**
+		* @brief Current SPI-bus settings
+		*/
 		SPISettings currentSPISettings;
+		
+		/**
+		* @brief Current EUID (Extended Unique IDentifier)
+		*/
 		uint64_t euid;
+
+		/**
+		* @brief The current (or last) PPDU
+		*/
 		uint8_t *rxData;
+
+		/**
+		* @brief The current PPDU length
+		*/
 		uint16_t *rxDataLen;
+		/**
+		* @brief The max PPDU length
+		*/
 		uint16_t rxDataLenMax;
+
+		/**
+		* @brief Flag indicating if last reception has data
+		*/
 		uint8_t rxDataAvailable;
+
+		/**
+		* @brief Transceiver status
+		*/
 		uint8_t trxStatus;
+
+		/**
+		* @brief Flag indicating if last transmission is done
+		*/
 		bool lastTxOK;
+
+		/**
+		* @brief Timestamp of last transmitted frame
+		*/
 		uint64_t lastTxTimestamp;
+
+		/**
+		* @brief Timestamp of last received frame
+		*/
 		uint64_t lastRxTimestamp;
+
+		/**
+		* @brief Last clock offset (aka clock skew)
+		*/
 		double clkOffset;
 
 
@@ -799,11 +858,30 @@ class DecaDuino {
 		*/
 		void writeSpiUint32(uint8_t address, uint32_t ui32t);
 
+		/**
+		* @brief Returns the antenna delay value in the DW1000 register
+		* @return The antenna delay value in the register
+		* @author Adrien van den Bossche
+		* @date 20160915
+		*/
+		uint16_t getAntennaDelayReg();
+
+		/**
+		* @brief Sets the antenna delay value in the DW1000 register
+		* @param antennaDelay The antenna delay value
+		* @return No return
+		* @author Adrien van den Bossche
+		* @date 20160915
+		*/
+		void setAntennaDelayReg(uint16_t newAntennaDelay);
+
 		uint8_t debugStr[DEBUG_STR_LEN];
 		void spi_send ( uint8_t u8 );
 		void spi_send ( uint16_t u16 );
 		void spi_send ( uint8_t* buf, uint16_t len );
 		void spi_receive ( uint8_t* buf, uint16_t len );
+
+		uint16_t antennaDelay;
 	
 	protected:
 
