@@ -7,9 +7,7 @@
 uint16_t antennaDelay;
 #endif
 
-#define AIR_SPEED_OF_LIGHT 229702547.0
-#define DW1000_TIMEBASE 15.65E-12
-#define COEFF AIR_SPEED_OF_LIGHT*DW1000_TIMEBASE
+#define COEFF RANGING_UNIT
 
 #define TIMEOUT 10
 

@@ -102,7 +102,9 @@
 
 #define RANGING_ERROR 0x00
 
-#define TIME_UNIT 1/(499.2*128*1000000)
+#define DW1000_TIMEBASE 15.65E-12
+#define AIR_SPEED_OF_LIGHT 282622876.092008 // @brief Unofficial celerity value, prototype based, by Adrien van den Bossche <vandenbo at univ-tlse2.fr>
+#define RANGING_UNIT AIR_SPEED_OF_LIGHT*DW1000_TIMEBASE
 
 //#define DWM1000_DEFAULT_ANTENNA_DELAY_VALUE 0x7CCD 
 //#define DWM1000_DEFAULT_ANTENNA_DELAY_VALUE 33000
