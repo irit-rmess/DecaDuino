@@ -126,6 +126,8 @@
 
 #define DW1000_REGISTER_SYS_CFG				0x04
 #define DW1000_REGISTER_SYS_CFG_RXAUTR_MASK 		0x20000000
+#define DW1000_REGISTER_SYS_CFG_PHR_MODE_MASK 		0x00030000
+#define DW1000_REGISTER_SYS_CFG_PHR_MODE_SHIFT 		16
 
 #define DW1000_REGISTER_SYS_TIME			0x06
 
@@ -232,6 +234,23 @@ class DecaDuino {
 		* @date 20141115
 		*/
 		void resetDW1000();
+
+		/**
+		* @brief Set PHR Mode
+                * @param mode 0 for standard 127 bytes frame, 3 for extended 1023 bytes frame
+		* @return No return
+		* @author Laurent GUERBY
+		* @date 20170329
+		*/
+                void setPHRMode(uint8_t mode);
+
+		/**
+		* @brief Returns the PHR Mode
+		* @return PHR Mode
+		* @author Laurent GUERBY
+		* @date 20170329
+		*/
+                uint8_t getPHRMode(void);
 
 		/**
 		* @brief Stores the System Time Counter value in the variable referenced by the pointer passed as an input parameter

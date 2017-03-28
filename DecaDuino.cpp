@@ -816,6 +816,23 @@ void DecaDuino::getSystemTimeCounter ( uint64_t *p ) {
 }
 
 
+void DecaDuino::setPHRMode(uint8_t mode) {
+	uint32_t ui32t;
+
+	ui32t = readSpiUint32(DW1000_REGISTER_SYS_CFG);
+	ui32t = ui32t & (~DW1000_REGISTER_SYS_CFG_PHR_MODE_MASK);
+	ui32t |= mode << DW1000_REGISTER_SYS_CFG_PHR_MODE_SHIFT;
+	writeSpiUint32(DW1000_REGISTER_SYS_CFG,ui32t);
+}
+
+uint8_t DecaDuino::getPHRMode(void) {
+	uint32_t ui32t;
+
+	ui32t = readSpiUint32(DW1000_REGISTER_SYS_CFG);
+	ui32t = (ui32t & DW1000_REGISTER_SYS_CFG_PHR_MODE_MASK) >> DW1000_REGISTER_SYS_CFG_PHR_MODE_SHIFT;
+        return (uint8_t)ui32t;
+}
+
 uint64_t DecaDuino::getSystemTimeCounter ( void ) {
 
 	uint64_t p;
