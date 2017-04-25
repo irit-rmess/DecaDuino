@@ -1252,3 +1252,29 @@ void DecaDuino::wakeRequest(void) {
 
 }
 
+
+float DecaDuino::getNLOSIndication(void) {
+	float indicator = 0;
+	uint8_t reg12[8];
+	uint8_t reg15[14];
+	uint16_t C;	//bytes 7 and 6 of reg12
+	uint16_t F1;	//bytes 8 and 7 of reg15
+	uint16_t F2;	//bytes 3 and 2 of reg12
+	uint16_t F3;	//bytes 5 and 4 of reg12
+ 
+	//read register 0x12:DW1000_REGISTER_RX_RFQUAL
+	readSpi(DW1000_REGISTER_RX_RFQUAL, reg12, 8);
+	C = reg12[7]*256 + reg12[6];
+	F2 = reg12[3]*256 + reg12[2];
+	F3 = reg12[5]*256+ reg12[4];
+
+	//read register 0x15:DW1000_REGISTER_RX_TIME
+	readSpi(DW1000_REGISTER_RX_TIME	, reg15, 14);
+	F1 = reg15[8]*256 + reg12[7];
+
+
+	//compute LOS/NLOS indicator
+	indicator = 131072*C/(F1*F1 + F2*F2 + F3*F3);
+
+	return indicator;
+}

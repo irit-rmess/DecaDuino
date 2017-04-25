@@ -166,6 +166,8 @@
 
 #define DW1000_REGISTER_RX_BUFFER			0x11
 
+#define DW1000_REGISTER_RX_RFQUAL			0x12
+
 #define DW1000_REGISTER_RX_TTCKI			0x13
 
 #define DW1000_REGISTER_RX_TTCKO			0x14
@@ -758,6 +760,17 @@ class DecaDuino {
 		* @date 20160915
 		*/
 		void setAntennaDelay(uint16_t newAntennaDelay);
+
+		/**
+		* @brief Gets the NLOS indication value associated with the latest reception. 
+                * Interpretation is based on the result of 10log10(x), x being the return value of the function.
+                * A result less than 6dB suggests a LOS channel while a result greater than 10dB indicates an NLOS channel.
+		* @param None
+		* @return The estimated NLOS indicator
+		* @author Rejane Dalce
+		* @date 20170420
+		*/
+		float getNLOSIndication(void);
 
 		/**
 		* @brief Current SPI-bus settings
