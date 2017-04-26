@@ -1274,7 +1274,13 @@ float DecaDuino::getNLOSIndication(void) {
 
 
 	//compute LOS/NLOS indicator
-	indicator = 131072*C/(F1*F1 + F2*F2 + F3*F3);
-
+	indicator = 131072.0*C/(F1*F1 + F2*F2 + F3*F3);
+#ifdef DECADUINO_DEBUG 
+	Serial.printf("%d\n",C);
+	Serial.printf("%d\n",F1);
+	Serial.printf("%d\n",F2);
+	Serial.printf("%d\n",F3);
+	Serial.printf("i=%f\n",indicator);
+#endif
 	return indicator;
 }
