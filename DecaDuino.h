@@ -243,12 +243,12 @@ class DecaDuino {
 
 		/**
 		* @brief Set PHR Mode
-                * @param mode 0 for standard 127 bytes frame, 3 for extended 1023 bytes frame
+		* @param mode 0 for standard 127 bytes frame, 3 for extended 1023 bytes frame
 		* @return No return
 		* @author Laurent GUERBY
 		* @date 20170329
 		*/
-                void setPHRMode(uint8_t mode);
+		void setPHRMode(uint8_t mode);
 
 		/**
 		* @brief Returns the PHR Mode
@@ -256,7 +256,7 @@ class DecaDuino {
 		* @author Laurent GUERBY
 		* @date 20170329
 		*/
-                uint8_t getPHRMode(void);
+		uint8_t getPHRMode(void);
 
 		/**
 		* @brief Stores the System Time Counter value in the variable referenced by the pointer passed as an input parameter
@@ -763,8 +763,8 @@ class DecaDuino {
 
 		/**
 		* @brief Gets the NLOS indication value associated with the latest reception. 
-        * Interpretation is based on the result of 10log10(x), x being the return value of the function.
-        * A result less than 6dB suggests a LOS channel while a result greater than 10dB indicates an NLOS channel.
+		* Interpretation is based on the result of 10log10(x), x being the return value of the function.
+		* A result less than 6dB suggests a LOS channel while a result greater than 10dB indicates an NLOS channel.
 		* @param None
 		* @return The estimated NLOS indicator
 		* @author Rejane Dalce

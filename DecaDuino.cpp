@@ -92,12 +92,12 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 #endif
 
 	// Enable frame filtering on addressing fields if init() is called with a shortAddressAndPanId != 0xFFFFFFFF
-        if ( shortAddressAndPanId != 0xFFFFFFFF ) {
-        	ui32t = readSpiUint32(DW1000_REGISTER_SYS_CFG);
-                ui32t |= 0x0000003D;
-        	writeSpiUint32(DW1000_REGISTER_SYS_CFG,ui32t);
+	if ( shortAddressAndPanId != 0xFFFFFFFF ) {
+		ui32t = readSpiUint32(DW1000_REGISTER_SYS_CFG);
+		ui32t |= 0x0000003D;
+		writeSpiUint32(DW1000_REGISTER_SYS_CFG,ui32t);
 		setShortAddressAndPanId(shortAddressAndPanId);
-        }
+	}
 
 	// Set default antenna delay value
 	setAntennaDelay(DWM1000_DEFAULT_ANTENNA_DELAY_VALUE);
@@ -152,8 +152,8 @@ void DecaDuino::resetDW1000() {
 
 	delay(5);
 
-        // Load the LDE algorithm microcode into LDE RAM or disable LDE execution (clear LDERUNE)
-        // Load the LDE algorithm microcode into LDE RAM (procedure p.22 DW1000 User Manual + comment p.21)
+		// Load the LDE algorithm microcode into LDE RAM or disable LDE execution (clear LDERUNE)
+		// Load the LDE algorithm microcode into LDE RAM (procedure p.22 DW1000 User Manual + comment p.21)
 
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
 
@@ -631,7 +631,7 @@ void DecaDuino::spi_receive ( uint8_t* buf, uint16_t len ) {
 	int i;
 
 	for (i=0; i<len; i++)
-                buf[i] = SPI.transfer(0);
+		buf[i] = SPI.transfer(0);
 }
 
 
@@ -830,7 +830,7 @@ uint8_t DecaDuino::getPHRMode(void) {
 
 	ui32t = readSpiUint32(DW1000_REGISTER_SYS_CFG);
 	ui32t = (ui32t & DW1000_REGISTER_SYS_CFG_PHR_MODE_MASK) >> DW1000_REGISTER_SYS_CFG_PHR_MODE_SHIFT;
-        return (uint8_t)ui32t;
+		return (uint8_t)ui32t;
 }
 
 uint64_t DecaDuino::getSystemTimeCounter ( void ) {
@@ -916,8 +916,8 @@ int DecaDuino::setShortAddressAndPanId(uint32_t shortAddressPanId) {
 
 	uint32_t ret;	
 
-        writeSpiUint32(0x03, shortAddressPanId);
-        ret = readSpiUint32(0x03);
+	writeSpiUint32(0x03, shortAddressPanId);
+	ret = readSpiUint32(0x03);
 	if ( ret != shortAddressPanId ) {
 #ifdef DECADUINO_DEBUG
 		Serial.println("Setting Short Address and PanId OK\n");
@@ -952,8 +952,8 @@ uint8_t DecaDuino::getRxPrf(void) {
  	uint32_t ui32t;
 
 	ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
-        ui32t = ( ui32t & DW1000_REGISTER_CHAN_CTRL_RXPRF_MASK) >> 18;
-        return (uint8_t)ui32t;
+	ui32t = ( ui32t & DW1000_REGISTER_CHAN_CTRL_RXPRF_MASK) >> 18;
+	return (uint8_t)ui32t;
 }
 
 
@@ -962,8 +962,8 @@ uint8_t DecaDuino::getTxPcode(void) {
  	uint32_t ui32t;
 
 	ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
-        ui32t = ( ui32t & DW1000_REGISTER_CHAN_CTRL_TX_PCODE_MASK) >> 22;
-        return (uint8_t)ui32t;
+	ui32t = ( ui32t & DW1000_REGISTER_CHAN_CTRL_TX_PCODE_MASK) >> 22;
+	return (uint8_t)ui32t;
 }
 
 
@@ -972,8 +972,8 @@ uint8_t DecaDuino::getRxPcode(void) {
  	uint32_t ui32t;
 
 	ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
-        ui32t = ( ui32t & DW1000_REGISTER_CHAN_CTRL_RX_PCODE_MASK) >> 27;
-        return (uint8_t)ui32t;
+	ui32t = ( ui32t & DW1000_REGISTER_CHAN_CTRL_RX_PCODE_MASK) >> 27;
+	return (uint8_t)ui32t;
 }
 
 
@@ -998,14 +998,14 @@ bool DecaDuino::setChannel(uint8_t channel) {
 
 bool DecaDuino::setRxPrf(uint8_t prf) {
 
-        uint32_t ui32t;
+	uint32_t ui32t;
 
 	if ( ( prf == 1 ) || ( prf == 2 ) ) {
 
 		ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
-                ui32t = ui32t & (~DW1000_REGISTER_CHAN_CTRL_RXPRF_MASK);
-                ui32t |= prf << 18; 
-                writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
+		ui32t = ui32t & (~DW1000_REGISTER_CHAN_CTRL_RXPRF_MASK);
+		ui32t |= prf << 18; 
+		writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
 		return true;
 
 	} else return false;
@@ -1014,14 +1014,14 @@ bool DecaDuino::setRxPrf(uint8_t prf) {
 
 bool DecaDuino::setTxPcode(uint8_t pcode) {
 
-        uint32_t ui32t;
+	uint32_t ui32t;
 
  	if ( ( pcode > 0 ) && ( pcode <= 20 ) ) {
 
 		ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
-                ui32t = ui32t & (~DW1000_REGISTER_CHAN_CTRL_TX_PCODE_MASK);
-                ui32t |= pcode << 22; 
-                writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
+		ui32t = ui32t & (~DW1000_REGISTER_CHAN_CTRL_TX_PCODE_MASK);
+		ui32t |= pcode << 22; 
+		writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
 		return true;
 
 	} else return false;
@@ -1030,14 +1030,14 @@ bool DecaDuino::setTxPcode(uint8_t pcode) {
 
 bool DecaDuino::setRxPcode(uint8_t pcode) {
 
-        uint32_t ui32t;
+	uint32_t ui32t;
 
  	if ( ( pcode > 0 ) && ( pcode <= 20 ) ) {
 
 		ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
-                ui32t = ui32t & (~DW1000_REGISTER_CHAN_CTRL_RX_PCODE_MASK);
-                ui32t |= pcode << 27; 
-                writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
+		ui32t = ui32t & (~DW1000_REGISTER_CHAN_CTRL_RX_PCODE_MASK);
+		ui32t |= pcode << 27; 
+		writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
 		return true;
 
 	} else return false;
@@ -1254,6 +1254,7 @@ void DecaDuino::wakeRequest(void) {
 
 
 float DecaDuino::getNLOSIndication(void) {
+
 	float indicator = 0;
 	uint8_t reg12[8];
 	uint8_t reg15[14];
@@ -1271,7 +1272,6 @@ float DecaDuino::getNLOSIndication(void) {
 	//read register 0x15:DW1000_REGISTER_RX_TIME
 	readSpi(DW1000_REGISTER_RX_TIME	, reg15, 14);
 	F1 = reg15[8]*256 + reg12[7];
-
 
 	//compute LOS/NLOS indicator
 	indicator = 131072.0*C/(F1*F1 + F2*F2 + F3*F3);
