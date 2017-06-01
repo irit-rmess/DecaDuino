@@ -1,22 +1,32 @@
+// DecaDuinoReceiver
+// This sketch shows how to use the DecaDuino library to receive messages over the UWB radio.
+// The sketch prints the received bytes in HEX; it can be used as a frame sniffer.
+// by Adrien van den Bossche <vandenbo@univ-tlse2.fr>
+// Licensing: see DecaDuino licence
+
 #include <SPI.h>
 #include <DecaDuino.h>
 
-DecaDuino decaduino;
-uint8_t txData[128];
-uint8_t rxData[128];
+#define MAX_FRAME_LEN 120
+uint8_t rxData[MAX_FRAME_LEN];
 uint16_t rxLen;
-#define FRAME_LEN 64
+DecaDuino decaduino;
 int rxFrames;
 
 
-void setup() {
-
+void setup()
+{
   pinMode(13, OUTPUT);
+  Serial.begin(115200);
   SPI.setSCK(14);
   if ( !decaduino.init() ) {
     Serial.println("decaduino init failed");
-    digitalWrite(13, HIGH);   
-    while(1);
+    while(1) {
+      digitalWrite(13, HIGH);
+      delay(50);
+      digitalWrite(13, LOW);
+      delay(50);
+    }
   }
   
   rxFrames = 0;
@@ -24,16 +34,16 @@ void setup() {
   decaduino.plmeRxEnableRequest();
 }
 
-void loop() {
-  
-  int i;
 
+void loop()
+{  
+  // If a message has been received, print it and re-enable receiver
   if ( decaduino.rxFrameAvailable() ) {
     digitalWrite(13, HIGH);
-    Serial.print("["); Serial.print(++rxFrames); Serial.print("] ");
+    Serial.print("#"); Serial.print(++rxFrames); Serial.print(" ");
     Serial.print(rxLen);
-    Serial.print("bytes received: ");
-    for (i=0; i<rxLen; i++) {
+    Serial.print("bytes received: |");
+    for (int i=0; i<rxLen; i++) {
       Serial.print(rxData[i], HEX);
       Serial.print("|");
     }
