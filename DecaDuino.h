@@ -576,7 +576,7 @@ class DecaDuino {
 		void wakeRequest(void);
 
 		/**
-		* @brief Returns true of the a frame have been received.
+		* @brief Returns true if a frame has been received.
 		* @return true if a frame has been received, false otherwise.
 		* @author Adrien van den Bossche
 		* @date 20141115
@@ -584,7 +584,7 @@ class DecaDuino {
 		uint8_t rxFrameAvailable(void);
 
 		/**
-		* @brief Returns true of the a frame have been received, copy received bytes in buf and store message length in len. 
+		* @brief Returns true if a frame has been received, copy received bytes in buf and store message length in len. 
 		* @param buf The address of the buffer
 		* @param len The address of the message length
 		* @return true if a frame has been received, false otherwise.
@@ -594,7 +594,7 @@ class DecaDuino {
 		uint8_t rxFrameAvailable(uint8_t* buf, uint16_t *len);
 
 		/**
-		* @brief Returns true of the a frame have been received, copy received bytes in buf and store message length in len. The received bytes shall be copied toward the end of the buffer of size max.
+		* @brief Returns true if a frame has been received, copy received bytes in buf and store message length in len. The received bytes shall be copied toward the end of the buffer of size max.
 		* @param buf The address of the buffer
 		* @param len The address of the message length
 		* @param max The buffer size 
@@ -605,7 +605,7 @@ class DecaDuino {
 		uint8_t rxFrameAvailable(uint8_t* buf, uint16_t *len, uint16_t max);
 
 		/**
-		* @brief Returns true if the last transmission request as been succefully completed
+		* @brief Returns true if the last transmission request has been succefully completed
 		* @return true if the last transmission request has been succefully completed
 		* @author Adrien van den Bossche
 		* @date 20141115
