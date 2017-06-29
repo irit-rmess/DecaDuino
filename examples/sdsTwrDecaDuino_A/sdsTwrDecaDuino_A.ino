@@ -162,7 +162,7 @@ void loop() {
       t2 = decaduino.decodeUint64(&rxData[1]);
       t3 = decaduino.decodeUint64(&rxData[9]);
       t6 = decaduino.decodeUint64(&rxData[17]);
-      tof = (2*t4 - t1 - 2*t3 + t2 + t6 - t5)/4;
+      tof = (((((t4 - t1) & mask) - ((t3 - t2) & mask)) & mask) + ((((t6 - t3) & mask) - ((t5 - t4) & mask)) & mask))/4;
       Serial.print("ToF=");
       Serial.print(tof);
       Serial.print(" d=");
