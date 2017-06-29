@@ -12,23 +12,17 @@ uint16_t antennaDelay;
 #define TIMEOUT 10
 
 #define TWR_ENGINE_STATE_INIT 1
-#define TWR_ENGINE_STATE_WAIT_NEW_CYCLE 2
-#define TWR_ENGINE_STATE_SEND_START 3
-#define TWR_ENGINE_STATE_WAIT_START_SENT 4
-#define TWR_ENGINE_STATE_MEMORISE_T1 5
-#define TWR_ENGINE_STATE_WATCHDOG_FOR_ACK_REQ 6
-#define TWR_ENGINE_STATE_RX_ON_FOR_ACK_REQ 7
-#define TWR_ENGINE_STATE_WAIT_ACK_REQ 8
-#define TWR_ENGINE_STATE_MEMORISE_T4 9
-#define TWR_ENGINE_STATE_SEND_ACK 10 
-#define TWR_ENGINE_STATE_WAIT_ACK_SENT 11
-#define TWR_ENGINE_STATE_MEMORISE_T5 12
-#define TWR_ENGINE_STATE_WATCHDOG_FOR_DATA_REPLY 13
-#define TWR_ENGINE_STATE_RX_ON_FOR_DATA_REPLY 14
-#define TWR_ENGINE_STATE_WAIT_DATA_REPLY 15
-#define TWR_ENGINE_STATE_EXTRACT_T2_T3_T6 16
+#define TWR_ENGINE_STATE_WAIT_START_SENT 2
+#define TWR_ENGINE_STATE_MEMORISE_T1 3
+#define TWR_ENGINE_STATE_WAIT_ACK_REQ 4
+#define TWR_ENGINE_STATE_MEMORISE_T4 5
+#define TWR_ENGINE_STATE_SEND_ACK 6
+#define TWR_ENGINE_STATE_WAIT_ACK_SENT 7
+#define TWR_ENGINE_STATE_MEMORISE_T5 8
+#define TWR_ENGINE_STATE_WAIT_DATA_REPLY 9
+#define TWR_ENGINE_STATE_EXTRACT_T2_T3_T6 10
 
-#define TWR_MSG_TYPE_UNKNOW 0
+#define TWR_MSG_TYPE_UNKNOWN 0
 #define TWR_MSG_TYPE_START 1
 #define TWR_MSG_TYPE_ACK_REQ 2
 #define TWR_MSG_TYPE_ACK 3
@@ -37,6 +31,7 @@ uint16_t antennaDelay;
 int rxFrames;
 
 uint64_t t1, t2, t3, t4, t5, t6;
+uint64_t mask = 0xFFFFFFFFFF;
 int32_t tof;
 
 DecaDuino decaduino;
@@ -44,7 +39,7 @@ uint8_t txData[128];
 uint8_t rxData[128];
 uint16_t rxLen;
 int state;
-int timeout;
+uint32_t timeout;
 
 void setup() {
 
@@ -87,49 +82,38 @@ void loop() {
   
     case TWR_ENGINE_STATE_INIT :
       decaduino.plmeRxDisableRequest();
-      state = TWR_ENGINE_STATE_WAIT_NEW_CYCLE;
-      break;
-    
-    case TWR_ENGINE_STATE_WAIT_NEW_CYCLE :
-      delay(1000);
+			delay(1000);
       Serial.println("New SDS_TWR");
-      state = TWR_ENGINE_STATE_SEND_START;
-      break;
-    
-    case TWR_ENGINE_STATE_SEND_START :
       txData[0] = TWR_MSG_TYPE_START;
       decaduino.pdDataRequest(txData, 1);
       state = TWR_ENGINE_STATE_WAIT_START_SENT;
       break;
-       
+      
     case TWR_ENGINE_STATE_WAIT_START_SENT :
-      if (decaduino.hasTxSucceeded())
-      state = TWR_ENGINE_STATE_MEMORISE_T1;
+      if (decaduino.hasTxSucceeded()) {
+      	state = TWR_ENGINE_STATE_MEMORISE_T1;
+      }
       break;
        
     case TWR_ENGINE_STATE_MEMORISE_T1 :
       t1 = decaduino.lastTxTimestamp;
-      state = TWR_ENGINE_STATE_WATCHDOG_FOR_ACK_REQ;
-      break;
-       
-    case TWR_ENGINE_STATE_WATCHDOG_FOR_ACK_REQ :
       timeout = millis() + TIMEOUT;
-      state = TWR_ENGINE_STATE_RX_ON_FOR_ACK_REQ;
-      break;
-       
-    case TWR_ENGINE_STATE_RX_ON_FOR_ACK_REQ :
       decaduino.plmeRxEnableRequest();
       state = TWR_ENGINE_STATE_WAIT_ACK_REQ;
       break;
        
     case TWR_ENGINE_STATE_WAIT_ACK_REQ :
       if ( millis() > timeout) {
-      state = TWR_ENGINE_STATE_INIT;}
+      	state = TWR_ENGINE_STATE_INIT;
+      }
       else { 
         if (decaduino.rxFrameAvailable()){
           if (rxData[0] == TWR_MSG_TYPE_ACK_REQ) {
-          state = TWR_ENGINE_STATE_MEMORISE_T4;
-          } else state = TWR_ENGINE_STATE_RX_ON_FOR_ACK_REQ;
+          	state = TWR_ENGINE_STATE_MEMORISE_T4;
+          } else {
+          	decaduino.plmeRxEnableRequest();
+          	state = TWR_ENGINE_STATE_WAIT_ACK_REQ;
+          }
         }
       }
       break;
@@ -147,32 +131,29 @@ void loop() {
        
     case TWR_ENGINE_STATE_WAIT_ACK_SENT :
       if (decaduino.hasTxSucceeded()){
-      state = TWR_ENGINE_STATE_MEMORISE_T5;}
+      	state = TWR_ENGINE_STATE_MEMORISE_T5;
+      }
       break;
       
     case TWR_ENGINE_STATE_MEMORISE_T5 :
       t5 = decaduino.lastTxTimestamp;
-      state = TWR_ENGINE_STATE_WATCHDOG_FOR_DATA_REPLY;
-      break;
-       
-    case TWR_ENGINE_STATE_WATCHDOG_FOR_DATA_REPLY :
       timeout = millis() + TIMEOUT;
-      state = TWR_ENGINE_STATE_RX_ON_FOR_DATA_REPLY;
-      break;
-       
-    case TWR_ENGINE_STATE_RX_ON_FOR_DATA_REPLY :
       decaduino.plmeRxEnableRequest();
       state = TWR_ENGINE_STATE_WAIT_DATA_REPLY;
       break;
        
     case TWR_ENGINE_STATE_WAIT_DATA_REPLY :
       if ( millis() > timeout) {
-      state = TWR_ENGINE_STATE_INIT;}
+      	state = TWR_ENGINE_STATE_INIT;
+      }
       else { 
         if (decaduino.rxFrameAvailable()){
           if (rxData[0] == TWR_MSG_TYPE_DATA_REPLY) {
           state = TWR_ENGINE_STATE_EXTRACT_T2_T3_T6;
-          } else state = TWR_ENGINE_STATE_RX_ON_FOR_DATA_REPLY;
+          } else {
+          	decaduino.plmeRxEnableRequest();
+          	state = TWR_ENGINE_STATE_WAIT_DATA_REPLY;
+          	}
         }
       }
       break;

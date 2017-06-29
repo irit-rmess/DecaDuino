@@ -10,19 +10,16 @@ uint16_t antennaDelay;
 #define TIMEOUT 10
 
 #define TWR_ENGINE_STATE_INIT 1
-#define TWR_ENGINE_STATE_RX_ON 2
 #define TWR_ENGINE_STATE_WAIT_START 3
 #define TWR_ENGINE_STATE_MEMORISE_T2 4
 #define TWR_ENGINE_STATE_SEND_ACK_REQ 5
 #define TWR_ENGINE_STATE_WAIT_SENT 6
 #define TWR_ENGINE_STATE_MEMORISE_T3 7
-#define TWR_ENGINE_STATE_WATCHDOG_FOR_ACK 8
-#define TWR_ENGINE_STATE_RX_ON_FOR_ACK 9
 #define TWR_ENGINE_STATE_WAIT_ACK 10
 #define TWR_ENGINE_STATE_MEMORISE_T6 11
 #define TWR_ENGINE_STATE_SEND_DATA_REPLY 12
 
-#define TWR_MSG_TYPE_UNKNOW 0
+#define TWR_MSG_TYPE_UNKNOWN 0
 #define TWR_MSG_TYPE_START 1
 #define TWR_MSG_TYPE_ACK_REQ 2
 #define TWR_MSG_TYPE_ACK 3
@@ -38,7 +35,7 @@ uint8_t txData[128];
 uint8_t rxData[128];
 uint16_t rxLen;
 int state;
-int timeout;
+uint32_t timeout;
 
 void setup() {
 
@@ -79,19 +76,18 @@ void loop() {
   switch (state) {
   
     case TWR_ENGINE_STATE_INIT :
-       state = TWR_ENGINE_STATE_RX_ON;
-       break;
-       
-    case TWR_ENGINE_STATE_RX_ON :
-       decaduino.plmeRxEnableRequest();
+			 decaduino.plmeRxEnableRequest();
        state = TWR_ENGINE_STATE_WAIT_START;
        break;
-       
+
     case TWR_ENGINE_STATE_WAIT_START :
        if (decaduino.rxFrameAvailable()){
          if ( rxData[0] == TWR_MSG_TYPE_START){
-            state = TWR_ENGINE_STATE_MEMORISE_T2;
-         } else state = TWR_ENGINE_STATE_RX_ON; 
+           state = TWR_ENGINE_STATE_MEMORISE_T2;
+         } else {
+         	 decaduino.plmeRxEnableRequest();
+           state = TWR_ENGINE_STATE_WAIT_START; 
+         }
        }
        break;
        
@@ -108,32 +104,29 @@ void loop() {
        
     case TWR_ENGINE_STATE_WAIT_SENT:
        if (decaduino.hasTxSucceeded()){
-      state = TWR_ENGINE_STATE_MEMORISE_T3; }
+      	 state = TWR_ENGINE_STATE_MEMORISE_T3; 
+       }
        break;
        
     case TWR_ENGINE_STATE_MEMORISE_T3 :
        t3 = decaduino.lastTxTimestamp;
-       state = TWR_ENGINE_STATE_WATCHDOG_FOR_ACK;
-       break;
-       
-    case TWR_ENGINE_STATE_WATCHDOG_FOR_ACK :
        timeout = millis() + TIMEOUT;
-       state = TWR_ENGINE_STATE_RX_ON_FOR_ACK;
-       break;
-       
-    case TWR_ENGINE_STATE_RX_ON_FOR_ACK :
        decaduino.plmeRxEnableRequest();
        state = TWR_ENGINE_STATE_WAIT_ACK;
        break;
-       
+ 
     case TWR_ENGINE_STATE_WAIT_ACK :
        if ( millis() > timeout) {
-       state = TWR_ENGINE_STATE_INIT;}
+       	 state = TWR_ENGINE_STATE_INIT;
+       }
        else { 
          if (decaduino.rxFrameAvailable()){
            if (rxData[0] == TWR_MSG_TYPE_ACK) {
-           state = TWR_ENGINE_STATE_MEMORISE_T6;
-           } else state = TWR_ENGINE_STATE_RX_ON_FOR_ACK;
+           	 state = TWR_ENGINE_STATE_MEMORISE_T6;
+           } else {
+           	 decaduino.plmeRxEnableRequest();
+           	 state = TWR_ENGINE_STATE_WAIT_ACK;
+           }
          }
        }
        break;
