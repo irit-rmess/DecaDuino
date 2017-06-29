@@ -136,7 +136,6 @@ void loop() {
     
     case TWR_ENGINE_STATE_WAIT_ACK:
       if ( millis() > timeout ) {
-        Serial.println("TIMEOUT WAIT ACK");
         state = TWR_ENGINE_STATE_INIT;
       } else {
           if ( decaduino.rxFrameAvailable() ) {

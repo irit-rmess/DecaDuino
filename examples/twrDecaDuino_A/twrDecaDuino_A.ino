@@ -149,7 +149,7 @@ void loop() {
     case TWR_ENGINE_STATE_EXTRACT_T2_T3:
       t2 = decaduino.decodeUint64(&rxData[1]);
       t3 = decaduino.decodeUint64(&rxData[9]);
-      tof = (t4 - t1 - (t3 - t2))/2;
+      tof = (((t4 - t1) & mask) - ((t3 - t2) & mask))/2;
       distance = tof*COEFF*X_CORRECTION + Y_CORRECTION;
       Serial.print("ToF=");
       Serial.print(tof, HEX);
