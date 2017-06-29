@@ -16,14 +16,14 @@ uint16_t antennaDelay;
 #define TIMEOUT2 20
 
 #define TWR_ENGINE_STATE_INIT 1
-#define TWR_ENGINE_STATE_WAIT_SEND_START 2
+#define TWR_ENGINE_STATE_WAIT_START_SENT 2
 #define TWR_ENGINE_STATE_MEMORISE_T1 3
 #define TWR_ENGINE_STATE_WAIT_ACK 4
 #define TWR_ENGINE_STATE_MEMORISE_T4 5
 #define TWR_ENGINE_STATE_WAIT_DATA_REPLY 6
 #define TWR_ENGINE_STATE_EXTRACT_T2_T3 7
 #define TWR_ENGINE_STATE_SEND_ACK 8
-#define TWR_ENGINE_STATE_WAIT_SEND_ACK 9
+#define TWR_ENGINE_STATE_WAIT_ACK_SENT 9
 
 #define TWR_MSG_TYPE_UNKNOWN 0
 #define TWR_MSG_TYPE_START 1
@@ -93,10 +93,10 @@ void loop() {
       Serial.println("New TWR");
       txData[0] = TWR_MSG_TYPE_START;
       decaduino.pdDataRequest(txData, 1);
-      state = TWR_ENGINE_STATE_WAIT_SEND_START;
+      state = TWR_ENGINE_STATE_WAIT_START_SENT;
       break;
 
-    case TWR_ENGINE_STATE_WAIT_SEND_START:
+    case TWR_ENGINE_STATE_WAIT_START_SENT:
       if ( decaduino.hasTxSucceeded() ) {
         state = TWR_ENGINE_STATE_MEMORISE_T1;
       }
@@ -159,13 +159,13 @@ void loop() {
       state = TWR_ENGINE_STATE_SEND_ACK;
       break;
 
-	case TWR_ENGINE_STATE_SEND_ACK:
+    case TWR_ENGINE_STATE_SEND_ACK:
       txData[0] = TWR_MSG_TYPE_ACK;
       decaduino.pdDataRequest(txData, 1);
-      state = TWR_ENGINE_STATE_WAIT_SEND_ACK;
+      state = TWR_ENGINE_STATE_WAIT_ACK_SENT;
       break;
 
-    case TWR_ENGINE_STATE_WAIT_SEND_ACK:
+    case TWR_ENGINE_STATE_WAIT_ACK_SENT:
       if ( decaduino.hasTxSucceeded() ) {
         state = TWR_ENGINE_STATE_INIT;
       }
