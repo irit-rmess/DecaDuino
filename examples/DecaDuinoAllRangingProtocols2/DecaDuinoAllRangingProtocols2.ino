@@ -50,8 +50,9 @@ struct Neighb {
 uint32_t printNeighbTimeout;
 uint32_t rangeNeighbTimeout;
 
+#define NEIGHB_POS_PERIOD 3 // seconds
 #define PRINT_NEIGHB_PERIOD 3 // seconds
-#define RANGE_NEIGHB_PERIOD 1 // seconds
+#define RANGE_NEIGHB_PERIOD 20 // seconds
 
 #define MAX_NEIGHB 100
 
@@ -159,8 +160,6 @@ uint16_t rxLen;
 int state_ranging;
 int state_twr;
 int state_sdstwr;
-
-#define NEIGHB_POS_PERIOD 10 // seconds
 
 uint32_t timeout;
 uint32_t neighb_timeout;
@@ -1181,5 +1180,18 @@ void loop() {
   if ( millis() > printNeighbTimeout ) {
     printNeighbTimeout = millis() + PRINT_NEIGHB_PERIOD*1000;
     printNeighbTable();
+  }
+
+  if (isAvailable) {
+    if ( label == 0x1 ) {
+      if ( millis() > rangeNeighbTimeout ) {
+        rangeNeighbTimeout = millis() + RANGE_NEIGHB_PERIOD*1000;
+        protocol = SDSTWR_PROTOCOL;
+        if ( indexLastNode() > 0 ) {
+          //rangingRequest(random(indexLastNode()));
+          rangingRequest(0);
+        }
+      }
+    }
   }
 }
