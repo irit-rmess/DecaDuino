@@ -1061,8 +1061,11 @@ void setup() {
   digitalWrite(RGB_GREEN_PIN, LOW);
   digitalWrite(RGB_BLUE_PIN, HIGH);
 
+  randomSeed(analogRead(A20));
+
   while(Serial.available()==0);
   Serial.setTimeout(86400);
+  Serial.println("<label> <status> <2D or 3D position> <eAR> <protocols>");
   label=Serial.parseInt();
   Serial.printf("label : 0x%04X", label);
   Serial.println();
