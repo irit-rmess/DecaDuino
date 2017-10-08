@@ -47,6 +47,12 @@ struct Neighb {
   uint8_t protocols_available;
 };
 
+uint32_t printNeighbTimeout;
+uint32_t rangeNeighbTimeout;
+
+#define PRINT_NEIGHB_PERIOD 3 // seconds
+#define RANGE_NEIGHB_PERIOD 1 // seconds
+
 #define MAX_NEIGHB 100
 
 Neighb neighb_table[MAX_NEIGHB];
@@ -815,6 +821,17 @@ int nodeInNeighbTable(uint16_t addr) {
 }
 
 
+void printNeighbTable(void) {
+
+  Serial.printf("index\t@\tstatus\tx\ty\tz\teAR\tprotocs\n");
+  for (int i=0; i<MAX_NEIGHB; i++) {
+    if (neighb_table[i].neighb_label != 0xFFFF) {
+      Serial.printf("%d\t0x%04x\t0x%02x\t%.4f\t%.4f\t%.4f\t%.4f\t0x%02x\n", i, neighb_table[i].neighb_label, neighb_table[i].Status, neighb_table[i].x, neighb_table[i].y, neighb_table[i].z, neighb_table[i].eAR, neighb_table[i].protocols_available);
+    }
+  }
+}
+
+
 //check if the node if available
 bool nodeAvailable(int index) {
   
@@ -1156,8 +1173,9 @@ void loop() {
   macEngine();
   checkSerialAvailable();
   neighbPosition();
+
+  if ( millis() > printNeighbTimeout ) {
+    printNeighbTimeout = millis() + PRINT_NEIGHB_PERIOD*1000;
+    printNeighbTable();
+  }
 }
-
-
-
-
