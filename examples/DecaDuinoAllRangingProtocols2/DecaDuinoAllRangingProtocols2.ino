@@ -1043,7 +1043,7 @@ void neighbPosition() {
     // NEIGHB_POSITION can't be send during a ranging phase
     sendNeighbPosition();
     sqn++;
-    neighb_timeout = millis() + NEIGHB_POS_PERIOD*1000;
+    neighb_timeout = millis()+NEIGHB_POS_PERIOD*1000+random(-2000, 2000);
   }
 }
 
@@ -1147,7 +1147,8 @@ void setup() {
   decaduino.setRxBuffer(rxData, &rxLen);
 
   initNeighbTable();
-  neighb_timeout = millis() + NEIGHB_POS_PERIOD*1000;
+  neighb_timeout = millis()+NEIGHB_POS_PERIOD*1000+random(-2000, 2000);
+  rangeNeighbTimeout = millis() + 5000; //RANGE_NEIGHB_PERIOD*1000;
   decaduino.plmeRxEnableRequest();
   Serial.println("RUN");
   Serial.println();
