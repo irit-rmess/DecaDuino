@@ -50,9 +50,9 @@ struct Neighb {
 uint32_t printNeighbTimeout;
 uint32_t rangeNeighbTimeout;
 
-#define NEIGHB_POS_PERIOD 3 // seconds
-#define PRINT_NEIGHB_PERIOD 3 // seconds
-#define RANGE_NEIGHB_PERIOD 20 // seconds
+#define NEIGHB_POS_PERIOD 5 // seconds
+#define PRINT_NEIGHB_PERIOD 5 // seconds
+#define RANGE_NEIGHB_PERIOD 10 // seconds
 
 #define MAX_NEIGHB 100
 
@@ -221,6 +221,7 @@ void macEngine() {
 
 
 void rangingEngine() {
+  
   if ( rangingReq) {
     switch (state_ranging) {
 
@@ -268,6 +269,8 @@ void twrEngine() {
   switch (state_twr) {
     
     case TWR_ENGINE_STATE_IDLE:
+      ranging = false;
+      rx = RX_ON;
       break;
       
     case TWR_ENGINE_STATE_SEND_START:
@@ -299,7 +302,8 @@ void twrEngine() {
 
     case TWR_ENGINE_STATE_WAIT_ACK:
       if ( millis() > timeout ) {
-        state_twr = TWR_ENGINE_STATE_SEND_START;
+        //state_twr = TWR_ENGINE_STATE_SEND_START;
+        state_twr = TWR_ENGINE_STATE_IDLE; // abort ranging if ACK has not been received
       } else {
         if (( rx == RX_DONE ) && ( msg_type == TWR_MSG_TYPE_ACK )) {
           if ( rangingDebug ) {
@@ -316,7 +320,8 @@ void twrEngine() {
 
     case TWR_ENGINE_STATE_WAIT_DATA_REPLY:
       if ( millis() > timeout ) {
-        state_twr = TWR_ENGINE_STATE_SEND_START;
+        //state_twr = TWR_ENGINE_STATE_SEND_START;
+        state_twr = TWR_ENGINE_STATE_IDLE; // abort ranging if DATA_REPLY has not been received
       } else {
         if (( rx == RX_DONE ) && ( msg_type == TWR_MSG_TYPE_DATA_REPLY )) {
           if ( rangingDebug ) {
@@ -365,8 +370,6 @@ void twrEngine() {
         if ( rangingDebug ) {
           Serial.println("ACK SENT");
         }
-        ranging = false;
-        rx = RX_ON;
         state_twr = TWR_ENGINE_STATE_IDLE;
       }
       break;
@@ -453,8 +456,6 @@ void twrEngine() {
             Serial.println("ACK RECEIVED FROM CLIENT");
           }
           sqn++;
-          ranging = false;
-          rx = RX_ON;
           state_twr = TWR_ENGINE_STATE_IDLE;
         }
       }
@@ -472,6 +473,8 @@ void sdstwrEngine() {
   switch (state_sdstwr) {
 
     case SDSTWR_ENGINE_STATE_IDLE:
+      ranging = false;
+      rx = RX_ON;
       break;
 
     case SDSTWR_ENGINE_STATE_SEND_START:
@@ -486,7 +489,7 @@ void sdstwrEngine() {
       txData[7] = SDSTWR_MSG_TYPE_START;
       nbData = 8;
       tx = TX_ON;
-      state_sdstwr = TWR_ENGINE_STATE_MEMORISE_T1;
+      state_sdstwr = SDSTWR_ENGINE_STATE_MEMORISE_T1;
       break;
     
     case SDSTWR_ENGINE_STATE_MEMORISE_T1:
@@ -503,7 +506,8 @@ void sdstwrEngine() {
 
     case SDSTWR_ENGINE_STATE_WAIT_ACK_CLIENT:
       if ( millis() > timeout ) {
-        state_sdstwr = SDSTWR_ENGINE_STATE_SEND_START;
+        // state_sdstwr = SDSTWR_ENGINE_STATE_SEND_START;
+        state_sdstwr = SDSTWR_ENGINE_STATE_IDLE; // abort ranging if ACK has not been received
       } else {
         if (( rx == RX_DONE ) && ( msg_type == SDSTWR_MSG_TYPE_ACK )) {
           if ( rangingDebug ) {
@@ -545,7 +549,8 @@ void sdstwrEngine() {
 
     case SDSTWR_ENGINE_STATE_WAIT_DATA_REPLY:
       if ( millis() > timeout ) {
-        state_sdstwr = SDSTWR_ENGINE_STATE_SEND_START;
+        // state_sdstwr = SDSTWR_ENGINE_STATE_SEND_START;
+        state_sdstwr = SDSTWR_ENGINE_STATE_IDLE; // abort ranging if DATA_REPLY has not been received
       } else {
         if (( rx == RX_DONE ) && ( msg_type == SDSTWR_MSG_TYPE_DATA_REPLY )) {
           if ( rangingDebug ) {
@@ -573,8 +578,6 @@ void sdstwrEngine() {
       if ( tof * COEFF < 0 ) {
         Serial.println("ERROR NEGATIVE VALUE FOR DISTANCE");
       }
-      ranging = false;
-      rx = RX_ON;
       state_sdstwr = SDSTWR_ENGINE_STATE_IDLE;
       break;
 
@@ -663,9 +666,7 @@ void sdstwrEngine() {
           Serial.println("DATA REPLY SENT");
         }
         timeout = millis() + TIMEOUT;
-        rx = RX_ON;
         sqn++;
-        ranging = false;
         state_sdstwr = SDSTWR_ENGINE_STATE_IDLE;
       }
       break;
@@ -1182,16 +1183,16 @@ void loop() {
     printNeighbTable();
   }
 
+/*
   if (isAvailable) {
-    if ( label == 0x1 ) {
-      if ( millis() > rangeNeighbTimeout ) {
-        rangeNeighbTimeout = millis() + RANGE_NEIGHB_PERIOD*1000;
-        protocol = SDSTWR_PROTOCOL;
-        if ( indexLastNode() > 0 ) {
-          //rangingRequest(random(indexLastNode()));
-          rangingRequest(0);
-        }
+    if ( millis() > rangeNeighbTimeout ) {
+      rangeNeighbTimeout = millis() + RANGE_NEIGHB_PERIOD*1000;
+      protocol = SDSTWR_PROTOCOL;
+      if ( indexLastNode() > 0 ) {
+        //rangingRequest(random(indexLastNode()));
+        rangingRequest(0);
       }
     }
   }
+  */
 }
