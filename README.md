@@ -38,6 +38,6 @@ messages via the Serial port over the UWB radio.
 
 ### DecaDuinoTWR_client and DecaDuinoTWR_server
 
-This sketch proposes a simple implementation of the TWR protocol. Flash each
-example sketch on two nodes (client and server) and get the distance between the
-two nodes.
+These two sketchs propose a simple implementation of the TWR protocol. Flash
+each example sketch on two nodes (client and server) and get the distance
+between the two nodes.
