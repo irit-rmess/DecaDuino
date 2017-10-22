@@ -17,7 +17,7 @@
 ///
 /// \image html DecaDuinoStack.png
 ///
-/// DecaDuino has been written by Adrien van den Bossche and Réjane Dalcé at the <a href='http://www.irit.fr'>Institut de Recherche en Informatique de Toulouse</a> (IRIT), France. 
+/// DecaDuino has been written by Adrien van den Bossche and Réjane Dalcé at the <a href='http://www.irit.fr'>Institut de Recherche en Informatique de Toulouse</a> (IRIT), France. Thanks to Thierry Val, François Despaux, Laurent Guerby, Ibrahim Fofana and Robert Try for their contributions to DecaDuino.
 ///
 /// \par Download
 ///
@@ -34,7 +34,7 @@
 /// #include <SPI.h>
 /// #include <DecaDuino.h>
 /// \endcode
-/// For more details, please checkout the examples in the File->Examples->DecaDuino menu in the Arduino IDE.
+/// For more details, please checkout the examples in the File->Examples->DecaDuino menu in the Arduino IDE. The sketches include both frame send/receive examples and ranging protocols implementation examples.
 ///
 /// \par Contact, feedback and users forum
 /// 
