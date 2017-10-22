@@ -15,7 +15,7 @@
 #define TIMEOUT_WAIT_DATA_REPLY 20 //ms
 
 // Ranging period parameter
-#define RANGING_PERIOD 200 //ms
+#define RANGING_PERIOD 500 //ms
 
 // TWR server states state machine enumeration: see state diagram on documentation for more details
 enum { TWR_ENGINE_STATE_INIT, TWR_ENGINE_STATE_WAIT_START_SENT, TWR_ENGINE_STATE_MEMORISE_T1,
@@ -55,6 +55,9 @@ void setup()
   // Set RX buffer
   decaduino.setRxBuffer(rxData, &rxLen);
   state = TWR_ENGINE_STATE_INIT;
+
+  // Print top table colomns
+  Serial.println("ToF\td\tToF_sk\td_sk");
 }
 
 void loop()
@@ -132,18 +135,15 @@ void loop()
       t3 = decaduino.decodeUint64(&rxData[9]);
       tof = (((t4 - t1) & mask) - ((t3 - t2) & mask))/2;
       distance = tof*RANGING_UNIT;
-      Serial.print("ToF=");
-      Serial.print(tof, HEX);
-      Serial.print(" d=");
+      Serial.print(tof);
+      Serial.print("\t");
       Serial.print(distance);
-      Serial.println();
       tof = (((t4 - t1) & mask) - (1+1.0E-6*decaduino.getLastRxSkew())*((t3 - t2) & mask))/2;
       distance = tof*RANGING_UNIT;
-      Serial.print("ToF_skew_correction=");
-      Serial.print(tof, HEX);
-      Serial.print(" d_skew_correction=");
-      Serial.print(distance);
-      Serial.println();
+      Serial.print("\t");
+      Serial.print(tof);
+      Serial.print("\t");
+      Serial.println(distance);
       state = TWR_ENGINE_STATE_INIT;
       break;
 
