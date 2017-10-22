@@ -712,6 +712,25 @@ class DecaDuino {
 		void encodeUint64 ( uint64_t from, uint8_t *to );
 
 		/**
+		* @brief Builds a float value from four uint8 values
+		* @param data The address of the uint8_t buffer
+		* @return The decoded float
+		* @author Adrien van den Bossche
+		* @date 20171020
+		*/
+		float decodeFloat ( uint8_t *data );
+
+		/**
+		* @brief Formats an float value as a list of uint8 values
+		* @param from The float value
+		* @param to The address of the uint8_t buffer
+		* @return No return
+		* @author Adrien van den Bossche
+		* @date 20171020
+		*/
+		void encodeFloat ( float from, uint8_t *to );
+
+		/**
 		* @brief Prints an uint64_t value on console
 		* @param ui64 The uint64_t value
 		* @return No return

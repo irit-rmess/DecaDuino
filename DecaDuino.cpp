@@ -795,6 +795,41 @@ void DecaDuino::encodeUint64 ( uint64_t from, uint8_t *to ) {
 }
 
 
+float DecaDuino::decodeFloat ( uint8_t *data ) {
+
+	typedef union _data {
+		float f;
+		char  s[4];
+	} myData;
+
+	myData q;
+
+	q.s[0] = data[0];
+	q.s[1] = data[1];
+	q.s[2] = data[2];
+	q.s[3] = data[3];
+
+	return q.f;
+}
+
+
+void DecaDuino::encodeFloat ( float from, uint8_t *to ) {
+
+	typedef union _data {
+		float f;
+		char  s[4];
+	} myData;
+
+	myData q;
+	q.f = from;
+
+	to[0] = q.s[0];
+	to[1] = q.s[1];
+	to[2] = q.s[2];
+	to[3] = q.s[3];
+}
+
+
 void DecaDuino::printUint64 ( uint64_t ui64 ) {
 
 	uint8_t buf[8];
