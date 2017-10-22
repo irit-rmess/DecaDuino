@@ -13,7 +13,7 @@ documentation here: https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/)
 You have to put this library in your Arduino libraries directory.
 
 ## Start using DecaDuino with simple example sketchs
-All example sketches are availabled as usual in the Arduino IDE menu: 
+All example sketches are available as usual in the Arduino IDE menu: 
 ```
 File > Examples > DecaDuino
 ```
@@ -21,7 +21,7 @@ File > Examples > DecaDuino
 ### DecaDuinoSender
 
 This sketch shows how to use the DecaDuino library to send messages over the UWB
-radio
+radio.
 
 ### DecaDuinoReceiverSniffer
 
@@ -31,4 +31,13 @@ frame sniffer to dump received messages.
 
 ### DecaDuinoChat
 
+This sketch shows how to use the DecaDuino library to send and receive ascii
+messages via the Serial port over the UWB radio.
 
+## Use DecaDuino to implement ranging protocols
+
+### DecaDuinoTWR_client and DecaDuinoTWR_server
+
+This sketch proposes a simple implementation of the TWR protocol. Flash each
+example sketch on two nodes (client and server) and get the distance between the
+two nodes.
