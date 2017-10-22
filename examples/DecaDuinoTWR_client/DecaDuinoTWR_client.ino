@@ -17,7 +17,7 @@
 // Ranging period parameter
 #define RANGING_PERIOD 500 //ms
 
-// TWR server states state machine enumeration: see state diagram on documentation for more details
+// TWR client states state machine enumeration: see state diagram on documentation for more details
 enum { TWR_ENGINE_STATE_INIT, TWR_ENGINE_STATE_WAIT_START_SENT, TWR_ENGINE_STATE_MEMORISE_T1,
 TWR_ENGINE_STATE_WAIT_ACK, TWR_ENGINE_STATE_MEMORISE_T4, TWR_ENGINE_STATE_WAIT_DATA_REPLY, 
 TWR_ENGINE_STATE_EXTRACT_T2_T3 };
