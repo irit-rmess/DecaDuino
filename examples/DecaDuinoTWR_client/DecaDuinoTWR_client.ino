@@ -1,6 +1,6 @@
-// DecaDuino_TWR_client
+// DecaDuinoTWR_client
 // A simple implementation of the TWR protocol, client side
-// By Adrien van den Bossche, Réjane Dalcé, Robert Try
+// Contributors: Adrien van den Bossche, Réjane Dalcé, Ibrahim Fofana, Robert Try, Thierry Val
 // This sketch is a part of the DecaDuino Project - please refer to the DecaDuino LICENCE file for licensing details
 // This sketch implements the skew correction published in "Nezo Ibrahim Fofana, Adrien van den Bossche, Réjane
 // Dalcé, Thierry Val, "An Original Correction Method for Indoor Ultra Wide Band Ranging-based Localisation System"

@@ -1,6 +1,6 @@
-// DecaDuino_TWR_server
+// DecaDuinoTWR_server
 // A simple implementation of the TWR protocol, server side
-// By Adrien van den Bossche, Réjane Dalcé, Robert Try
+// Contributors: Adrien van den Bossche, Réjane Dalcé, Ibrahim Fofana, Robert Try, Thierry Val
 // This sketch is a part of the DecaDuino Project - please refer to the DecaDuino LICENCE file for licensing details
 
 #include <SPI.h>
