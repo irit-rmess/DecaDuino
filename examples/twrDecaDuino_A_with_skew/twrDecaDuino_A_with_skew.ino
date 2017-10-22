@@ -9,24 +9,16 @@ uint16_t antennaDelay;
 
 #define COEFF RANGING_UNIT
 
-#define X_CORRECTION 1.0
-#define Y_CORRECTION 0.0
-
-#define TIMEOUT 20
+#define TIMEOUT_WAIT_ACK 20
+#define TIMEOUT_WAIT_DATA_REPLY 20
 
 #define TWR_ENGINE_STATE_INIT 1
-#define TWR_ENGINE_STATE_WAIT_NEW_CYCLE 2
-#define TWR_ENGINE_STATE_SEND_START 3
-#define TWR_ENGINE_STATE_WAIT_SEND_START 4
-#define TWR_ENGINE_STATE_MEMORISE_T1 5
-#define TWR_ENGINE_STATE_WATCHDOG_FOR_ACK 6
-#define TWR_ENGINE_STATE_RX_ON_FOR_ACK 7
-#define TWR_ENGINE_STATE_WAIT_ACK 8
-#define TWR_ENGINE_STATE_MEMORISE_T4 9
-#define TWR_ENGINE_STATE_WATCHDOG_FOR_DATA_REPLY 10
-#define TWR_ENGINE_STATE_RX_ON_FOR_DATA_REPLY 11
-#define TWR_ENGINE_STATE_WAIT_DATA_REPLY 12
-#define TWR_ENGINE_STATE_EXTRACT_T2_T3 13
+#define TWR_ENGINE_STATE_WAIT_START_SENT 2
+#define TWR_ENGINE_STATE_MEMORISE_T1 3
+#define TWR_ENGINE_STATE_WAIT_ACK 4
+#define TWR_ENGINE_STATE_MEMORISE_T4 5
+#define TWR_ENGINE_STATE_WAIT_DATA_REPLY 6
+#define TWR_ENGINE_STATE_EXTRACT_T2_T3 7
 
 #define TWR_MSG_TYPE_UNKNOWN 0
 #define TWR_MSG_TYPE_START 1
@@ -37,6 +29,7 @@ int i;
 int rxFrames;
 
 uint64_t t1, t2, t3, t4;
+uint64_t mask = 0xFFFFFFFFFF;
 int32_t tof;
 
 DecaDuino decaduino;
@@ -44,7 +37,7 @@ uint8_t txData[128];
 uint8_t rxData[128];
 uint16_t rxLen;
 int state;
-int timeout;
+uint32_t timeout;
 
 
 void setup() {
@@ -90,38 +83,23 @@ void loop() {
    
     case TWR_ENGINE_STATE_INIT:
       decaduino.plmeRxDisableRequest();
-      state = TWR_ENGINE_STATE_WAIT_NEW_CYCLE;
-      break;
-      
-    case TWR_ENGINE_STATE_WAIT_NEW_CYCLE:
       delay(1000);
       //delay(100);
       Serial.println("New TWR");
-      state = TWR_ENGINE_STATE_SEND_START;
-      break;
-
-    case TWR_ENGINE_STATE_SEND_START:
       txData[0] = TWR_MSG_TYPE_START;
       decaduino.pdDataRequest(txData, 1);
-      state = TWR_ENGINE_STATE_WAIT_SEND_START;
+      state = TWR_ENGINE_STATE_WAIT_START_SENT;
       break;
-
-    case TWR_ENGINE_STATE_WAIT_SEND_START:
-      if ( decaduino.hasTxSucceeded() )
+      
+    case TWR_ENGINE_STATE_WAIT_START_SENT:
+      if ( decaduino.hasTxSucceeded() ) {
         state = TWR_ENGINE_STATE_MEMORISE_T1;
+      }
       break;
 
     case TWR_ENGINE_STATE_MEMORISE_T1:
       t1 = decaduino.lastTxTimestamp;
-      state = TWR_ENGINE_STATE_WATCHDOG_FOR_ACK;
-      break;
-
-    case TWR_ENGINE_STATE_WATCHDOG_FOR_ACK:
-      timeout = millis() + TIMEOUT;
-      state = TWR_ENGINE_STATE_RX_ON_FOR_ACK;
-      break;     
-
-    case TWR_ENGINE_STATE_RX_ON_FOR_ACK:
+      timeout = millis() + TIMEOUT_WAIT_ACK;
       decaduino.plmeRxEnableRequest();
       state = TWR_ENGINE_STATE_WAIT_ACK;
       break;
@@ -133,22 +111,17 @@ void loop() {
         if ( decaduino.rxFrameAvailable() ) {
           if ( rxData[0] == TWR_MSG_TYPE_ACK ) {
             state = TWR_ENGINE_STATE_MEMORISE_T4;
-          } else state = TWR_ENGINE_STATE_RX_ON_FOR_ACK;
+          } else {
+          	decaduino.plmeRxEnableRequest();
+          	state = TWR_ENGINE_STATE_WAIT_ACK;
+          }
         }
       }
       break;
 
     case TWR_ENGINE_STATE_MEMORISE_T4:
       t4 = decaduino.lastRxTimestamp;
-      state = TWR_ENGINE_STATE_RX_ON_FOR_DATA_REPLY;
-      break;
-
-    case TWR_ENGINE_STATE_WATCHDOG_FOR_DATA_REPLY:
-      timeout = millis() + TIMEOUT;
-      state = TWR_ENGINE_STATE_RX_ON_FOR_DATA_REPLY;
-      break;     
-
-    case TWR_ENGINE_STATE_RX_ON_FOR_DATA_REPLY:
+      timeout = millis() + TIMEOUT_WAIT_DATA_REPLY;
       decaduino.plmeRxEnableRequest();
       state = TWR_ENGINE_STATE_WAIT_DATA_REPLY;
       break;
@@ -160,7 +133,10 @@ void loop() {
         if ( decaduino.rxFrameAvailable() ) {
           if ( rxData[0] == TWR_MSG_TYPE_DATA_REPLY ) {
             state = TWR_ENGINE_STATE_EXTRACT_T2_T3;
-          } else state = TWR_ENGINE_STATE_RX_ON_FOR_DATA_REPLY;
+          } else {
+          	decaduino.plmeRxEnableRequest();
+          	state = TWR_ENGINE_STATE_WAIT_DATA_REPLY;
+          }
         }
       }
       break;
@@ -168,8 +144,8 @@ void loop() {
     case TWR_ENGINE_STATE_EXTRACT_T2_T3:
       t2 = decaduino.decodeUint64(&rxData[1]);
       t3 = decaduino.decodeUint64(&rxData[9]);
-      tof = (t4 - t1 - (1+1.0E-6*decaduino.getLastRxSkew())*(t3 - t2))/2;
-      distance = tof*COEFF*X_CORRECTION + Y_CORRECTION;
+      tof = (((t4 - t1) & mask) - (1+1.0E-6*decaduino.getLastRxSkew())*((t3 - t2) & mask))/2;
+      distance = tof*COEFF;
       Serial.print("ToF=");
       Serial.print(tof, HEX);
       Serial.print(" d=");

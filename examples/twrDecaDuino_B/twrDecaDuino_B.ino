@@ -1,31 +1,26 @@
-#define ENABLE_CALIBRATION_FROM_EEPROM
+// DecaDuino_TWR_server
+// A simple implementation of the TWR protocol, server side
+// By Adrien van den Bossche, Réjane Dalcé, Robert Try
+// This sketch is a part of the DecaDuino Project - please refer to the DecaDuino LICENCE file for licensing details
 
 #include <SPI.h>
 #include <DecaDuino.h>
-#ifdef ENABLE_CALIBRATION_FROM_EEPROM
-#include <EEPROM.h>
-uint16_t antennaDelay;
-#endif
 
-#define FRAME_LEN 64
+// Timeout parameters
+#define TIMEOUT_WAIT_ACK_SENT 5 //ms
+#define TIMEOUT_WAIT_DATA_REPLY_SENT 5 //ms
+#define ACK_DATA_REPLY_INTERFRAME 10 //ms
 
-#define TWR_ENGINE_STATE_INIT 1
-#define TWR_ENGINE_STATE_RX_ON 2
-#define TWR_ENGINE_STATE_WAIT_START 3
-#define TWR_ENGINE_STATE_MEMORISE_T2 4
-#define TWR_ENGINE_STATE_SEND_ACK 5
-#define TWR_ENGINE_STATE_WAIT_SENT 6
-#define TWR_ENGINE_STATE_MEMORISE_T3 7
-#define TWR_ENGINE_STATE_WAIT_BEFORE_SEND_DATA_REPLY 8
-#define TWR_ENGINE_STATE_SEND_DATA_REPLY 9 
+// TWR server states state machine enumeration: see state diagram on documentation for more details
+enum { TWR_ENGINE_STATE_INIT, TWR_ENGINE_STATE_WAIT_START, TWR_ENGINE_STATE_MEMORISE_T2,
+TWR_ENGINE_STATE_SEND_ACK, TWR_ENGINE_STATE_WAIT_ACK_SENT, TWR_ENGINE_STATE_MEMORISE_T3,
+TWR_ENGINE_STATE_SEND_DATA_REPLY, TWR_ENGINE_STATE_WAIT_DATA_REPLY_SENT };
 
+// Message types of the TWR protocol
 #define TWR_MSG_TYPE_UNKNOWN 0
 #define TWR_MSG_TYPE_START 1
 #define TWR_MSG_TYPE_ACK 2
 #define TWR_MSG_TYPE_DATA_REPLY 3
-
-int i;
-int rxFrames;
 
 uint64_t t2, t3;
 
@@ -34,53 +29,33 @@ uint8_t txData[128];
 uint8_t rxData[128];
 uint16_t rxLen;
 int state;
+uint32_t timeout;
 
 
 void setup() {
 
-  uint8_t buf[2];
-
   pinMode(13, OUTPUT);
+
+  // Set SPI clock pin (pin 14 on DecaWiNo board)
   SPI.setSCK(14);
+
+  // Init DecaDuino
   if ( !decaduino.init() ) {
     Serial.println("decaduino init failed");
-    while(1) {
-      digitalWrite(13, HIGH); 
-      delay(50);    
-      digitalWrite(13, LOW); 
-      delay(50);    
-    }
+    while(1) { digitalWrite(13, HIGH); delay(50); digitalWrite(13, LOW); delay(50); }
   }
 
-#ifdef ENABLE_CALIBRATION_FROM_EEPROM
-
-  // Gets antenna delay from the end of EEPROM. The two last bytes are used for DecaWiNo label, 
-  // so use n-2 and n-3 to store the antenna delay (16bit value)
-  buf[0] = EEPROM.read(EEPROM.length()-4);
-  buf[1] = EEPROM.read(EEPROM.length()-3);
-  antennaDelay = decaduino.decodeUint16(buf);
-
-  if ( antennaDelay == 0xffff ) {
-    Serial.println("Unvalid antenna delay value found in EEPROM. Using default value.");
-  } else decaduino.setAntennaDelay(antennaDelay);
-
-#endif
- 
   // Set RX buffer
   decaduino.setRxBuffer(rxData, &rxLen);
   state = TWR_ENGINE_STATE_INIT;
 }
+
 
 void loop() {
   
   switch (state) {
    
     case TWR_ENGINE_STATE_INIT:
-      //decaduino.plmeRxDisableRequest();
-      state = TWR_ENGINE_STATE_RX_ON;
-      break;
-      
-    case TWR_ENGINE_STATE_RX_ON:
       decaduino.plmeRxEnableRequest();
       state = TWR_ENGINE_STATE_WAIT_START;
       break;
@@ -89,7 +64,9 @@ void loop() {
       if ( decaduino.rxFrameAvailable() ) {
         if ( rxData[0] == TWR_MSG_TYPE_START ) {
           state = TWR_ENGINE_STATE_MEMORISE_T2;
-        } else state = TWR_ENGINE_STATE_RX_ON;
+        } else {
+					state = TWR_ENGINE_STATE_INIT;
+				}
       }
       break;
 
@@ -101,32 +78,41 @@ void loop() {
     case TWR_ENGINE_STATE_SEND_ACK:
       txData[0] = TWR_MSG_TYPE_ACK;
       decaduino.pdDataRequest(txData, 1);
-      state = TWR_ENGINE_STATE_WAIT_SENT;
+      timeout = millis() + TIMEOUT_WAIT_ACK_SENT;
+      state = TWR_ENGINE_STATE_WAIT_ACK_SENT;
       break;
 
-    case TWR_ENGINE_STATE_WAIT_SENT:
-      if ( decaduino.hasTxSucceeded() )
-        state = TWR_ENGINE_STATE_MEMORISE_T3;  
+    case TWR_ENGINE_STATE_WAIT_ACK_SENT:
+      if ( millis() > timeout ) {
+        state = TWR_ENGINE_STATE_INIT;
+      } else {
+        if ( decaduino.hasTxSucceeded() ) {
+          state = TWR_ENGINE_STATE_MEMORISE_T3;  
+        }
+      }
       break;
 
     case TWR_ENGINE_STATE_MEMORISE_T3:
-      t3 = decaduino.lastTxTimestamp;
-      state = TWR_ENGINE_STATE_WAIT_BEFORE_SEND_DATA_REPLY;
-      break;
-
-    case TWR_ENGINE_STATE_WAIT_BEFORE_SEND_DATA_REPLY:
-      delay(10);
+      t3 = decaduino.getLastTxTimestamp();
       state = TWR_ENGINE_STATE_SEND_DATA_REPLY;
       break;
 
     case TWR_ENGINE_STATE_SEND_DATA_REPLY:
+    	delay(ACK_DATA_REPLY_INTERFRAME);
       txData[0] = TWR_MSG_TYPE_DATA_REPLY;
       decaduino.encodeUint64(t2, &txData[1]);
       decaduino.encodeUint64(t3, &txData[9]);
       decaduino.pdDataRequest(txData, 17);
-      state = TWR_ENGINE_STATE_INIT;
+      timeout = millis() + TIMEOUT_WAIT_DATA_REPLY_SENT;
+      state = TWR_ENGINE_STATE_WAIT_DATA_REPLY_SENT;
       break;
  
+ 		case TWR_ENGINE_STATE_WAIT_DATA_REPLY_SENT:
+      if ( (millis()>timeout) || (decaduino.hasTxSucceeded()) ) {
+        state = TWR_ENGINE_STATE_INIT;
+      }
+      break;
+ 		
     default:
       state = TWR_ENGINE_STATE_INIT;
       break;
