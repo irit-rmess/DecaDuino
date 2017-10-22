@@ -15,10 +15,10 @@ uint16_t antennaDelay;
 #define TWR_ENGINE_STATE_WAIT_START 2
 #define TWR_ENGINE_STATE_MEMORISE_T2 3
 #define TWR_ENGINE_STATE_SEND_ACK 4
-#define TWR_ENGINE_STATE_WAIT_SEND_ACK 5
+#define TWR_ENGINE_STATE_WAIT_ACK_SENT 5
 #define TWR_ENGINE_STATE_MEMORISE_T3 6
 #define TWR_ENGINE_STATE_SEND_DATA_REPLY 7
-#define TWR_ENGINE_STATE_WAIT_SEND_DATA_REPLY 8
+#define TWR_ENGINE_STATE_WAIT_DATA_REPLY_SENT 8
 #define TWR_ENGINE_STATE_WAIT_ACK 9
 
 #define TWR_MSG_TYPE_UNKNOWN 0
@@ -103,10 +103,10 @@ void loop() {
     case TWR_ENGINE_STATE_SEND_ACK:
       txData[0] = TWR_MSG_TYPE_ACK;
       decaduino.pdDataRequest(txData, 1);
-      state = TWR_ENGINE_STATE_WAIT_SEND_ACK;
+      state = TWR_ENGINE_STATE_WAIT_ACK_SENT;
       break;
 
-    case TWR_ENGINE_STATE_WAIT_SEND_ACK:
+    case TWR_ENGINE_STATE_WAIT_ACK_SENT:
       if ( decaduino.hasTxSucceeded() ) {
         state = TWR_ENGINE_STATE_MEMORISE_T3;  
       }
@@ -123,10 +123,10 @@ void loop() {
       decaduino.encodeUint64(t2, &txData[1]);
       decaduino.encodeUint64(t3, &txData[9]);
       decaduino.pdDataRequest(txData, 17);
-      state = TWR_ENGINE_STATE_WAIT_SEND_DATA_REPLY;
+      state = TWR_ENGINE_STATE_WAIT_DATA_REPLY_SENT;
       break;
  
- 		case TWR_ENGINE_STATE_WAIT_SEND_DATA_REPLY:
+ 		case TWR_ENGINE_STATE_WAIT_DATA_REPLY_SENT:
       if ( decaduino.hasTxSucceeded() ) {
         timeout = millis() + TIMEOUT;
         decaduino.plmeRxEnableRequest();
