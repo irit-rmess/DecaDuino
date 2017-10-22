@@ -49,6 +49,7 @@
 /// 
 /// \par Revision History
 /// 
+/// \version <a href='https://github.com/irit-irt/DecaDuino'>Current release on github.com</a>
 /// \version <a href='https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/download/decaduino-1.0.zip'>1.0 (19/03/2016) Initial release</a>
 /// 
 /// \par Academic Publications
