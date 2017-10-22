@@ -9,9 +9,6 @@ uint16_t antennaDelay;
 
 #define COEFF RANGING_UNIT
 
-#define X_CORRECTION 1.0
-#define Y_CORRECTION 0.0
-
 #define TIMEOUT 20
 #define TIMEOUT2 20
 
@@ -150,7 +147,7 @@ void loop() {
       t2 = decaduino.decodeUint64(&rxData[1]);
       t3 = decaduino.decodeUint64(&rxData[9]);
       tof = (((t4 - t1) & mask) - ((t3 - t2) & mask))/2;
-      distance = tof*COEFF*X_CORRECTION + Y_CORRECTION;
+      distance = tof*COEFF;
       Serial.print("ToF=");
       Serial.print(tof, HEX);
       Serial.print(" d=");
