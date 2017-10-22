@@ -693,6 +693,20 @@ class DecaDuino {
 		void encodeUint32 ( uint32_t from, uint8_t *to );
 
 		/**
+		* @brief Builds an uint64 value from five uint8 values
+		* @param data The address of the uint8_t buffer
+		* @return The decoded uint64_t
+		*/ 
+		uint64_t decodeUint40 ( uint8_t *data );
+
+		/**
+		* @brief Formats an uint64 value with only 5 LSbytes as a list of uint8 values
+		* @param from The uint64_t value
+		* @param to The address of the uint8_t buffer
+		*/ 
+		void encodeUint40 ( uint64_t from, uint8_t *to );	
+		
+		/**
 		* @brief Builds an uint64 value from eight uint8 values
 		* @param data The address of the uint8_t buffer
 		* @return The decoded uint64_t
@@ -790,60 +804,6 @@ class DecaDuino {
 		* @date 20170420
 		*/
 		float getNLOSIndication(void);
-
-		/**
-		* @brief Current SPI-bus settings
-		*/
-		SPISettings currentSPISettings;
-		
-		/**
-		* @brief Current EUID (Extended Unique IDentifier)
-		*/
-		uint64_t euid;
-
-		/**
-		* @brief The current (or last) PPDU
-		*/
-		uint8_t *rxData;
-
-		/**
-		* @brief The current PPDU length
-		*/
-		uint16_t *rxDataLen;
-		/**
-		* @brief The max PPDU length
-		*/
-		uint16_t rxDataLenMax;
-
-		/**
-		* @brief Flag indicating if last reception has data
-		*/
-		uint8_t rxDataAvailable;
-
-		/**
-		* @brief Transceiver status
-		*/
-		uint8_t trxStatus;
-
-		/**
-		* @brief Flag indicating if last transmission is done
-		*/
-		bool lastTxOK;
-
-		/**
-		* @brief Timestamp of last transmitted frame
-		*/
-		uint64_t lastTxTimestamp;
-
-		/**
-		* @brief Timestamp of last received frame
-		*/
-		uint64_t lastRxTimestamp;
-
-		/**
-		* @brief Last clock offset (aka clock skew)
-		*/
-		double clkOffset;
 
 
 	private:
@@ -972,6 +932,59 @@ class DecaDuino {
 		*/
 		void handleInterrupt();
 
+		/**
+		* @brief Current SPI-bus settings
+		*/
+		SPISettings currentSPISettings;
+		
+		/**
+		* @brief Current EUID (Extended Unique IDentifier)
+		*/
+		uint64_t euid;
+
+		/**
+		* @brief The current (or last) PPDU
+		*/
+		uint8_t *rxData;
+
+		/**
+		* @brief The current PPDU length
+		*/
+		uint16_t *rxDataLen;
+		/**
+		* @brief The max PPDU length
+		*/
+		uint16_t rxDataLenMax;
+
+		/**
+		* @brief Flag indicating if last reception has data
+		*/
+		uint8_t rxDataAvailable;
+
+		/**
+		* @brief Transceiver status
+		*/
+		uint8_t trxStatus;
+
+		/**
+		* @brief Flag indicating if last transmission is done
+		*/
+		bool lastTxOK;
+
+		/**
+		* @brief Timestamp of last transmitted frame
+		*/
+		uint64_t lastTxTimestamp;
+
+		/**
+		* @brief Timestamp of last received frame
+		*/
+		uint64_t lastRxTimestamp;
+
+		/**
+		* @brief Last clock offset (aka clock skew)
+		*/
+		double clkOffset;
 		uint8_t _slaveSelectPin;
 		uint8_t _interruptPin;
 		static DecaDuino* _DecaDuinoInterrupt[];

@@ -771,6 +771,27 @@ void DecaDuino::encodeUint32 ( uint32_t from, uint8_t *to ) {
 }
 
 
+uint64_t DecaDuino::decodeUint40 ( uint8_t *data )
+{
+	uint64_t tmp = 0;
+	tmp = data[4];
+	tmp = tmp << 32;
+	tmp = tmp | decodeUint32(data);
+	
+	return tmp;
+}
+
+
+void DecaDuino::encodeUint40 ( uint64_t from, uint8_t *to )
+{
+	to[4] = (from & 0xFF00000000) >> 32;
+	to[3] = (from & 0xFF000000) >> 24;
+	to[2] = (from & 0xFF0000) >> 16;
+	to[1] = (from & 0xFF00) >> 8;
+	to[0] = from & 0xFF;
+}
+
+
 uint64_t DecaDuino::decodeUint64 ( uint8_t *data ) {
 
 	uint64_t tmp = 0;
