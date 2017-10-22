@@ -37,14 +37,13 @@ int state;
 uint32_t timeout;
 
 
-void setup() {
-  
-  pinMode(13, OUTPUT);
+void setup()
+{
+  pinMode(13, OUTPUT); // Internal LED (pin 13 on DecaWiNo board)
+  Serial.begin(115200); // Init Serial port
+  SPI.setSCK(14); // Set SPI clock pin (pin 14 on DecaWiNo board)
 
-  // Set SPI clock pin (pin 14 on DecaWiNo board)
-  SPI.setSCK(14);
-
-  // Init DecaDuino
+  // Init DecaDuino and blink if initialisation fails
   if ( !decaduino.init() ) {
     Serial.println("decaduino init failed");
     while(1) { digitalWrite(13, HIGH); delay(50); digitalWrite(13, LOW); delay(50); }
@@ -55,8 +54,8 @@ void setup() {
   state = TWR_ENGINE_STATE_INIT;
 }
 
-void loop() {
-
+void loop()
+{
   float distance;
   
   switch (state) {
