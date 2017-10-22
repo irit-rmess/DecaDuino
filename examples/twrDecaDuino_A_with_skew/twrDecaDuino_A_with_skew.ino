@@ -9,8 +9,8 @@ uint16_t antennaDelay;
 
 #define COEFF RANGING_UNIT
 
-#define TIMEOUT 20
-#define TIMEOUT2 20
+#define TIMEOUT_WAIT_ACK 20
+#define TIMEOUT_WAIT_DATA_REPLY 20
 
 #define TWR_ENGINE_STATE_INIT 1
 #define TWR_ENGINE_STATE_WAIT_START_SENT 2
@@ -19,8 +19,6 @@ uint16_t antennaDelay;
 #define TWR_ENGINE_STATE_MEMORISE_T4 5
 #define TWR_ENGINE_STATE_WAIT_DATA_REPLY 6
 #define TWR_ENGINE_STATE_EXTRACT_T2_T3 7
-#define TWR_ENGINE_STATE_SEND_ACK 8
-#define TWR_ENGINE_STATE_WAIT_ACK_SENT 9
 
 #define TWR_MSG_TYPE_UNKNOWN 0
 #define TWR_MSG_TYPE_START 1
@@ -101,7 +99,7 @@ void loop() {
 
     case TWR_ENGINE_STATE_MEMORISE_T1:
       t1 = decaduino.lastTxTimestamp;
-      timeout = millis() + TIMEOUT;
+      timeout = millis() + TIMEOUT_WAIT_ACK;
       decaduino.plmeRxEnableRequest();
       state = TWR_ENGINE_STATE_WAIT_ACK;
       break;
@@ -123,7 +121,7 @@ void loop() {
 
     case TWR_ENGINE_STATE_MEMORISE_T4:
       t4 = decaduino.lastRxTimestamp;
-      timeout = millis() + TIMEOUT2;
+      timeout = millis() + TIMEOUT_WAIT_DATA_REPLY;
       decaduino.plmeRxEnableRequest();
       state = TWR_ENGINE_STATE_WAIT_DATA_REPLY;
       break;
@@ -153,19 +151,7 @@ void loop() {
       Serial.print(" d=");
       Serial.print(distance);
       Serial.println();
-      state = TWR_ENGINE_STATE_SEND_ACK;
-      break;
-      
-    case TWR_ENGINE_STATE_SEND_ACK:
-      txData[0] = TWR_MSG_TYPE_ACK;
-      decaduino.pdDataRequest(txData, 1);
-      state = TWR_ENGINE_STATE_WAIT_ACK_SENT;
-      break;
-
-    case TWR_ENGINE_STATE_WAIT_ACK_SENT:
-      if ( decaduino.hasTxSucceeded() ) {
-        state = TWR_ENGINE_STATE_INIT;
-      }
+      state = TWR_ENGINE_STATE_INIT;
       break;
 
     default:

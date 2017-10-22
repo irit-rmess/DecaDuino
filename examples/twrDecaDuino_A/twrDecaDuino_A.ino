@@ -1,34 +1,29 @@
-#define ENABLE_CALIBRATION_FROM_EEPROM
+// DecaDuino_TWR_client
+// A simple implementation of the TWR protocol, client side
+// By Adrien van den Bossche, Réjane Dalcé, Robert Try
+// This sketch is a part of the DecaDuino Project - please refer to the DecaDuino LICENCE file for licensing details
+// This sketch implements the skew correction published in "Nezo Ibrahim Fofana, Adrien van den Bossche, Réjane
+// Dalcé, Thierry Val, "An Original Correction Method for Indoor Ultra Wide Band Ranging-based Localisation System"
+// https://arxiv.org/pdf/1603.06736.pdf
 
 #include <SPI.h>
 #include <DecaDuino.h>
-#ifdef ENABLE_CALIBRATION_FROM_EEPROM
-#include <EEPROM.h>
-uint16_t antennaDelay;
-#endif
 
-#define COEFF RANGING_UNIT
+// Timeout parameters
+#define TIMEOUT_WAIT_START_SENT 5 //ms
+#define TIMEOUT_WAIT_ACK 10 //ms
+#define TIMEOUT_WAIT_DATA_REPLY 20 //ms
 
-#define TIMEOUT 20
-#define TIMEOUT2 20
+// TWR server states state machine enumeration: see state diagram on documentation for more details
+enum { TWR_ENGINE_STATE_INIT, TWR_ENGINE_STATE_WAIT_START_SENT, TWR_ENGINE_STATE_MEMORISE_T1,
+TWR_ENGINE_STATE_WAIT_ACK, TWR_ENGINE_STATE_MEMORISE_T4, TWR_ENGINE_STATE_WAIT_DATA_REPLY, 
+TWR_ENGINE_STATE_EXTRACT_T2_T3 };
 
-#define TWR_ENGINE_STATE_INIT 1
-#define TWR_ENGINE_STATE_WAIT_START_SENT 2
-#define TWR_ENGINE_STATE_MEMORISE_T1 3
-#define TWR_ENGINE_STATE_WAIT_ACK 4
-#define TWR_ENGINE_STATE_MEMORISE_T4 5
-#define TWR_ENGINE_STATE_WAIT_DATA_REPLY 6
-#define TWR_ENGINE_STATE_EXTRACT_T2_T3 7
-#define TWR_ENGINE_STATE_SEND_ACK 8
-#define TWR_ENGINE_STATE_WAIT_ACK_SENT 9
-
+// Message types of the TWR protocol
 #define TWR_MSG_TYPE_UNKNOWN 0
 #define TWR_MSG_TYPE_START 1
 #define TWR_MSG_TYPE_ACK 2
 #define TWR_MSG_TYPE_DATA_REPLY 3
-
-int i;
-int rxFrames;
 
 uint64_t t1, t2, t3, t4;
 uint64_t mask = 0xFFFFFFFFFF;
@@ -43,35 +38,18 @@ uint32_t timeout;
 
 
 void setup() {
-
-  uint8_t buf[2];
-
+  
   pinMode(13, OUTPUT);
+
+  // Set SPI clock pin (pin 14 on DecaWiNo board)
   SPI.setSCK(14);
+
+  // Init DecaDuino
   if ( !decaduino.init() ) {
     Serial.println("decaduino init failed");
-    while(1) {
-      digitalWrite(13, HIGH); 
-      delay(50);    
-      digitalWrite(13, LOW); 
-      delay(50);    
-    }
+    while(1) { digitalWrite(13, HIGH); delay(50); digitalWrite(13, LOW); delay(50); }
   }
 
-#ifdef ENABLE_CALIBRATION_FROM_EEPROM
-
-  // Gets antenna delay from the end of EEPROM. The two last bytes are used for DecaWiNo label, 
-  // so use n-2 and n-3 to store the antenna delay (16bit value)
-  buf[0] = EEPROM.read(EEPROM.length()-4);
-  buf[1] = EEPROM.read(EEPROM.length()-3);
-  antennaDelay = decaduino.decodeUint16(buf);
-
-  if ( antennaDelay == 0xffff ) {
-    Serial.println("Unvalid antenna delay value found in EEPROM. Using default value.");
-  } else decaduino.setAntennaDelay(antennaDelay);
-
-#endif
-  
   // Set RX buffer
   decaduino.setRxBuffer(rxData, &rxLen);
   state = TWR_ENGINE_STATE_INIT;
@@ -85,23 +63,26 @@ void loop() {
    
     case TWR_ENGINE_STATE_INIT:
       decaduino.plmeRxDisableRequest();
-      delay(1000);
-      //delay(100);
       Serial.println("New TWR");
       txData[0] = TWR_MSG_TYPE_START;
       decaduino.pdDataRequest(txData, 1);
+      timeout = millis() + TIMEOUT_WAIT_START_SENT;
       state = TWR_ENGINE_STATE_WAIT_START_SENT;
       break;
 
     case TWR_ENGINE_STATE_WAIT_START_SENT:
-      if ( decaduino.hasTxSucceeded() ) {
-        state = TWR_ENGINE_STATE_MEMORISE_T1;
+      if ( millis() > timeout ) {
+        state = TWR_ENGINE_STATE_INIT;
+      } else {
+        if ( decaduino.hasTxSucceeded() ) {
+          state = TWR_ENGINE_STATE_MEMORISE_T1;
+        }
       }
       break;
 
     case TWR_ENGINE_STATE_MEMORISE_T1:
       t1 = decaduino.lastTxTimestamp;
-      timeout = millis() + TIMEOUT;
+      timeout = millis() + TIMEOUT_WAIT_ACK;
       decaduino.plmeRxEnableRequest();
       state = TWR_ENGINE_STATE_WAIT_ACK;
       break;
@@ -122,8 +103,8 @@ void loop() {
       break;
 
     case TWR_ENGINE_STATE_MEMORISE_T4:
-      t4 = decaduino.lastRxTimestamp;
-      timeout = millis() + TIMEOUT2;
+      t4 = decaduino.getLastRxTimestamp();
+      timeout = millis() + TIMEOUT_WAIT_DATA_REPLY;
       decaduino.plmeRxEnableRequest();
       state = TWR_ENGINE_STATE_WAIT_DATA_REPLY;
       break;
@@ -147,25 +128,21 @@ void loop() {
       t2 = decaduino.decodeUint64(&rxData[1]);
       t3 = decaduino.decodeUint64(&rxData[9]);
       tof = (((t4 - t1) & mask) - ((t3 - t2) & mask))/2;
-      distance = tof*COEFF;
+      distance = tof*RANGING_UNIT;
       Serial.print("ToF=");
       Serial.print(tof, HEX);
       Serial.print(" d=");
       Serial.print(distance);
       Serial.println();
-      state = TWR_ENGINE_STATE_SEND_ACK;
-      break;
-
-    case TWR_ENGINE_STATE_SEND_ACK:
-      txData[0] = TWR_MSG_TYPE_ACK;
-      decaduino.pdDataRequest(txData, 1);
-      state = TWR_ENGINE_STATE_WAIT_ACK_SENT;
-      break;
-
-    case TWR_ENGINE_STATE_WAIT_ACK_SENT:
-      if ( decaduino.hasTxSucceeded() ) {
-        state = TWR_ENGINE_STATE_INIT;
-      }
+      tof = (((t4 - t1) & mask) - (1+1.0E-6*decaduino.getLastRxSkew())*((t3 - t2) & mask))/2;
+      distance = tof*RANGING_UNIT;
+      Serial.print("ToF_skew_correction=");
+      Serial.print(tof, HEX);
+      Serial.print(" d_skew_correction=");
+      Serial.print(distance);
+      Serial.println();
+      delay(200);
+      state = TWR_ENGINE_STATE_INIT;
       break;
 
     default:
