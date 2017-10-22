@@ -1,32 +1,28 @@
-#define ENABLE_CALIBRATION_FROM_EEPROM
+// DecaDuinoSDSTWR_server
+// A simple implementation of the TWR protocol, server side
+// Contributors: Adrien van den Bossche, Réjane Dalcé, Ibrahim Fofana, Robert Try, Thierry Val
+// This sketch is a part of the DecaDuino Project - please refer to the DecaDuino LICENCE file for licensing details
 
 #include <SPI.h>
 #include <DecaDuino.h>
-#ifdef ENABLE_CALIBRATION_FROM_EEPROM
-#include <EEPROM.h>
-uint16_t antennaDelay;
-#endif
 
-#define TIMEOUT 10
+// Timeout parameters
+#define TIMEOUT_WAIT_ACK_REQ_SENT 5 //ms
+#define TIMEOUT_WAIT_ACK 10 //ms
+#define TIMEOUT_WAIT_DATA_REPLY_SENT 5 //ms
 
-#define TWR_ENGINE_STATE_INIT 1
-#define TWR_ENGINE_STATE_WAIT_START 3
-#define TWR_ENGINE_STATE_MEMORISE_T2 4
-#define TWR_ENGINE_STATE_SEND_ACK_REQ 5
-#define TWR_ENGINE_STATE_WAIT_SENT 6
-#define TWR_ENGINE_STATE_MEMORISE_T3 7
-#define TWR_ENGINE_STATE_WAIT_ACK 10
-#define TWR_ENGINE_STATE_MEMORISE_T6 11
-#define TWR_ENGINE_STATE_SEND_DATA_REPLY 12
+// SDS-TWR server states state machine enumeration: see state diagram on documentation for more details
+enum { SDSTWR_ENGINE_STATE_INIT, SDSTWR_ENGINE_STATE_WAIT_START, SDSTWR_ENGINE_STATE_MEMORISE_T2, 
+SDSTWR_ENGINE_STATE_SEND_ACK_REQ, SDSTWR_ENGINE_STATE_WAIT_ACK_REQ_SENT, SDSTWR_ENGINE_STATE_MEMORISE_T3, 
+SDSTWR_ENGINE_STATE_WAIT_ACK, SDSTWR_ENGINE_STATE_MEMORISE_T6, SDSTWR_ENGINE_STATE_SEND_DATA_REPLY,
+SDSTWR_ENGINE_STATE_WAIT_DATA_REPLY_SENT};
 
-#define TWR_MSG_TYPE_UNKNOWN 0
-#define TWR_MSG_TYPE_START 1
-#define TWR_MSG_TYPE_ACK_REQ 2
-#define TWR_MSG_TYPE_ACK 3
-#define TWR_MSG_TYPE_DATA_REPLY 4
-
-int i;
-int rxFrames;
+// Message types of the SDS-TWR protocol
+#define SDSTWR_MSG_TYPE_UNKNOWN 10
+#define SDSTWR_MSG_TYPE_START 11
+#define SDSTWR_MSG_TYPE_ACK_REQ 12
+#define SDSTWR_MSG_TYPE_ACK 13
+#define SDSTWR_MSG_TYPE_DATA_REPLY 14
 
 uint64_t t2, t3, t6;
 
@@ -37,116 +33,113 @@ uint16_t rxLen;
 int state;
 uint32_t timeout;
 
-void setup() {
 
-  uint8_t buf[2];
+void setup()
+{
+  pinMode(13, OUTPUT); // Internal LED (pin 13 on DecaWiNo board)
+  Serial.begin(115200); // Init Serial port
+  SPI.setSCK(14); // Set SPI clock pin (pin 14 on DecaWiNo board)
 
-  pinMode(13, OUTPUT);
-  SPI.setSCK(14);
+  // Init DecaDuino and blink if initialisation fails
   if ( !decaduino.init() ) {
-    Serial.print("decaduino init failed");
-    while(1) {
-      digitalWrite(13, HIGH);
-      delay(50);
-      digitalWrite(13, LOW);
-      delay(50);
-    }
+    Serial.println("decaduino init failed");
+    while(1) { digitalWrite(13, HIGH); delay(50); digitalWrite(13, LOW); delay(50); }
   }
 
-#ifdef ENABLE_CALIBRATION_FROM_EEPROM
-
-  // Gets antenna delay from the end of EEPROM. The two last bytes are used for DecaWiNo label, 
-  // so use n-2 and n-3 to store the antenna delay (16bit value)
-  buf[0] = EEPROM.read(EEPROM.length()-4);
-  buf[1] = EEPROM.read(EEPROM.length()-3);
-  antennaDelay = decaduino.decodeUint16(buf);
-
-  if ( antennaDelay == 0xffff ) {
-    Serial.println("Unvalid antenna delay value found in EEPROM. Using default value.");
-  } else decaduino.setAntennaDelay(antennaDelay);
-
-#endif
-
+  // Set RX buffer
   decaduino.setRxBuffer(rxData, &rxLen);
-  state=TWR_ENGINE_STATE_INIT;
+  state = SDSTWR_ENGINE_STATE_INIT;
 }
 
-void loop() {
-  
+
+void loop()
+{
   switch (state) {
   
-    case TWR_ENGINE_STATE_INIT :
-			 decaduino.plmeRxEnableRequest();
-       state = TWR_ENGINE_STATE_WAIT_START;
-       break;
+    case SDSTWR_ENGINE_STATE_INIT :
+			decaduino.plmeRxEnableRequest();
+      state = SDSTWR_ENGINE_STATE_WAIT_START;
+      break;
 
-    case TWR_ENGINE_STATE_WAIT_START :
-       if (decaduino.rxFrameAvailable()){
-         if ( rxData[0] == TWR_MSG_TYPE_START){
-           state = TWR_ENGINE_STATE_MEMORISE_T2;
-         } else {
-         	 decaduino.plmeRxEnableRequest();
-           state = TWR_ENGINE_STATE_WAIT_START; 
-         }
-       }
-       break;
+    case SDSTWR_ENGINE_STATE_WAIT_START :
+      if (decaduino.rxFrameAvailable()){
+        if ( rxData[0] == SDSTWR_MSG_TYPE_START){
+         state = SDSTWR_ENGINE_STATE_MEMORISE_T2;
+       } else {
+          decaduino.plmeRxEnableRequest();
+          state = SDSTWR_ENGINE_STATE_WAIT_START; 
+        }
+      }
+      break;
        
-    case TWR_ENGINE_STATE_MEMORISE_T2 :
-       t2 = decaduino.lastRxTimestamp;
-       state = TWR_ENGINE_STATE_SEND_ACK_REQ;
-       break;
+    case SDSTWR_ENGINE_STATE_MEMORISE_T2 :
+      t2 = decaduino.getLastRxTimestamp();
+      state = SDSTWR_ENGINE_STATE_SEND_ACK_REQ;
+      break;
          
-    case TWR_ENGINE_STATE_SEND_ACK_REQ : 
-       txData[0]= TWR_MSG_TYPE_ACK_REQ;
-       decaduino.pdDataRequest(txData, 1);
-       state = TWR_ENGINE_STATE_WAIT_SENT;
-       break;
+    case SDSTWR_ENGINE_STATE_SEND_ACK_REQ : 
+      txData[0]= SDSTWR_MSG_TYPE_ACK_REQ;
+      decaduino.pdDataRequest(txData, 1);
+      timeout = millis() + TIMEOUT_WAIT_ACK_REQ_SENT;
+      state = SDSTWR_ENGINE_STATE_WAIT_ACK_REQ_SENT;
+      break;
        
-    case TWR_ENGINE_STATE_WAIT_SENT:
-       if (decaduino.hasTxSucceeded()){
-      	 state = TWR_ENGINE_STATE_MEMORISE_T3; 
-       }
-       break;
+    case SDSTWR_ENGINE_STATE_WAIT_ACK_REQ_SENT:
+      if ( millis() > timeout ) {
+        state = SDSTWR_ENGINE_STATE_INIT;
+      } else {
+        if ( decaduino.hasTxSucceeded() ) {
+          state = SDSTWR_ENGINE_STATE_MEMORISE_T3; 
+        }
+      }
+      break;
        
-    case TWR_ENGINE_STATE_MEMORISE_T3 :
-       t3 = decaduino.lastTxTimestamp;
-       timeout = millis() + TIMEOUT;
-       decaduino.plmeRxEnableRequest();
-       state = TWR_ENGINE_STATE_WAIT_ACK;
-       break;
+    case SDSTWR_ENGINE_STATE_MEMORISE_T3 :
+      t3 = decaduino.getLastTxTimestamp();
+      timeout = millis() + TIMEOUT_WAIT_ACK;
+      decaduino.plmeRxEnableRequest();
+      state = SDSTWR_ENGINE_STATE_WAIT_ACK;
+      break;
  
-    case TWR_ENGINE_STATE_WAIT_ACK :
-       if ( millis() > timeout) {
-       	 state = TWR_ENGINE_STATE_INIT;
-       }
-       else { 
-         if (decaduino.rxFrameAvailable()){
-           if (rxData[0] == TWR_MSG_TYPE_ACK) {
-           	 state = TWR_ENGINE_STATE_MEMORISE_T6;
-           } else {
-           	 decaduino.plmeRxEnableRequest();
-           	 state = TWR_ENGINE_STATE_WAIT_ACK;
-           }
-         }
-       }
-       break;
+    case SDSTWR_ENGINE_STATE_WAIT_ACK :
+      if ( millis() > timeout) {
+      	 state = SDSTWR_ENGINE_STATE_INIT;
+      }
+      else { 
+        if (decaduino.rxFrameAvailable()){
+          if (rxData[0] == SDSTWR_MSG_TYPE_ACK) {
+         	  state = SDSTWR_ENGINE_STATE_MEMORISE_T6;
+          } else {
+          	decaduino.plmeRxEnableRequest();
+           	state = SDSTWR_ENGINE_STATE_WAIT_ACK;
+          }
+        }
+      }
+      break;
        
-    case TWR_ENGINE_STATE_MEMORISE_T6 :
-       t6 = decaduino.lastRxTimestamp;
-       state = TWR_ENGINE_STATE_SEND_DATA_REPLY; 
-       break;
-       
-    case TWR_ENGINE_STATE_SEND_DATA_REPLY :
-       txData[0] = TWR_MSG_TYPE_DATA_REPLY;
-       decaduino.encodeUint64(t2, &txData[1]);
-       decaduino.encodeUint64(t3, &txData[9]);
-       decaduino.encodeUint64(t6, &txData[17]);
-       decaduino.pdDataRequest(txData, 25);
-       state = TWR_ENGINE_STATE_INIT;
-       break;
-       
+    case SDSTWR_ENGINE_STATE_MEMORISE_T6 :
+      t6 = decaduino.getLastRxTimestamp();
+      state = SDSTWR_ENGINE_STATE_SEND_DATA_REPLY; 
+      break;
+      
+    case SDSTWR_ENGINE_STATE_SEND_DATA_REPLY :
+      txData[0] = SDSTWR_MSG_TYPE_DATA_REPLY;
+      decaduino.encodeUint40(t2, &txData[1]);
+      decaduino.encodeUint40(t3, &txData[6]);
+      decaduino.encodeUint40(t6, &txData[11]);
+      decaduino.pdDataRequest(txData, 16);
+      timeout = millis() + TIMEOUT_WAIT_DATA_REPLY_SENT;
+      state = SDSTWR_ENGINE_STATE_WAIT_DATA_REPLY_SENT;
+      break;
+
+    case SDSTWR_ENGINE_STATE_WAIT_DATA_REPLY_SENT:
+      if ( (millis()>timeout) || (decaduino.hasTxSucceeded()) ) {
+        state = SDSTWR_ENGINE_STATE_INIT;
+      }
+      break;
+
     default :
-      state = TWR_ENGINE_STATE_INIT;
+      state = SDSTWR_ENGINE_STATE_INIT;
       break;  
   }
 }
