@@ -1,7 +1,8 @@
 // DecaDuinoChat
-// This sketch shows how to use the DecaDuino library to send and receive ascii messages via the Serial port over the UWB radio
+// This sketch shows how to use the DecaDuino library to send and receive ascii messages via the Serial port over
+// the UWB radio
 // by Adrien van den Bossche <vandenbo@univ-tlse2.fr>
-// Licensing: see DecaDuino licence
+// This sketch is a part of the DecaDuino Project - please refer to the DecaDuino LICENCE file for licensing details
 
 #include <SPI.h>
 #include <DecaDuino.h>
@@ -17,17 +18,14 @@ int rxFrames;
 
 void setup()
 {
-  pinMode(13, OUTPUT);
-  Serial.begin(115200);
-  SPI.setSCK(14);
+  pinMode(13, OUTPUT); // Internal LED (pin 13 on DecaWiNo board)
+  Serial.begin(115200); // Init Serial port
+  SPI.setSCK(14); // Set SPI clock pin (pin 14 on DecaWiNo board)
+
+  // Init DecaDuino and blink if initialisation fails
   if ( !decaduino.init() ) {
     Serial.println("decaduino init failed");
-    while(1) {
-      digitalWrite(13, HIGH);
-      delay(50);
-      digitalWrite(13, LOW);
-      delay(50);
-    }
+    while(1) { digitalWrite(13, HIGH); delay(50); digitalWrite(13, LOW); delay(50); }
   }
 
   rxFrames = 0;
@@ -40,10 +38,9 @@ void setup()
 
 void loop()
 {
-  int i;
-  int let_s_send = false;
+  int i, let_s_send = false;
 
-  // This is the sender part
+  // This is the sender part ****************************************************************
   // Get chars on Serial and prepare buffer
   while ( ( Serial.available() > 0 ) && ( txLen < MAX_FRAME_LEN ) ) {
     char c = Serial.read();
@@ -57,7 +54,7 @@ void loop()
   if ( let_s_send == true ) {
     // LED ON, disable RX, send, wait sent complete, re-enable RX and LED OFF
     digitalWrite(13, HIGH);
-    decaduino.plmeRxDisableRequest();
+    decaduino.plmeRxDisableRequest(); // Always disable RX before request frame sending
     decaduino.pdDataRequest(txData, txLen);
     txData[txLen]= 0;
     Serial.print("Sending ["); Serial.print((char*)txData); Serial.print("]... ");
@@ -68,7 +65,7 @@ void loop()
     digitalWrite(13, LOW);
   }
 
-  // This is the receiver part
+  // This is the receiver part **************************************************************
   if ( decaduino.rxFrameAvailable() ) {
     // LED ON, print received chars, re-enable RX and LED OFF
     digitalWrite(13, HIGH);
@@ -77,7 +74,7 @@ void loop()
     Serial.print("bytes received: ");
     rxData[rxLen] = 0;
     Serial.println((char*)rxData);
-    decaduino.plmeRxEnableRequest();
+    decaduino.plmeRxEnableRequest(); // Always renable RX after a frame reception
     digitalWrite(13, LOW);
   }
 }
