@@ -61,6 +61,7 @@ void loop()
   switch (state) {
    
     case TWR_ENGINE_STATE_INIT:
+      delay(200);
       decaduino.plmeRxDisableRequest();
       Serial.println("New TWR");
       txData[0] = TWR_MSG_TYPE_START;
@@ -140,7 +141,6 @@ void loop()
       Serial.print(" d_skew_correction=");
       Serial.print(distance);
       Serial.println();
-      delay(200);
       state = TWR_ENGINE_STATE_INIT;
       break;
 
