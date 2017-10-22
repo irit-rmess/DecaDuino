@@ -2,7 +2,7 @@
 // This sketch shows how to use the DecaDuino library to receive messages over the UWB radio.
 // The sketch prints the received bytes in HEX; it can be used as a frame sniffer.
 // by Adrien van den Bossche <vandenbo@univ-tlse2.fr>
-// Licensing: see DecaDuino licence
+// This sketch is a part of the DecaDuino Project - please refer to the DecaDuino LICENCE file for licensing details
 
 #include <SPI.h>
 #include <DecaDuino.h>
@@ -16,22 +16,20 @@ int rxFrames;
 
 void setup()
 {
-  pinMode(13, OUTPUT);
-  Serial.begin(115200);
-  SPI.setSCK(14);
+  pinMode(13, OUTPUT); // Internal LED (pin 13 on DecaWiNo board)
+  Serial.begin(115200); // Init Serial port
+  SPI.setSCK(14); // Set SPI clock pin (pin 14 on DecaWiNo board)
+
+  // Init DecaDuino and blink if initialisation fails
   if ( !decaduino.init() ) {
     Serial.println("decaduino init failed");
-    while(1) {
-      digitalWrite(13, HIGH);
-      delay(50);
-      digitalWrite(13, LOW);
-      delay(50);
-    }
+    while(1) { digitalWrite(13, HIGH); delay(50); digitalWrite(13, LOW); delay(50); }
   }
   
-  rxFrames = 0;
+  // Set RX buffer and enable RX
   decaduino.setRxBuffer(rxData, &rxLen);
   decaduino.plmeRxEnableRequest();
+  rxFrames = 0;
 }
 
 
@@ -48,7 +46,7 @@ void loop()
       Serial.print("|");
     }
     Serial.println();
-    decaduino.plmeRxEnableRequest();
+    decaduino.plmeRxEnableRequest(); // Always renable RX after a frame reception
     digitalWrite(13, LOW);
   }
 }

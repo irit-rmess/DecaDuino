@@ -28,10 +28,11 @@ void setup()
     while(1) { digitalWrite(13, HIGH); delay(50); digitalWrite(13, LOW); delay(50); }
   }
 
-  rxFrames = 0;
-  txLen = 0;
+  // Set RX buffer and enable RX
   decaduino.setRxBuffer(rxData, &rxLen);
   decaduino.plmeRxEnableRequest();
+  rxFrames = 0;
+  txLen = 0;
   Serial.println("DecaDuino chat ready!");
 }
 
