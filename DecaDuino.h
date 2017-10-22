@@ -21,7 +21,7 @@
 ///
 /// \par Download
 ///
-/// Get the lastest version of the library <a href='https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/download/decaduino-lastest.zip'>here</a>. Previous versions are also available in the "Revision History" section of this documentation..
+/// Get the <a href='https://github.com/irit-irt/DecaDuino'>current release of the library on github.com</a>. Previous versions (before github.com hosting) are also available in the "Revision History" section of this documentation.
 /// 
 /// \par Installation
 /// 
@@ -49,8 +49,9 @@
 /// 
 /// \par Revision History
 /// 
-/// \version <a href='https://github.com/irit-irt/DecaDuino'>Current release on github.com</a>
-/// \version <a href='https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/download/decaduino-1.0.zip'>1.0 (19/03/2016) Initial release</a>
+/// - <a href='https://github.com/irit-irt/DecaDuino'>Current release on github.com</a>
+///
+/// - <a href='https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/download/decaduino-1.0.zip'>1.0 (19/03/2016) Initial release</a>
 /// 
 /// \par Academic Publications
 ///
