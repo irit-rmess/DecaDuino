@@ -49,7 +49,7 @@ Flash each example sketch on two nodes (client and server) and get the distance
 between the two nodes. The documentation directory contains the client and
 server state machine diagram.
 
-### Symetric Double-Sided Two-Way Ranging (SDS-TWR) protocol
+### Symmetric Double-Sided Two-Way Ranging (SDS-TWR) protocol
 
 The two example sketchs DecaDuinoSDSTWR_client and DecaDuinoSDSTWR_server
 propose a simple implementation of the SDS-TWR protocol without addressing
