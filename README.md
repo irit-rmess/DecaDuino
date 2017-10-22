@@ -36,11 +36,27 @@ messages via the Serial port over the UWB radio.
 
 ## Use DecaDuino to implement ranging protocols
 
-### DecaDuinoTWR_client and DecaDuinoTWR_server
+DecaDuino can be used to implement Time-of-Flight (ToF) ranging protocols
+by timestamping frames at transmission and reception. The DecaDuino library
+comes with a set of sketches that implement popular ranging protocols.
 
-These two sketchs propose a simple implementation of the TWR protocol. Flash
-each example sketch on two nodes (client and server) and get the distance
+### Two-Way Ranging (TWR) protocol
+
+The two example sketchs DecaDuinoTWR_client and DecaDuinoTWR_server propose a
+simple implementation of the TWR protocol without addressing fields. 
+
+Flash each example sketch on two nodes (client and server) and get the distance
+between the two nodes. The documentation directory contains the client and
+server state machine diagram.
+
+### Symetric Double-Sided Two-Way Ranging (SDS-TWR) protocol
+
+The two example sketchs DecaDuinoSDSTWR_client and DecaDuinoSDSTWR_server
+propose a simple implementation of the SDS-TWR protocol without addressing
+fields. The SDS-TWR protocol implies more messages but is theorically better
+than the TWR protocol since the clock skew effect is compensated by the
+symetry of the exchanges. 
+
+Flash each example sketch on two nodes (client and server) and get the distance
 between the two nodes.
 
-The documentation directory contains the client and server state machine
-diagram.
