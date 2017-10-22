@@ -70,7 +70,7 @@ void loop()
       break;
 
     case TWR_ENGINE_STATE_MEMORISE_T2:
-      t2 = decaduino.lastRxTimestamp;
+      t2 = decaduino.getLastRxTimestamp();
       state = TWR_ENGINE_STATE_SEND_ACK;
       break;
 
@@ -99,9 +99,9 @@ void loop()
     case TWR_ENGINE_STATE_SEND_DATA_REPLY:
     	delay(ACK_DATA_REPLY_INTERFRAME);
       txData[0] = TWR_MSG_TYPE_DATA_REPLY;
-      decaduino.encodeUint64(t2, &txData[1]);
-      decaduino.encodeUint64(t3, &txData[9]);
-      decaduino.pdDataRequest(txData, 17);
+      decaduino.encodeUint40(t2, &txData[1]);
+      decaduino.encodeUint40(t3, &txData[6]);
+      decaduino.pdDataRequest(txData, 11);
       timeout = millis() + TIMEOUT_WAIT_DATA_REPLY_SENT;
       state = TWR_ENGINE_STATE_WAIT_DATA_REPLY_SENT;
       break;

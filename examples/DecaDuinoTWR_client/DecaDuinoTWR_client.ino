@@ -87,7 +87,7 @@ void loop()
       break;
 
     case TWR_ENGINE_STATE_MEMORISE_T1:
-      t1 = decaduino.lastTxTimestamp;
+      t1 = decaduino.getLastTxTimestamp();
       timeout = millis() + TIMEOUT_WAIT_ACK;
       decaduino.plmeRxEnableRequest();
       state = TWR_ENGINE_STATE_WAIT_ACK;
@@ -131,8 +131,8 @@ void loop()
       break;
 
     case TWR_ENGINE_STATE_EXTRACT_T2_T3:
-      t2 = decaduino.decodeUint64(&rxData[1]);
-      t3 = decaduino.decodeUint64(&rxData[9]);
+      t2 = decaduino.decodeUint40(&rxData[1]);
+      t3 = decaduino.decodeUint40(&rxData[6]);
       tof = (((t4 - t1) & mask) - ((t3 - t2) & mask))/2;
       distance = tof*RANGING_UNIT;
       Serial.print(tof);
