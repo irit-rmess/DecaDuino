@@ -41,3 +41,6 @@ messages via the Serial port over the UWB radio.
 These two sketchs propose a simple implementation of the TWR protocol. Flash
 each example sketch on two nodes (client and server) and get the distance
 between the two nodes.
+
+The documentation directory contains the client and server state machine
+diagram.
