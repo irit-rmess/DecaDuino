@@ -14,6 +14,9 @@
 #define TIMEOUT_WAIT_ACK 10 //ms
 #define TIMEOUT_WAIT_DATA_REPLY 20 //ms
 
+// Ranging period parameter
+#define RANGING_PERIOD 200 //ms
+
 // TWR server states state machine enumeration: see state diagram on documentation for more details
 enum { TWR_ENGINE_STATE_INIT, TWR_ENGINE_STATE_WAIT_START_SENT, TWR_ENGINE_STATE_MEMORISE_T1,
 TWR_ENGINE_STATE_WAIT_ACK, TWR_ENGINE_STATE_MEMORISE_T4, TWR_ENGINE_STATE_WAIT_DATA_REPLY, 
@@ -61,7 +64,7 @@ void loop()
   switch (state) {
    
     case TWR_ENGINE_STATE_INIT:
-      delay(200);
+      delay(RANGING_PERIOD); // Wait to avoid medium flooding between two rangings or if a ranging fails
       decaduino.plmeRxDisableRequest();
       Serial.println("New TWR");
       txData[0] = TWR_MSG_TYPE_START;
