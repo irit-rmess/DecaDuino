@@ -65,7 +65,7 @@ symetry of the exchanges.
 Flash each example sketch on two nodes (client and server) and get the distance
 between the two nodes.
 
-## LICENSING
+## Licensing
 Using DecaDuino is subject to licensing:
 
 * GPL_V3: See http://www.gnu.org/copyleft/gpl.html
