@@ -675,7 +675,22 @@ void DecaDuino::readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t*
 	} else {
 
 		// This is a 3-bytes header SPI transaction
-		/** @todo implement readSpiSubAddress in case of a 3-bytes header SPI transaction */
+		
+		uint8_t sub_addrL, sub_addrH;
+
+		sub_addrL = 0x80 | (subAddress & 0x7F); // Extension Address Indicator (0x80) + low-order 7 bits of sub address
+		sub_addrH = 0 | ((subAddress>>7) & 0xFF); // high-order 8 bits of sub address
+
+		ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+			SPI.beginTransaction(currentSPISettings);
+			digitalWrite(_slaveSelectPin, LOW);
+			spi_send(addr);
+			spi_send(sub_addrL);
+			spi_send(sub_addrH);
+			spi_receive(buf,len);
+			digitalWrite(_slaveSelectPin, HIGH); 
+			SPI.endTransaction();
+		}
 	}
 }
 
