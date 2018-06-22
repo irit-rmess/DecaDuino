@@ -1009,7 +1009,11 @@ uint8_t DecaDuino::getRxPrf(void) {
 
 	ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
 	ui32t = ( ui32t & DW1000_REGISTER_CHAN_CTRL_RXPRF_MASK) >> 18;
-	return (uint8_t)ui32t;
+	switch ((uint8_t)ui32t) {
+		case 1: return 16;
+		case 2: return 64;
+	}
+	return 0;
 }
 
 
