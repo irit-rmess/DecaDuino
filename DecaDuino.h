@@ -351,6 +351,15 @@ class DecaDuino {
  		uint8_t getChannelRaw(void);
 
 		/**
+		* @brief Returns the channel control register
+		* @return A 4-byte register from the transceiver
+		* @author Réjane Dalce
+		* @date 20180806
+		*/
+
+		uint32_t getChanControl(void);
+
+		/**
 		* @brief Returns the currently configured radio channel
 		* @return The channel value as an unsigned byte
 		* @author Réjane Dalce

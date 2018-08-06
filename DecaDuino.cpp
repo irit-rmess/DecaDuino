@@ -1109,6 +1109,11 @@ uint8_t DecaDuino::getChannel(void) {
 	return getChannelRaw() & 0x0F;
 }
 
+uint32_t DecaDuino::getChanControl(void) {
+
+	return readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
+}
+
 
 uint8_t DecaDuino::getRxPrf(void) {
 
@@ -1146,19 +1151,53 @@ uint8_t DecaDuino::getRxPcode(void) {
 
 bool DecaDuino::setChannel(uint8_t channel) {
 
- 	uint32_t ui32t;
+ 	uint32_t ui32t = 0;
+	uint32_t pcode = 0;
+	uint8_t wchannel = channel;
 
- 	if ( ( channel != 6 ) && ( channel <= 7 ) && ( channel >= 1 ) ) {
+ 	if ( ( wchannel != 6 ) && ( wchannel <= 7 ) && ( wchannel >= 1 ) ) {
 
- 		channel =  channel + (channel << 4);
+ 		wchannel =  wchannel + (wchannel << 4);
  		ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
  		ui32t = ui32t & 0xFFFFFF00;
- 		ui32t |= channel; // set rx and tx channel 
+ 		ui32t |= wchannel; // set rx and tx channel 
+		// select corresponding preamble code among valid values for selected (channel, PRF) pair; at least two values are available for each selection
+		switch(channel){
+			case 1:
+				if(getRxPrf()==16) pcode = 2;
+				else if(getRxPrf()==64) pcode = 9;
+				break;
+			case 2:
+				if(getRxPrf()==16) pcode = 4;
+				else if(getRxPrf()==64) pcode = 9;
+				break;
+			case 3:
+				if(getRxPrf()==16) pcode = 6;
+				else if(getRxPrf()==64) pcode = 9;
+				break;
+			case 4:
+				if(getRxPrf()==16) pcode = 8;
+				else if(getRxPrf()==64) pcode = 17;
+				break;
+			case 5:
+				if(getRxPrf()==16) pcode = 4;
+				else if(getRxPrf()==64) pcode = 9;
+				break;
+			case 7:
+				if(getRxPrf()==16) pcode = 8;
+				else if(getRxPrf()==64) pcode = 17;
+				break;
+		}
+
+		pcode = pcode | (pcode << 5);
+		pcode = pcode << 22;
+		ui32t = ui32t & 0x003FFFFF;
+		ui32t = ui32t | pcode;
+
  		writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
- 		if ( getChannelRaw() == channel )
+		if ( getChannelRaw() == wchannel )
  			return true;
  	}
-
  	return false;
 }
 
