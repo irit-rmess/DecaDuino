@@ -1168,24 +1168,24 @@ bool DecaDuino::setChannel(uint8_t channel) {
 				else if(getRxPrf()==64) pcode = 9;
 				break;
 			case 2:
-				if(getRxPrf()==16) pcode = 4;
-				else if(getRxPrf()==64) pcode = 9;
+				if(getRxPrf()==16) pcode = 3;
+				else if(getRxPrf()==64) pcode = 10;
 				break;
 			case 3:
 				if(getRxPrf()==16) pcode = 6;
-				else if(getRxPrf()==64) pcode = 9;
+				else if(getRxPrf()==64) pcode = 11;
 				break;
 			case 4:
-				if(getRxPrf()==16) pcode = 8;
+				if(getRxPrf()==16) pcode = 7;
 				else if(getRxPrf()==64) pcode = 17;
 				break;
 			case 5:
 				if(getRxPrf()==16) pcode = 4;
-				else if(getRxPrf()==64) pcode = 9;
+				else if(getRxPrf()==64) pcode = 12;
 				break;
 			case 7:
 				if(getRxPrf()==16) pcode = 8;
-				else if(getRxPrf()==64) pcode = 17;
+				else if(getRxPrf()==64) pcode = 18;
 				break;
 		}
 
