@@ -1128,6 +1128,133 @@ uint8_t DecaDuino::getRxPrf(void) {
 	return 0;
 }
 
+uint8_t DecaDuino::getFpAmpl1(void) {
+	
+	
+	uint8_t u8t;
+	
+	readSpiSubAddress(DW1000_REGISTER_RX_TIME, 0x07, &u8t, 1);
+	
+	
+	
+	
+	return u8t;
+}
+
+
+
+
+uint16_t DecaDuino::getFpAmpl2(void) {
+	
+	uint32_t ui32t;
+	ui32t = readSpiUint32(DW1000_REGISTER_RX_RFQUAL);
+	ui32t = ( ui32t & DW1000_REGISTER_RX_RFQUAL_FPAMPL2_MASK ) >> 16;
+	
+	return (uint16_t) ui32t;
+}
+	
+
+	
+
+uint16_t DecaDuino::getFpAmpl3(void) {
+	uint8_t buffer[2];
+	uint16_t ui16t;
+	readSpiSubAddress(DW1000_REGISTER_RX_RFQUAL, 0x06, buffer, 2);
+	ui16t =   *((uint16_t *)buffer) ;
+	
+	
+	return ui16t;
+}
+
+uint16_t DecaDuino::getRxPacc(void) {
+
+ 	uint32_t ui32t;
+
+	ui32t = readSpiUint32(DW1000_REGISTER_RX_FINFO);
+	ui32t = ( ui32t & DW1000_REGISTER_RX_FINFO_RXPACC_MASK) >> 20;
+	return (uint16_t)ui32t;
+}
+
+
+double DecaDuino::getFpPower(void) {
+	
+	double fppow;
+	float F1 = (float) getFpAmpl1();
+	float F2 = (float) getFpAmpl2();
+	float F3 = (float) getFpAmpl3();
+	float N = (float) getRxPacc();
+	uint8_t prf = getRxPrf();
+	float A;
+	
+	if (prf == 1) {
+		// prf set to 16 MHz
+		A = 113.77;
+	}
+	else {
+		// prf set to 64 MHz
+		A = 121.74;
+	}
+		
+	fppow = 10 * ( log10( ( (F1 * F1) + (F2 * F2) + (F3 * F3) ) / (N * N) ) ) - A;
+	
+	return(fppow);
+}
+	
+	
+uint16_t DecaDuino::getCirp(void) {
+	uint8_t buffer[2];
+	uint16_t ui16t;
+	readSpiSubAddress(DW1000_REGISTER_RX_RFQUAL, 0x04, buffer, 2);
+	ui16t = *((uint16_t *)buffer);
+	return ui16t;
+	
+}
+
+float DecaDuino::getSNR(void) {
+	float ratio,cire,ampl2;
+	cire = (float) getCire();
+	ampl2 = (float) getFpAmpl2();
+	
+	ratio = ampl2 / cire;
+	
+	return(ratio);
+}
+
+uint16_t DecaDuino::getCire(void) {
+	uint32_t ui32t;
+	ui32t = readSpiUint32(DW1000_REGISTER_RX_RFQUAL);
+	ui32t = ( ui32t & DW1000_REGISTER_RX_RFQUAL_CIRE_MASK );
+	
+	return (uint16_t) ui32t;
+	
+}
+	
+	
+double DecaDuino::getRSSI(void) {
+	
+	double rss;
+	float C = (float) getCire();
+	float N = (float) getRxPacc();
+	uint8_t prf = getRxPrf();
+	float A;
+	
+	if (prf == 1) {
+		// prf set to 16 MHz
+		A = 113.77;
+	}
+	else {
+		// prf set to 64 MHz
+		A = 121.74;
+	}
+	
+	rss = 10 * ( log10( (C * pow(2,17)) / (N * N) ) )  - A;
+	
+	return(rss);
+}
+	
+	
+	
+
 
 uint8_t DecaDuino::getTxPcode(void) {
 
@@ -1609,6 +1736,7 @@ uint8_t DecaDuino::getVoltageRaw() {
 		u8t = 0x01; writeSpiSubAddress(0x2A, 0x00, &u8t, 1); // 4. Write Register 2A:00 1byte 0x01
 		u8t = 0x00; writeSpiSubAddress(0x2A, 0x00, &u8t, 1); // 5. Write Register 2A:00 1byte 0x00
 		readSpiSubAddress(0x2A, 0x03, &u8t, 1); // 6. Read Register 2A:03 1byte 8 bit Voltage reading
+
 	}
     #ifdef ARDUINO_DWM1001_DEV
     end_atomic(prim);
@@ -1619,11 +1747,34 @@ uint8_t DecaDuino::getVoltageRaw() {
 
 
 float DecaDuino::getTemperature(void) {
+	
+	
+	uint8_t u8t;
+	uint8_t buf_16[2];
+	uint8_t buf_32[4];
+	float temp,diff;
+	uint8_t t23,raw_temp;
+	
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+		
+		buf_16[0] = 0x09;buf_16[1] = 0x00; writeSpiSubAddress(0x2D, 0x04, buf_16, 2);
+		u8t= 0x03; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
+		u8t= 0x00; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
+		readSpiSubAddress(0x2D,0x0A,buf_32,4);
+		
+		
+	}
+	raw_temp = getTemperatureRaw();
+	t23 =   buf_32[0];
+	diff = (float) (raw_temp - t23);
+	temp =   diff * 1.14 + 23.0; 
+		
+		
 
 	// Temperature (°C )= (SAR_LTEMP - (OTP_READ(Vtemp @ 23°C )) x 1.14) + 23
 	// Todo: what is OTP_READ(Vtemp @ 23°C ) ?
 
-	return 0;
+	return temp;
 }
 
 
@@ -1631,8 +1782,34 @@ float DecaDuino::getVoltage(void) {
 
 	// Voltage (volts) = (SAR_LVBAT- (OTP_READ(Vmeas @ 3.3 V )) /173) + 3.3
 	// Todo: what is OTP_READ(Vmeas @ 3.3 V ) ?
+	
+	uint8_t u8t;
+	uint8_t buf_16[2];
+	uint8_t buf_32[4];
+	float raw_v;
+	float v33,v;
+	
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+		
+		buf_16[0] = 0x08;buf_16[1] = 0x00; writeSpiSubAddress(0x2D, 0x04, buf_16, 2);
+		u8t= 0x03; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
+		u8t= 0x00; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
+		readSpiSubAddress(0x2D,0x0A,buf_32,4);
+		
+		
+	}
+	raw_v = (float)getVoltageRaw();
+	v33 =  (float) buf_32[0];
+	v =  ( ( raw_v - v33 ) / 173) + 3.3; 
+		
+		
 
-	return 0;
+	// Temperature (°C )= (SAR_LTEMP - (OTP_READ(Vtemp @ 23°C )) x 1.14) + 23
+	// Todo: what is OTP_READ(Vtemp @ 23°C ) ?
+
+	return v;
+
+	
 }
 
 

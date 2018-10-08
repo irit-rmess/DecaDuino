@@ -94,8 +94,9 @@
 #define DecaDuino_h
 
 #include "Arduino.h"
+#include <math.h>
 
-//#define DECADUINO_DEBUG
+#define DECADUINO_DEBUG
 
 #ifdef ARDUINO_DWM1001_DEV
 #define DW1000_IRQ0_PIN 22
@@ -169,16 +170,22 @@
 
 #define DW1000_REGISTER_RX_FINFO			0x10
 #define DW1000_REGISTER_RX_FINFO_RXFLEN_MASK		0x000003FF
+#define DW1000_REGISTER_RX_FINFO_RXPACC_MASK		0xFFF00000
+
 
 #define DW1000_REGISTER_RX_BUFFER			0x11
 
-#define DW1000_REGISTER_RX_RFQUAL			0x12
+#define DW1000_REGISTER_RX_RFQUAL					0x12
+#define DW1000_REGISTER_RX_RFQUAL_FPAMPL2_MASK 		0XFFFF0000
+#define DW1000_REGISTER_RX_RFQUAL_CIRE_MASK 		0X0000FFFF
 
 #define DW1000_REGISTER_RX_TTCKI			0x13
 
 #define DW1000_REGISTER_RX_TTCKO			0x14
 
 #define DW1000_REGISTER_RX_TIME				0x15
+
+
 
 #define DW1000_REGISTER_TX_TIME				0x17
 
@@ -392,6 +399,86 @@ class DecaDuino {
 		* @author Réjane Dalce
 		* @date 20161003
 		*/
+		
+		
+
+		
+		
+		uint8_t getFpAmpl1(void);
+		
+		/**
+		* @brief Returns first path amplitude point 1
+		* @return the amplitude as an uint8
+		* @author Baptiste Pestourie
+		* @date 20180614
+		*/
+		uint16_t getFpAmpl2(void);
+		/**
+		* @brief Returns first path amplitude point 2
+		* @return the amplitude as an uint16
+		* @author Baptiste Pestourie
+		* @date 20180614
+		*/
+		uint16_t getFpAmpl3(void);
+		
+		/**
+		* @brief Returns first path amplitude point 3
+		* @return the amplitude as an uint16
+		* @author Baptiste Pestourie
+		* @date 20180614
+		*/
+		
+		uint16_t getRxPacc(void);
+		/**
+		* @brief Returns preamble accumulation count
+		* @return preamble accumulation count as an uint16
+		* @author Baptiste Pestourie
+		* @date 20180614
+		*/
+		
+		double getFpPower(void);
+		/**
+		* @brief Returns first path amplitude power
+		* @return first path amplitude power as a double (dBm)
+		* @author Baptiste Pestourie
+		* @date 20180614
+		*/
+
+		uint16_t getCirp(void);
+		/**
+		* @brief Returns Channel Impulse Response Power
+		* @return CIRP as uint16
+		* @author Baptiste Pestourie
+		* @date 20180614
+		*/
+		
+		uint16_t getCire(void);
+		/**
+		* @brief Returns Standard Deviation of Channel Impulse Response Estimation
+		* @return CIRE as uint16
+		* @author Baptiste Pestourie
+		* @date 20180614
+		*/
+		
+		double getRSSI(void);
+		/**
+		* @brief Returns received signal power
+		* @return RSSI as double (dBm)
+		* @author Baptiste Pestourie
+		* @date 20180614
+		*/
+		
+		
+		float getSNR(void);	
+		/**
+		* @brief Returns signal to noise ratio
+		* @return SNR as float
+		* @author Baptiste Pestourie
+		* @date 20180614
+		*/
+		
+		
+		
 		uint8_t getTxPcode(void);
  
 		/**
