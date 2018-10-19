@@ -5,7 +5,7 @@
 
 #include <SPI.h>
 #include "DecaDuino.h"
-#ifdef ARDUINO_DWM1001-DEV
+#ifdef ARDUINO_DWM1001_DEV
 #define SPI SPI1
 static inline uint32_t begin_atomic()
 {
@@ -178,7 +178,7 @@ void DecaDuino::resetDW1000() {
 		// Load the LDE algorithm microcode into LDE RAM or disable LDE execution (clear LDERUNE)
 		// Load the LDE algorithm microcode into LDE RAM (procedure p.22 DW1000 User Manual + comment p.21)
 
-    #ifdef ARDUINO_DWM1001-DEV
+    #ifdef ARDUINO_DWM1001_DEV
     uint32_t prim = begin_atomic();
     {
     #else
@@ -218,7 +218,7 @@ void DecaDuino::resetDW1000() {
 		SPI.endTransaction(); 
 	}
 
-    #ifdef ARDUINO_DWM1001-DEV
+    #ifdef ARDUINO_DWM1001_DEV
     end_atomic(prim);
     #endif
 
@@ -466,7 +466,7 @@ uint8_t DecaDuino::pdDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, ui
 	Serial.println();
 #endif
 
-    #ifdef ARDUINO_DWM1001-DEV
+    #ifdef ARDUINO_DWM1001_DEV
     uint32_t prim = begin_atomic();
     {
     #else
@@ -501,7 +501,7 @@ uint8_t DecaDuino::pdDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, ui
 		lastTxOK = false;
 	}
 
-    #ifdef ARDUINO_DWM1001-DEV
+    #ifdef ARDUINO_DWM1001_DEV
     end_atomic(prim);
     #endif
 /*
@@ -622,7 +622,7 @@ uint8_t DecaDuino::rxFrameAvailable(uint8_t* buf, uint16_t *len, uint16_t max) {
 
 	uint16_t i;
 
-    #ifdef ARDUINO_DWM1001-DEV
+    #ifdef ARDUINO_DWM1001_DEV
     uint32_t prim = begin_atomic();
     {
     #else
@@ -644,7 +644,7 @@ uint8_t DecaDuino::rxFrameAvailable(uint8_t* buf, uint16_t *len, uint16_t max) {
 			return true;
 		}
 	}
-    #ifdef ARDUINO_DWM1001-DEV
+    #ifdef ARDUINO_DWM1001_DEV
     end_atomic(prim);
     #endif
 	return false;
@@ -691,7 +691,7 @@ void DecaDuino::readSpi(uint8_t address, uint8_t* buf, uint16_t len) {
 
 	uint8_t addr = 0 | (address & 0x3F) ; // Mask register address (6bits) and preserve MSb at low (Read) and no subaddress
 
-    #ifdef ARDUINO_DWM1001-DEV
+    #ifdef ARDUINO_DWM1001_DEV
     uint32_t prim = begin_atomic();
     {
     #else
@@ -704,7 +704,7 @@ void DecaDuino::readSpi(uint8_t address, uint8_t* buf, uint16_t len) {
 		digitalWrite(_slaveSelectPin, HIGH);
 		SPI.endTransaction();
 	}
-    #ifdef ARDUINO_DWM1001-DEV
+    #ifdef ARDUINO_DWM1001_DEV
     end_atomic(prim);
     #endif
 }
@@ -722,7 +722,7 @@ void DecaDuino::readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t*
 
 		sub_addr = 0 | (subAddress & 0x7F); // Mask register address (6bits)
 
-        #ifdef ARDUINO_DWM1001-DEV
+        #ifdef ARDUINO_DWM1001_DEV
         uint32_t prim = begin_atomic();
         {
         #else
@@ -736,7 +736,7 @@ void DecaDuino::readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t*
 			digitalWrite(_slaveSelectPin, HIGH); 
 			SPI.endTransaction();
 		}
-        #ifdef ARDUINO_DWM1001-DEV
+        #ifdef ARDUINO_DWM1001_DEV
         end_atomic(prim);
         #endif
 
@@ -749,7 +749,7 @@ void DecaDuino::readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t*
 		sub_addrL = 0x80 | (subAddress & 0x7F); // Extension Address Indicator (0x80) + low-order 7 bits of sub address
 		sub_addrH = 0 | ((subAddress>>7) & 0xFF); // high-order 8 bits of sub address
 
-        #ifdef ARDUINO_DWM1001-DEV
+        #ifdef ARDUINO_DWM1001_DEV
         uint32_t prim = begin_atomic();
         {
         #else
@@ -764,7 +764,7 @@ void DecaDuino::readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t*
 			digitalWrite(_slaveSelectPin, HIGH); 
 			SPI.endTransaction();
 		}
-        #ifdef ARDUINO_DWM1001-DEV
+        #ifdef ARDUINO_DWM1001_DEV
         end_atomic(prim);
         #endif
 	}
@@ -784,7 +784,7 @@ void DecaDuino::writeSpi(uint8_t address, uint8_t* buf, uint16_t len) {
 
 	uint8_t addr = 0 | (address & 0x3F) | 0x80; // Mask register address (6bits) and set MSb (Write) and no subaddress
 
-    #ifdef ARDUINO_DWM1001-DEV
+    #ifdef ARDUINO_DWM1001_DEV
     uint32_t prim = begin_atomic();
     {
     #else
@@ -797,7 +797,7 @@ void DecaDuino::writeSpi(uint8_t address, uint8_t* buf, uint16_t len) {
 		digitalWrite(_slaveSelectPin, HIGH);
 		SPI.endTransaction();
 	}
-    #ifdef ARDUINO_DWM1001-DEV
+    #ifdef ARDUINO_DWM1001_DEV
     end_atomic(prim);
     #endif
 }
@@ -815,7 +815,7 @@ void DecaDuino::writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t
 
 		sub_addr = 0 | (subAddress & 0x7F); // Mask register address (6bits)
 
-        #ifdef ARDUINO_DWM1001-DEV
+        #ifdef ARDUINO_DWM1001_DEV
         uint32_t prim = begin_atomic();
         {
         #else
@@ -829,7 +829,7 @@ void DecaDuino::writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t
 			digitalWrite(_slaveSelectPin, HIGH);
 			SPI.endTransaction();
 		}
-        #ifdef ARDUINO_DWM1001-DEV
+        #ifdef ARDUINO_DWM1001_DEV
         end_atomic(prim);
         #endif
 
@@ -1336,7 +1336,7 @@ uint8_t DecaDuino::getTemperatureRaw() {
 
 	uint8_t u8t;
 
-    #ifdef ARDUINO_DWM1001-DEV
+    #ifdef ARDUINO_DWM1001_DEV
     uint32_t prim = begin_atomic();
     {
     #else
@@ -1350,7 +1350,7 @@ uint8_t DecaDuino::getTemperatureRaw() {
 		u8t = 0x00; writeSpiSubAddress(0x2A, 0x00, &u8t, 1); // 5. Write Register 2A:00 1byte 0x00
 		readSpiSubAddress(0x2A, 0x04, &u8t, 1); // 6. Read Register 2A:04 1byte 8 bit Temperature reading
 	}
-    #ifdef ARDUINO_DWM1001-DEV
+    #ifdef ARDUINO_DWM1001_DEV
     end_atomic(prim);
     #endif
 
@@ -1362,7 +1362,7 @@ uint8_t DecaDuino::getVoltageRaw() {
 
 	uint8_t u8t;
 
-    #ifdef ARDUINO_DWM1001-DEV
+    #ifdef ARDUINO_DWM1001_DEV
     uint32_t prim = begin_atomic();
     {
     #else
@@ -1376,7 +1376,7 @@ uint8_t DecaDuino::getVoltageRaw() {
 		u8t = 0x00; writeSpiSubAddress(0x2A, 0x00, &u8t, 1); // 5. Write Register 2A:00 1byte 0x00
 		readSpiSubAddress(0x2A, 0x03, &u8t, 1); // 6. Read Register 2A:03 1byte 8 bit Voltage reading
 	}
-    #ifdef ARDUINO_DWM1001-DEV
+    #ifdef ARDUINO_DWM1001_DEV
     end_atomic(prim);
     #endif
 
