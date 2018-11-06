@@ -1148,20 +1148,120 @@ uint8_t DecaDuino::getRxPcode(void) {
 	return (uint8_t)ui32t;
 }
 
+/* Channel configuration
+ * Inspired from Decawave DW1000 API
+ * /
+
+// Translation table giving the indexes for channel settings tables
+static const int CHANNEL[] = {
+    -1,
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    -1,
+    6
+};
+
+#define FS_CTRL_ID              0x2B            /* Frequency synthesiser control block */
+/* offset from FS_CTRL_ID in bytes */
+#define FS_PLLCFG_OFFSET        0x07            /* Frequency synthesiser  PLL configuration */
+#define FS_PLLCFG_LEN           (4)
+static const uint32_t FS_PLLCFG_CH[] = {
+    0x09000407UL,                               /* Operating Channel 1 */
+    0x08400508UL,                               /* Operating Channel 2 */
+    0x08401009UL,                               /* Operating Channel 3 */
+    0x08400508UL,                               /* Operating Channel 4 (same as 2) */
+    0x0800041DUL,                               /* Operating Channel 5 */
+    0x0800041DUL                                /* Operating Channel 7 (same as 5) */
+};
+
+/* offset from FS_CTRL_ID in bytes */
+#define FS_PLLTUNE_OFFSET       0x0B            /* Frequency synthesiser  PLL Tuning */
+#define FS_PLLTUNE_LEN          (1)
+static const uint8_t FS_PLLTUNE_CH[] = {
+    0x1E,                                       /* Operating Channel 1 */
+    0x26,                                       /* Operating Channel 2 */
+    0x56,                                       /* Operating Channel 3 */
+    0x26,                                       /* Operating Channel 4 (same as 2) */
+    0xBE,                                       /* Operating Channel 5 */
+    0xBE                                        /* Operating Channel 7 (same as 5) */
+};
+
+#define RF_CONF_ID              0x28            /* Analog RF Configuration */
+#define RF_CONF_LEN             (58)
+/* offset from TX_CAL_ID in bytes */
+#define RF_RXCTRLH_OFFSET       0x0B            /* Analog RX Control Register */
+#define RF_RXCTRLH_LEN          (1)
+#define RF_RXCTRLH_NBW          0xD8            /* RXCTRLH value for narrow bandwidth channels */
+#define RF_RXCTRLH_WBW          0xBC            /* RXCTRLH value for wide bandwidth channels */
+/* offset from TX_CAL_ID in bytes */
+#define RF_TXCTRL_OFFSET        0x0C            /* Analog TX Control Register */
+#define RF_TXCTRL_LEN           (4)
+#define RF_TXCTRL_TXMTUNE_MASK  0x000001E0UL    /* Transmit mixer tuning register */
+#define RF_TXCTRL_TXTXMQ_MASK   0x00000E00UL    /* Transmit mixer Q-factor tuning register */
+static const uint32_t RF_TXCTRL[] = {
+    0x00005C40UL,                               /* Operating Channel 1 */
+    0x00045CA0UL,                               /* Operating Channel 2 */
+    0x00086CC0UL,                               /* Operating Channel 3 */
+    0x00045C80UL,                               /* Operating Channel 4 */
+    0x001E3FE0UL,                               /* Operating Channel 5 */
+    0x001E7DE0UL                                /* Operating Channel 7 */
+};
+
+#define CHAN_CTRL_TX_CHAN_MASK  0x0000000FUL    /* Supported channels are 1, 2, 3, 4, 5, and 7.*/
+#define CHAN_CTRL_TX_CHAN_SHIFT (0)             /* Bits 0..3        TX channel number 0-15 selection */
+
+#define CHAN_CTRL_RX_CHAN_MASK  0x000000F0UL
+#define CHAN_CTRL_RX_CHAN_SHIFT (4)             /* Bits 4..7        RX channel number 0-15 selection */
+
+#define CHAN_CTRL_RXFPRF_MASK   0x000C0000UL    /* Bits 18..19      Specify (Force) RX Pulse Repetition Rate: 00 = 4 MHz, 01 = 16 MHz, 10 = 64MHz. */
+#define CHAN_CTRL_RXFPRF_SHIFT  (18)
+/* Specific RXFPRF configuration */
+#define CHAN_CTRL_RXFPRF_4      0x00000000UL    /* Specify (Force) RX Pulse Repetition Rate: 00 = 4 MHz, 01 = 16 MHz, 10 = 64MHz. */
+#define CHAN_CTRL_RXFPRF_16     0x00040000UL    /* Specify (Force) RX Pulse Repetition Rate: 00 = 4 MHz, 01 = 16 MHz, 10 = 64MHz. */
+#define CHAN_CTRL_RXFPRF_64     0x00080000UL    /* Specify (Force) RX Pulse Repetition Rate: 00 = 4 MHz, 01 = 16 MHz, 10 = 64MHz. */
+#define CHAN_CTRL_TX_PCOD_MASK  0x07C00000UL    /* Bits 22..26      TX Preamble Code selection, 1 to 24. */
+#define CHAN_CTRL_TX_PCOD_SHIFT (22)
+#define CHAN_CTRL_RX_PCOD_MASK  0xF8000000UL    /* Bits 27..31      RX Preamble Code selection, 1 to 24. */
+#define CHAN_CTRL_RX_PCOD_SHIFT (27)
+/*offset 16 */
+#define CHAN_CTRL_DWSFD         0x00020000UL    /* Bit 17 This bit enables a non-standard DecaWave proprietary SFD sequence. */
+#define CHAN_CTRL_DWSFD_SHIFT   (17)
+#define CHAN_CTRL_TNSSFD        0x00100000UL    /* Bit 20 Non-standard SFD in the transmitter */
+#define CHAN_CTRL_TNSSFD_SHIFT  (20)
+#define CHAN_CTRL_RNSSFD        0x00200000UL    /* Bit 21 Non-standard SFD in the receiver */
+#define CHAN_CTRL_RNSSFD_SHIFT  (21)
 
 bool DecaDuino::setChannel(uint8_t channel) {
+    if ( ( channel != 6 ) && ( channel <= 7 ) && ( channel >= 1 ) ) {
+        // PLL configuration
+        writeSpiSubAddress(FS_CTRL_ID, FS_PLLCFG_OFFSET,
+                (uint8_t*)&FS_PLLCFG_CH[CHANNEL[channel]], FS_PLLCFG_LEN);
+        writeSpiSubAddress(FS_CTRL_ID, FS_PLLTUNE_OFFSET,
+                (uint8_t*)&FS_PLLTUNE_CH[CHANNEL[channel]], FS_PLLTUNE_LEN);
 
- 	uint32_t ui32t = 0;
-	uint32_t pcode = 0;
-	uint8_t wchannel = channel;
+        // Narrow/Wide Band configuration
+        uint8_t rxctrlh;
+        if (channel == 4 || channel == 7)
+        {
+            rxctrlh = RF_RXCTRLH_WBW;
+        }
+        else
+        {
+            rxctrlh = RF_RXCTRLH_WBW;
+        }
+        writeSpiSubAddress(RF_CONF_ID, RF_RXCTRLH_OFFSET,
+                &rxctrlh, RF_RXCTRLH_LEN);
 
- 	if ( ( wchannel != 6 ) && ( wchannel <= 7 ) && ( wchannel >= 1 ) ) {
+        // Analog TX control configuration
+        writeSpiSubAddress(RF_CONF_ID, RF_TXCTRL_OFFSET,
+                (uint8_t*)&RF_TXCTRL[channel], RF_TXCTRL_LEN);
 
- 		wchannel =  wchannel + (wchannel << 4);
- 		ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
- 		ui32t = ui32t & 0xFFFFFF00;
- 		ui32t |= wchannel; // set rx and tx channel 
 		// select corresponding preamble code among valid values for selected (channel, PRF) pair; at least two values are available for each selection
+        uint8_t pcode = 0;
 		switch(channel){
 			case 1:
 				if(getRxPrf()==16) pcode = 2;
@@ -1189,16 +1289,26 @@ bool DecaDuino::setChannel(uint8_t channel) {
 				break;
 		}
 
-		pcode = pcode | (pcode << 5);
-		pcode = pcode << 22;
-		ui32t = ui32t & 0x003FFFFF;
-		ui32t = ui32t | pcode;
+        uint32_t chan_ctrl = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
+        chan_ctrl &= ~(CHAN_CTRL_TX_CHAN_MASK | CHAN_CTRL_RX_CHAN_MASK
+            | CHAN_CTRL_TX_PCOD_MASK | CHAN_CTRL_RX_PCOD_MASK);
 
- 		writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
-		if ( getChannelRaw() == wchannel )
- 			return true;
- 	}
- 	return false;
+        chan_ctrl |= (CHAN_CTRL_TX_CHAN_MASK & (channel << CHAN_CTRL_TX_CHAN_SHIFT)) | // Transmit Channel
+              (CHAN_CTRL_RX_CHAN_MASK & (channel << CHAN_CTRL_RX_CHAN_SHIFT)) | // Receive Channel
+              (CHAN_CTRL_TX_PCOD_MASK & (pcode << CHAN_CTRL_TX_PCOD_SHIFT)) | // TX Preamble Code
+              (CHAN_CTRL_RX_PCOD_MASK & (pcode << CHAN_CTRL_RX_PCOD_SHIFT)) ; // RX Preamble Code
+
+        writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, chan_ctrl);
+
+        uint32_t actual_chan_ctrl = getChanControl();
+    #ifdef DECADUINO_DEBUG
+        sprintf((char*)debugStr,"Expected CHAN_CTRL=0x%08x, Actual CHAN_CTRL=0x%08x", chan_ctrl, actual_chan_ctrl);
+        Serial.println((char*)debugStr);
+    #endif
+        if ( actual_chan_ctrl == chan_ctrl )
+            return true;
+    }
+    return false;
 }
 
 
