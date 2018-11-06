@@ -75,7 +75,7 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 	// Load Extended Unique Identifier – the 64-bit IEEE device address - in memory
 	euid = getEuid();
 
-    #ifdef ARDUINO_DWM1001
+    #ifdef ARDUINO_DWM1001_DEV
 	_DecaDuinoInterrupt[0] = this;
     attachInterrupt(_interruptPin, DecaDuino::isr0, RISING);
     #else
@@ -241,7 +241,7 @@ void DecaDuino::isr0() {
 #ifdef DECADUINO_DEBUG 
 	//Serial.println("\n###isr0###");
 #endif
-    #ifdef ARDUINO_DWM1001
+    #ifdef ARDUINO_DWM1001_DEV
     _DecaDuinoInterrupt[0]->handleInterrupt();
     #else
 	if (_DecaDuinoInterrupt[DW1000_IRQ0_PIN]) _DecaDuinoInterrupt[DW1000_IRQ0_PIN]->handleInterrupt();
