@@ -1150,7 +1150,7 @@ uint8_t DecaDuino::getRxPcode(void) {
 
 /* Channel configuration
  * Inspired from Decawave DW1000 API
- * /
+ */
 
 // Translation table giving the indexes for channel settings tables
 static const int CHANNEL[] = {
