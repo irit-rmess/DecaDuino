@@ -1235,6 +1235,39 @@ static const uint32_t RF_TXCTRL[] = {
 #define CHAN_CTRL_RNSSFD        0x00200000UL    /* Bit 21 Non-standard SFD in the receiver */
 #define CHAN_CTRL_RNSSFD_SHIFT  (21)
 
+#define LDE_IF_ID               0x2E            /* Leading edge detection control block */
+/* offset from LDE_IF_ID in bytes */
+#define LDE_REPC_OFFSET         0x2804  /* 16-bit configuration register for setting the replica avoidance coefficient */
+#define LDE_REPC_LEN            (2)
+// LDE replica coefficient configuration base on rx pcode
+static const uint16_t LDE_REPC[] = {
+    0,
+    0x5998,
+    0x5998,
+    0x51EA,
+    0x428E,
+    0x451E,
+    0x2E14,
+    0x8000,
+    0x51EA,
+    0x28F4,
+    0x3332,
+    0x3AE0,
+    0x3D70,
+    0x3AE0,
+    0x35C2,
+    0x2B84,
+    0x35C2,
+    0x3332,
+    0x35C2,
+    0x35C2,
+    0x47AE,
+    0x3AE0,
+    0x3850,
+    0x30A2,
+    0x3850
+};
+
 bool DecaDuino::setChannel(uint8_t channel) {
     if ( ( channel != 6 ) && ( channel <= 7 ) && ( channel >= 1 ) ) {
         // PLL configuration
@@ -1288,6 +1321,14 @@ bool DecaDuino::setChannel(uint8_t channel) {
 				else if(getRxPrf()==64) pcode = 18;
 				break;
 		}
+
+        uint16_t lde_repc = LDE_REPC[pcode];
+        if (getDataRate() == DW1000_DATARATE_110KBPS)
+        {
+            lde_repc >>= 3;
+        }
+        writeSpiSubAddress(LDE_IF_ID, LDE_REPC_OFFSET,
+                (uint8_t*)&lde_repc, LDE_REPC_LEN);
 
         uint32_t chan_ctrl = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
         chan_ctrl &= ~(CHAN_CTRL_TX_CHAN_MASK | CHAN_CTRL_RX_CHAN_MASK
