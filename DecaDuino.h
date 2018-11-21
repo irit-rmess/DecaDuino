@@ -209,6 +209,17 @@
 #define DW1000_REGISTER_PMSC_CTRL1			0x36
 #define DW1000_REGISTER_OFFSET_PMSC_CTRL1		0x04
 
+typedef enum {
+    DW1000_DATARATE_110KBPS,
+    DW1000_DATARATE_850KBPS,
+    DW1000_DATARATE_6_8MBPS
+} dw1000_datarate_t;
+
+const char DW1000_DATARATE[][9] = {
+    "100 Kbps",
+    "850 Kbps",
+    "6,8 Mbps"
+};
 
 class DecaDuino {
 
@@ -820,6 +831,22 @@ class DecaDuino {
 		*/
 		float getNLOSIndication(void);
 
+        /**
+         * @brief Gets the transmission data rate
+         * @return The enum value of the data rate
+         * @author Benjamin Freeman
+         * @date 20181121
+         */
+        dw1000_datarate_t getDataRate();
+
+        /**
+         * @brief Sets the transmission data rate
+         * @param rate The enum value of the data rate
+         * @return No return
+         * @author Benjamin Freeman
+         * @date 20181121
+         */
+        void setDataRate(dw1000_datarate_t rate);
 
 	private:
 

@@ -1701,3 +1701,76 @@ float DecaDuino::getNLOSIndication(void) {
 #endif
 	return indicator;
 }
+
+/* offset from DRX_CONF_ID in bytes */
+#define DRX_TUNE0b_OFFSET       (0x02)  /* sub-register 0x02 is a 16-bit tuning register. */
+#define DRX_TUNE0b_LEN          (2)
+#define DRX_TUNE0b_MASK         0xFFFF  /* 7.2.40.2 Sub-Register 0x27:02  DRX_TUNE0b */
+
+/* offset from DRX_CONF_ID in bytes */
+#define DRX_TUNE1b_OFFSET       0x06    /* 7.2.40.4 Sub-Register 0x27:06  DRX_TUNE1b */
+#define DRX_TUNE1b_LEN          (2)
+#define DRX_TUNE1b_MASK         0xFFFF
+#define DRX_TUNE1b_110K         0x0064
+#define DRX_TUNE1b_850K_6M8     0x0020
+#define DRX_TUNE1b_6M8_PRE64    0x0010
+
+#define SYS_CFG_RXM110K         0x00400000UL    /* Receiver Mode 110 kbps data rate */
+
+// SFD Threshold
+static const uint16_t DRX_TUNE0b[] =
+{
+    0x000A,                                     /* 100 kbps */
+    0x0001,                                     /* 850 kbps */
+    0x0001                                      /* 6.8 Mbps */
+};
+
+#define TX_FCTRL_TXBR_MASK      0x00006000UL    /* bit mask to access Transmit Bit Rate */
+static const uint32_t TX_FCTRL_TXBR[] = {
+    0x00000000UL,                               /* 100 kbps */
+    0x00002000UL,                               /* 850 kbps */
+    0x00004000UL                                /* 6.8 Mbps */
+};
+
+dw1000_datarate_t DecaDuino::getDataRate() {
+	uint32_t tx_fctrl = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
+    uint32_t tx_fctrl_txbr = tx_fctrl & TX_FCTRL_TXBR_MASK;
+    for (int i = 0; i < sizeof(TX_FCTRL_TXBR); i++)
+    {
+        if (tx_fctrl_txbr == TX_FCTRL_TXBR[i]) return (dw1000_datarate_t)i;
+    }
+}
+
+void DecaDuino::setDataRate(dw1000_datarate_t rate) {
+    // DTUNE0
+    writeSpiSubAddress(DRX_CONF_ID, DRX_TUNE0b_OFFSET,
+            (uint8_t*)&DRX_TUNE0b[rate], DRX_TUNE0b_LEN);
+
+    uint32_t tune1b;
+	uint32_t sys_cfg = readSpiUint32(DW1000_REGISTER_SYS_CFG);
+    if (rate == DW1000_DATARATE_110KBPS)
+    {
+        tune1b = DRX_TUNE1b_110K;
+        sys_cfg |= SYS_CFG_RXM110K;
+    }
+    else
+    {
+        sys_cfg &= ~SYS_CFG_RXM110K;
+        if (getPreambleLength() == 64)
+        {
+            tune1b = DRX_TUNE1b_6M8_PRE64;
+        }
+        else
+        {
+            tune1b = DRX_TUNE1b_850K_6M8;
+        }
+    }
+    writeSpiUint32(DW1000_REGISTER_SYS_CFG, sys_cfg);
+    writeSpiSubAddress(DRX_CONF_ID, DRX_TUNE1b_OFFSET,
+            (uint8_t*)&tune1b, DRX_TUNE1b_LEN);
+
+	uint32_t tx_fctrl = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
+    tx_fctrl &= ~TX_FCTRL_TXBR_MASK;
+    tx_fctrl |= TX_FCTRL_TXBR[rate];
+    writeSpiUint32(DW1000_REGISTER_TX_FCTRL, tx_fctrl);
+}
