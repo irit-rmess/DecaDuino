@@ -97,7 +97,7 @@
 
 //#define DECADUINO_DEBUG
 
-#ifdef ARDUINO_DWM1001-DEV
+#ifdef ARDUINO_DWM1001_DEV
 #define DW1000_IRQ0_PIN 22
 #else
 #define DW1000_IRQ0_PIN 9
