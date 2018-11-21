@@ -1449,35 +1449,63 @@ int DecaDuino::getPreambleLength(void) {
 	return plength;
 }
 
+#define DRX_CONF_ID             0x27            /* Digital Receiver configuration */
+#define DRX_CONF_LEN            (44)
+
+/* offset from DRX_CONF_ID in bytes */
+#define DRX_TUNE2_OFFSET        0x08    /* 7.2.40.5 Sub-Register 0x27:08  DRX_TUNE2 */
+#define DRX_TUNE2_LEN           (4)
+uint32_t DRX_TUNE2[][2] = {             /* Row = PAC, Col = PRF */
+    { 0x311A002DUL, 0x313B006BUL},      /* PAC 8 */
+    { 0x331A0052UL, 0x333B00BEUL},      /* PAC 16 */
+    { 0x351A009AUL, 0x353B015EUL},      /* PAC 32 */
+    { 0x371A011DUL, 0x373B0296UL}       /* PAC 64 */
+};
+
+/* offset from DRX_CONF_ID in bytes */
+#define DRX_TUNE4H_OFFSET       0x26    /* 7.2.40.10 Sub-Register 0x27:26  DRX_TUNE4H */
+#define DRX_TUNE4H_LEN          (2)
+#define DRX_TUNE4H_MASK         0xFFFF
+#define DRX_TUNE4H_PRE64        0x0010
+#define DRX_TUNE4H_PRE128PLUS   0x0028
 
 bool DecaDuino::setPreambleLength (int plength) {
 
 	uint32_t ui32t;
 	uint32_t mask;
+    int recommended_pac_size_index;
 	switch(plength){
 		case 64:
 			mask = 0x00040000;
+            recommended_pac_size_index = 0;
 			break;
 		case 128:
 			mask = 0x00140000;
+            recommended_pac_size_index = 0;
 			break;
 		case 256:
 			mask = 0x00240000;
+            recommended_pac_size_index = 1;
 			break;
 		case 512:
 			mask = 0x00340000;
+            recommended_pac_size_index = 1;
 			break;
 		case 1024:
 			mask = 0x00080000;
+            recommended_pac_size_index = 2;
 			break;
 		case 1536:
 			mask = 0x00180000;
+            recommended_pac_size_index = 3;
 			break;
 		case 2048:
 			mask = 0x00280000;
+            recommended_pac_size_index = 3;
 			break;
 		case 4096:
 			mask = 0x000C0000;
+            recommended_pac_size_index = 3;
 			break;
 		default:
 			return false;			
@@ -1486,6 +1514,22 @@ bool DecaDuino::setPreambleLength (int plength) {
 	ui32t = ui32t & 0xFFC3FFFF; // bits 21, 20, 19, 18 to zero
 	ui32t |= mask;
 	writeSpiUint32(DW1000_REGISTER_TX_FCTRL, ui32t);
+
+    int prf_index = getRxPrf() == 16 ? 0 : 1;
+    writeSpiSubAddress(DRX_CONF_ID, DRX_TUNE2_OFFSET,
+            (uint8_t*)&DRX_TUNE2[recommended_pac_size_index][prf_index], DRX_TUNE2_LEN);
+
+    uint16_t tune4h;
+    if (plength > 64)
+    {
+        tune4h = DRX_TUNE4H_PRE128PLUS;
+    }
+    else
+    {
+        tune4h = DRX_TUNE4H_PRE64;
+    }
+    writeSpiSubAddress(DRX_CONF_ID, DRX_TUNE4H_OFFSET,
+            (uint8_t*)&tune4h, DRX_TUNE4H_LEN);
 	return true;		
 }
 
