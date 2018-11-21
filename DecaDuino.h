@@ -401,6 +401,14 @@ class DecaDuino {
 		* @date 20161003
 		*/
 		uint8_t getRxPcode(void);
+
+        /**
+         * @brief Gets the device identifier
+         * @return The entire 32-bit DEV_ID register
+         * @author Benjamin Freeman
+         * @date 20181121
+         */
+        uint32_t getDevID(void);
  
  		/**
 		* @brief Sets the radio channels for TX and RX

@@ -70,7 +70,7 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 	resetDW1000();
 
 	// Check the device type
-	if ( readSpiUint32(DW1000_REGISTER_DEV_ID) != 0xdeca0130 ) return false;
+	if ( getDevID()  != 0xdeca0130 ) return false;
 
 	// Load Extended Unique Identifier – the 64-bit IEEE device address - in memory
 	euid = getEuid();
@@ -1773,4 +1773,8 @@ void DecaDuino::setDataRate(dw1000_datarate_t rate) {
     tx_fctrl &= ~TX_FCTRL_TXBR_MASK;
     tx_fctrl |= TX_FCTRL_TXBR[rate];
     writeSpiUint32(DW1000_REGISTER_TX_FCTRL, tx_fctrl);
+}
+
+uint32_t DecaDuino::getDevID(void) {
+    return readSpiUint32(DW1000_REGISTER_DEV_ID);
 }
