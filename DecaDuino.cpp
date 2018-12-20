@@ -1159,7 +1159,7 @@ uint16_t DecaDuino::getFpAmpl2(void) {
 uint16_t DecaDuino::getFpAmpl3(void) {
 	uint8_t buffer[2];
 	uint16_t ui16t;
-	readSpiSubAddress(DW1000_REGISTER_RX_RFQUAL, 0x06, buffer, 2);
+	readSpiSubAddress(DW1000_REGISTER_RX_RFQUAL, 0x04, buffer, 2);
 	ui16t =   *((uint16_t *)buffer) ;
 	
 	
@@ -1204,7 +1204,7 @@ double DecaDuino::getFpPower(void) {
 uint16_t DecaDuino::getCirp(void) {
 	uint8_t buffer[2];
 	uint16_t ui16t;
-	readSpiSubAddress(DW1000_REGISTER_RX_RFQUAL, 0x04, buffer, 2);
+	readSpiSubAddress(DW1000_REGISTER_RX_RFQUAL, 0x06, buffer, 2);
 	ui16t = *((uint16_t *)buffer);
 	return ui16t;
 	
@@ -1233,7 +1233,7 @@ uint16_t DecaDuino::getCire(void) {
 double DecaDuino::getRSSI(void) {
 	
 	double rss;
-	float C = (float) getCire();
+	float C = (float) getCirp();
 	float N = (float) getRxPacc();
 	uint8_t prf = getRxPrf();
 	float A;
