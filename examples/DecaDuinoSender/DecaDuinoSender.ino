@@ -9,20 +9,28 @@
 #define MAX_FRAME_LEN 120
 uint8_t txData[MAX_FRAME_LEN];
 uint16_t txLen;
+#ifdef ARDUINO_DWM1001_DEV
+DecaDuino decaduino(SS1, DW_IRQ);
+#define LED_ON LOW
+#define LED_OFF HIGH
+#else
 DecaDuino decaduino;
-int rxFrames;
-
+#define LED_ON HIGH
+#define LED_OFF LOW
+#endif
 
 void setup()
 {
-  pinMode(13, OUTPUT); // Internal LED (pin 13 on DecaWiNo board)
+  pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(115200); // Init Serial port
+  #ifndef ARDUINO_DWM1001_DEV
   SPI.setSCK(14); // Set SPI clock pin (pin 14 on DecaWiNo board)
+  #endif
 
   // Init DecaDuino and blink if initialisation fails
   if ( !decaduino.init() ) {
     Serial.println("decaduino init failed");
-    while(1) { digitalWrite(13, HIGH); delay(50); digitalWrite(13, LOW); delay(50); }
+    while(1) { digitalWrite(LED_BUILTIN, LED_ON); delay(50); digitalWrite(LED_BUILTIN, LED_OFF); delay(50); }
   }
 }
 
@@ -30,13 +38,13 @@ void setup()
 void loop()
 {
   // make dummy data, send it and wait the end of the transmission.
-  digitalWrite(13, HIGH);
+  digitalWrite(LED_BUILTIN, LED_ON);
   for (int i=0; i<MAX_FRAME_LEN; i++) {
     txData[i] = i;
   }
   decaduino.pdDataRequest(txData, MAX_FRAME_LEN);
   while ( !decaduino.hasTxSucceeded() );
-  digitalWrite(13, LOW);
+  digitalWrite(LED_BUILTIN, LED_OFF);
   
   // wait 1 second 
   delay(1000);

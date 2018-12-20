@@ -10,22 +10,32 @@
 #define MAX_FRAME_LEN 120
 uint8_t rxData[MAX_FRAME_LEN];
 uint16_t rxLen;
-DecaDuino decaduino;
 int rxFrames;
+#ifdef ARDUINO_DWM1001_DEV
+DecaDuino decaduino(SS1, DW_IRQ);
+#define LED_ON LOW
+#define LED_OFF HIGH
+#else
+DecaDuino decaduino;
+#define LED_ON HIGH
+#define LED_OFF LOW
+#endif
+
 
 
 void setup()
 {
-  pinMode(13, OUTPUT); // Internal LED (pin 13 on DecaWiNo board)
+  pinMode(LED_BUILTIN, OUTPUT); // Internal LED (pin LED_BUILTIN on DecaWiNo board)
   Serial.begin(115200); // Init Serial port
+  #ifndef ARDUINO_DWM1001_DEV
   SPI.setSCK(14); // Set SPI clock pin (pin 14 on DecaWiNo board)
+  #endif
 
   // Init DecaDuino and blink if initialisation fails
   if ( !decaduino.init() ) {
     Serial.println("decaduino init failed");
-    while(1) { digitalWrite(13, HIGH); delay(50); digitalWrite(13, LOW); delay(50); }
+    while(1) { digitalWrite(LED_BUILTIN, LED_ON); delay(50); digitalWrite(LED_BUILTIN, LED_OFF); delay(50); }
   }
-  
   // Set RX buffer and enable RX
   decaduino.setRxBuffer(rxData, &rxLen);
   decaduino.plmeRxEnableRequest();
@@ -37,7 +47,7 @@ void loop()
 {  
   // If a message has been received, print it and re-enable receiver
   if ( decaduino.rxFrameAvailable() ) {
-    digitalWrite(13, HIGH);
+    digitalWrite(LED_BUILTIN, LED_ON);
     Serial.print("#"); Serial.print(++rxFrames); Serial.print(" ");
     Serial.print(rxLen);
     Serial.print("bytes received: |");
@@ -47,7 +57,7 @@ void loop()
     }
     Serial.println();
     decaduino.plmeRxEnableRequest(); // Always renable RX after a frame reception
-    digitalWrite(13, LOW);
+    digitalWrite(LED_BUILTIN, LED_OFF);
   }
 }
 
