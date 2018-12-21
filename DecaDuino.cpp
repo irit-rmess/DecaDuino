@@ -1157,12 +1157,9 @@ uint16_t DecaDuino::getFpAmpl2(void) {
 	
 
 uint16_t DecaDuino::getFpAmpl3(void) {
-	uint8_t buffer[2];
 	uint16_t ui16t;
-	readSpiSubAddress(DW1000_REGISTER_RX_RFQUAL, 0x04, buffer, 2);
-	ui16t =   *((uint16_t *)buffer) ;
-	
-	
+	readSpiSubAddress(DW1000_REGISTER_RX_RFQUAL, 0x04,
+            (uint8_t *) &ui16t, sizeof(ui16t));	
 	return ui16t;
 }
 
@@ -1202,12 +1199,10 @@ double DecaDuino::getFpPower(void) {
 	
 	
 uint16_t DecaDuino::getCirp(void) {
-	uint8_t buffer[2];
 	uint16_t ui16t;
-	readSpiSubAddress(DW1000_REGISTER_RX_RFQUAL, 0x06, buffer, 2);
-	ui16t = *((uint16_t *)buffer);
+	readSpiSubAddress(DW1000_REGISTER_RX_RFQUAL, 0x06,
+            (uint8_t *)&ui16t, sizeof(ui16t));
 	return ui16t;
-	
 }
 
 float DecaDuino::getSNR(void) {
@@ -1736,7 +1731,6 @@ uint8_t DecaDuino::getVoltageRaw() {
 		u8t = 0x01; writeSpiSubAddress(0x2A, 0x00, &u8t, 1); // 4. Write Register 2A:00 1byte 0x01
 		u8t = 0x00; writeSpiSubAddress(0x2A, 0x00, &u8t, 1); // 5. Write Register 2A:00 1byte 0x00
 		readSpiSubAddress(0x2A, 0x03, &u8t, 1); // 6. Read Register 2A:03 1byte 8 bit Voltage reading
-
 	}
     #ifdef ARDUINO_DWM1001_DEV
     end_atomic(prim);
