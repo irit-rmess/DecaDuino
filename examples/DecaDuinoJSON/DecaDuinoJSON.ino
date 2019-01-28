@@ -76,9 +76,9 @@ int parseCommand ( char json[] )
     Serial.print("  frequency: ");
     Serial.println(frequency);
     Serial.print("  power: ");
+    Serial.println(power);
     Serial.print("  preambleLength: ");
     Serial.println(preambleLength);
-    Serial.println(power);
     Serial.print("  modulation: ");
     Serial.println(modulation);
     Serial.print("  bandwidth: ");
