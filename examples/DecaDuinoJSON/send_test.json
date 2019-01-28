@@ -1,14 +1,17 @@
 {
-    "phyPayload": "SGVsbG8gV29ybGQK",
-    "txInfo": {
-        "nodeID": "8f",
-        "frequency": 3993600000,
-        "preambleLength": 2048,
-        "modulation": "UWB",
-        "UWBModulationInfo": {
-          "bandwidth": 499200,
-          "dataRate": 110000
-        }
-    },
-    "token": 38150
+    "message_type": "DecaDuino_tx",
+    "message": {
+        "phyPayload": "SGVsbG8gV29ybGQK",
+        "txInfo": {
+            "nodeID": "8f",
+            "frequency": 3993600000,
+            "preambleLength": 2048,
+            "modulation": "UWB",
+            "UWBModulationInfo": {
+                "bandwidth": 499200,
+                "dataRate": 110000
+            }
+        },
+        "token": 38150
+    }
 }
