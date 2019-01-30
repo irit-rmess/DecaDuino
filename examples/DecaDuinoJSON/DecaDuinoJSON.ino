@@ -374,7 +374,9 @@ void loop()
 
     stats_txPacketsEmitted++;
     txBufferLen = 0;
-    Serial.printf("{\"message_type\":\"DecaDuino_ack\",\"message\":{\"nodeID\":\"%s\",\"token\":%d, \"timestamp\":%ld}}\r\n", stored_nodeID, tx_token, micros());
+    Serial.printf("{\"message_type\":\"DecaDuino_ack\",\"message\":{\"nodeID\":\"%s\",\"token\":%d, \"timestamp\":%ld, \"tx_dw_timestamp_hex\":\"0x", stored_nodeID, tx_token, micros());
+    decaduino.printUint64(decaduino.getLastTxTimestamp());
+    Serial.printf("\"p}}\r\n");
   }
 
   // Check incoming messages from radio
@@ -389,7 +391,9 @@ void loop()
       Serial.printf("{\"message_type\":\"DecaDuino_rx\",\"message\":{");
       Serial.printf("\"txInfo\":{\"frequency\":%lu,\"modulation\":\"UWB\",\"UWBModulationInfo\":{", current_frequency);
       Serial.printf("\"bandwidth\":%d,\"dataRate\":%d}},", current_bandwidth, current_dataRate);
-      Serial.printf("\"rxInfo\":{\"nodeID\":\"%s\",\"timestamp\":%ld,", stored_nodeID, micros());
+      Serial.printf("\"rxInfo\":{\"nodeID\":\"%s\",\"timestamp\":%ld,\"rx_dw_timestamp_hex\":\"0x", stored_nodeID, micros());
+      decaduino.printUint64(decaduino.getLastRxTimestamp());
+      Serial.printf("\",");
       Serial.printf("\"rssi\":%d,\"UWBSNR\":%d,\"size\":%d},",-1,-1,rxBufferLen);
       Serial.printf("\"phyPayload\":\"%s\"}}\r\n", phyPayloadBase64);
     }
