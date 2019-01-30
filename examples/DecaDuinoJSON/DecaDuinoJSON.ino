@@ -37,8 +37,10 @@ int json_buffer_len = 0;
 
 int parseCommand ( char json[] )
 {
+  char json_buffer_temp[2048];
   StaticJsonBuffer<2048> jsonBuffer;
-  JsonObject& root = jsonBuffer.parseObject(json);
+  memcpy(json_buffer_temp, json, strlen(json));
+  JsonObject& root = jsonBuffer.parseObject(json_buffer_temp);
 
   if (!root.success()) {
     DEBUG_MESSAGE("parseObject() failed\r\n");
@@ -281,6 +283,25 @@ void setup()
   decaduino.plmeRxEnableRequest();
 }
 
+int isJsonComplete ( char json[] ) 
+{
+  // Analyse JSON string and return true if the number of {} and [] is coherent
+  int len = strlen(json);
+  int bracket_count = 0;
+  int brace_count = 0;
+
+  for (int i=0; i<len; i++)
+  {
+    if ( json[i] == '{' ) brace_count++;
+    else if ( json[i] == '}' ) brace_count--;
+    else if ( json[i] == '[' ) bracket_count++;
+    else if ( json[i] == ']' ) bracket_count--;
+  }
+
+  if ( brace_count == 0 && bracket_count == 0 ) return true;
+  else return false;
+}
+
 void sendData(char * data, int size)
 {
   decaduino.plmeRxDisableRequest(); // Always disable RX before request frame sending
@@ -302,33 +323,39 @@ void loop()
   wino.rgbDraw(0,255,0);
 
   if ( millis() > statsTimeout ) send_stats();
-
-  if ( millis() > json_timeout )
-  {
-      reset_json_buffer();
-  }
+  if ( millis() > json_timeout ) reset_json_buffer();
 
   // Get chars from Serial
   while ( Serial.available() > 0 )
   {
+    char c = Serial.read();
+    
     if ( json_buffer_len == 0 )
     {
-      // First char: set timeout
-      json_timeout = millis() + JSON_TIMEOUT;
+      if (c == '\r' || c == '\t' || c == ' ' || c == '\n' ) 
+      {
+        continue;
+      }
+      else 
+      {
+        // First char: set timeout
+        json_timeout = millis() + JSON_TIMEOUT;      
+      }
     }
 
-    char c = Serial.read();
+    if (c != '\r' && c != '\t')
+    {
+      json_buffer[json_buffer_len++] = c;
+    }
 
-    if (c == '\n' && json_buffer_len != 0)
+    if (json_buffer_len != 0)
     {
         // Always put a NULL char at the end of the string for the parser
         json_buffer[json_buffer_len] = '\0';
-        parseCommand(json_buffer);
-        reset_json_buffer();
-    }
-    else if (c != '\r' && c != '\t')
-    {
-        json_buffer[json_buffer_len++] = c;
+        if ( isJsonComplete(json_buffer) )
+        {
+          if ( parseCommand(json_buffer) == true ) reset_json_buffer();
+        }
     }
   }
 
@@ -347,7 +374,7 @@ void loop()
 
     stats_txPacketsEmitted++;
     txBufferLen = 0;
-    Serial.printf("{\"message_type\":\"DecaDuino_ack\",\"message\":{\"nodeID\":\"%s\",\"token\":%d}}\r\n", stored_nodeID, tx_token);
+    Serial.printf("{\"message_type\":\"DecaDuino_ack\",\"message\":{\"nodeID\":\"%s\",\"token\":%d, \"timestamp\":%ld}}\r\n", stored_nodeID, tx_token, micros());
   }
 
   // Check incoming messages from radio
