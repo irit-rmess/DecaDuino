@@ -12,6 +12,14 @@ documentation here: https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/)
 ## Installation
 You have to put this library in your Arduino libraries directory.
 
+### DecaWino (Teensy)
+
+Instructions here: https://wino.cc/tutorials/teensywino-installing-software-development-tools/
+
+### DWM1001-DEV (nRF5x)
+
+Instructions here: https://github.com/sandeepmistry/arduino-nRF5/#installing
+
 ## Start using DecaDuino with simple example sketchs
 All example sketches are available as usual in the Arduino IDE menu: 
 ```
@@ -32,7 +40,14 @@ frame sniffer to dump received messages.
 ### DecaDuinoChat
 
 This sketch shows how to use the DecaDuino library to send and receive ascii
-messages via the Serial port over the UWB radio.
+messages via the Serial port over the UWB radio. Commands are available to
+change the radio's configuration: channel, datarate and preamble length.
+
+### DecaDuinoJSON
+
+This sketch shows how to use the DecaDuino library to control the UWB radio
+with JSON over serial. The JSON format used is based on LoraServer's Gateway
+Bridge JSON format (https://www.loraserver.io/lora-gateway-bridge/integrate/payload-types/json/).
 
 ## Use DecaDuino to implement ranging protocols
 
