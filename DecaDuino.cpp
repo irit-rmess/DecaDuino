@@ -191,7 +191,8 @@ void DecaDuino::resetDW1000() {
 	}
 
 	// Initialise the SPI port
-	currentSPISettings = SPISettings(6000000, MSBFIRST, SPI_MODE0);
+	//currentSPISettings = SPISettings(6000000, MSBFIRST, SPI_MODE0);
+	currentSPISettings = SPISettings(20000000, MSBFIRST, SPI_MODE0);
 	delay(1);
 
 #ifdef DECADUINO_DEBUG 
@@ -347,6 +348,7 @@ void DecaDuino::handleInterrupt() {
 					printUint64(lastRxTimestamp);
 					Serial.print(", skew=");
 					Serial.println(clkOffset);
+				
 #endif
 
 				}
@@ -1017,7 +1019,7 @@ uint8_t DecaDuino::getFpAmpl1(void) {
 	
 	uint8_t u8t;
 	
-	readSpiSubAddress(DW1000_REGISTER_RX_TIME, 0x07, &u8t, 1);
+	readSpiSubAddress(DW1000_REGISTER_RX_TIME, DW1000_REGISTER_OFFSET_FPAMPL1, &u8t, 1);
 	
 	
 	
@@ -1043,7 +1045,7 @@ uint16_t DecaDuino::getFpAmpl2(void) {
 uint16_t DecaDuino::getFpAmpl3(void) {
 	uint8_t buffer[2];
 	uint16_t ui16t;
-	readSpiSubAddress(DW1000_REGISTER_RX_RFQUAL, 0x06, buffer, 2);
+	readSpiSubAddress(DW1000_REGISTER_RX_RFQUAL, DW1000_REGISTER_OFFSET_FPAMPL3, buffer, 2);
 	ui16t =   *((uint16_t *)buffer) ;
 	
 	
@@ -1072,14 +1074,14 @@ double DecaDuino::getFpPower(void) {
 	
 	if (prf == 1) {
 		// prf set to 16 MHz
-		A = 113.77;
+		A = DWM1000_PRF_16MHZ_CIRE_CONSTANT;
 	}
 	else {
 		// prf set to 64 MHz
-		A = 121.74;
+		A = DWM1000_PRF_64MHZ_CIRE_CONSTANT;
 	}
 		
-	fppow = 10 * ( log10( ( (F1 * F1) + (F2 * F2) + (F3 * F3) ) / (N * N) ) ) - A;
+	fppow = 10 * ( log10( ( (F1 * F1) + (F2 * F2) + (F3 * F3) ) / (N * N) ) ) - A; // from DWM1000 user manual, page 46
 	
 	return(fppow);
 }
@@ -1088,7 +1090,7 @@ double DecaDuino::getFpPower(void) {
 uint16_t DecaDuino::getCirp(void) {
 	uint8_t buffer[2];
 	uint16_t ui16t;
-	readSpiSubAddress(DW1000_REGISTER_RX_RFQUAL, 0x04, buffer, 2);
+	readSpiSubAddress(DW1000_REGISTER_RX_RFQUAL, DW1000_REGISTER_OFFSET_CIRP, buffer, 2);
 	ui16t = *((uint16_t *)buffer);
 	return ui16t;
 	
@@ -1099,7 +1101,7 @@ float DecaDuino::getSNR(void) {
 	cire = (float) getCire();
 	ampl2 = (float) getFpAmpl2();
 	
-	ratio = ampl2 / cire;
+	ratio = ampl2 / cire; // from DWM1000 user manual
 	
 	return(ratio);
 }
@@ -1124,14 +1126,14 @@ double DecaDuino::getRSSI(void) {
 	
 	if (prf == 1) {
 		// prf set to 16 MHz
-		A = 113.77;
+		A = DWM1000_PRF_16MHZ_CIRE_CONSTANT;
 	}
 	else {
 		// prf set to 64 MHz
-		A = 121.74;
+		A = DWM1000_PRF_64MHZ_CIRE_CONSTANT;
 	}
 	
-	rss = 10 * ( log10( (C * pow(2,17)) / (N * N) ) )  - A;
+	rss = 10 * ( log10( (C * pow(2,17)) / (N * N) ) )  - A; // from DWM1000 user manual, page 46 
 	
 	return(rss);
 }
@@ -1194,6 +1196,35 @@ bool DecaDuino::setRxPrf(uint8_t prf) {
 	} else return false;
 }
 
+
+bool DecaDuino::setTxPrf(uint8_t prf) {
+
+	uint32_t ui32t;
+	
+	if ( ( prf == 1 ) || ( prf == 2 ) ) {
+
+		ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
+		ui32t = ui32t & (~DW1000_REGISTER_TX_FCTRL_TXPRF_MASK);
+		ui32t |= prf << 16; 
+		writeSpiUint32(DW1000_REGISTER_TX_FCTRL, ui32t);
+		return true;
+
+	} else return false;
+}
+
+bool DecaDuino::setDrxTune(uint8_t prf) {
+	uint16_t drxVal;
+	if (prf == 16) {
+		drxVal = DW1000_REGISTER_DRX_TUNE_PRF16;
+	}
+	else if (prf == 64) {
+		drxVal = DW1000_REGISTER_DRX_TUNE_PRF64;
+	}
+	else return false;
+	writeSpiSubAddress(DW1000_REGISTER_DIGITAL_TRANSCEIVER_CONFIGURATION, DW1000_REGISTER_OFFSET_DRX_TUNE1A, (uint8_t *) &drxVal, 2);
+	return true;
+
+}
 
 bool DecaDuino::setTxPcode(uint8_t pcode) {
 
@@ -1395,23 +1426,25 @@ float DecaDuino::getTemperature(void) {
 	uint8_t t23,raw_temp;
 	
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+		// Reading Temperature measured at 23°C in OTP Memory (procedure page 61 DWM1000 user manual)
 		
-		buf_16[0] = 0x09;buf_16[1] = 0x00; writeSpiSubAddress(0x2D, 0x04, buf_16, 2);
-		u8t= 0x03; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
-		u8t= 0x00; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
-		readSpiSubAddress(0x2D,0x0A,buf_32,4);
+		buf_16[0] = DWM1000_OTP_ADDR_TEMP;
+		buf_16[1] = DWM1000_OTP_OFFSET_TEMP23; 
+		writeSpiSubAddress(DWM1000_REGISTER_OTP, DWM1000_REGISTER_OFFSET_OTP_ADDR, buf_16, 2);
+		
+		u8t= 0x03; writeSpiSubAddress(DWM1000_REGISTER_OTP, DWM1000_REGISTER_OFFSET_OTP_CTRL, &u8t, 1);
+		u8t= 0x00; writeSpiSubAddress(DWM1000_REGISTER_OTP, DWM1000_REGISTER_OFFSET_OTP_CTRL, &u8t, 1);
+		
+		readSpiSubAddress(DWM1000_REGISTER_OTP,DWM1000_REGISTER_OFFSET_OTP_RDAT,buf_32,4);
 		
 		
 	}
 	raw_temp = getTemperatureRaw();
 	t23 =   buf_32[0];
 	diff = (float) (raw_temp - t23);
-	temp =   diff * 1.14 + 23.0; 
+	temp =   diff * 1.14 + 23.0;  // DWM1000 user manual page 159
 		
 		
-
-	// Temperature (°C )= (SAR_LTEMP - (OTP_READ(Vtemp @ 23°C )) x 1.14) + 23
-	// Todo: what is OTP_READ(Vtemp @ 23°C ) ?
 
 	return temp;
 }
@@ -1419,8 +1452,7 @@ float DecaDuino::getTemperature(void) {
 
 float DecaDuino::getVoltage(void) {
 
-	// Voltage (volts) = (SAR_LVBAT- (OTP_READ(Vmeas @ 3.3 V )) /173) + 3.3
-	// Todo: what is OTP_READ(Vmeas @ 3.3 V ) ?
+
 	
 	uint8_t u8t;
 	uint8_t buf_16[2];
@@ -1429,22 +1461,24 @@ float DecaDuino::getVoltage(void) {
 	float v33,v;
 	
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+		// Reading Voltage measured at 3.3V in OTP Memory (procedure page 61 DWM1000 user manual)
 		
-		buf_16[0] = 0x08;buf_16[1] = 0x00; writeSpiSubAddress(0x2D, 0x04, buf_16, 2);
-		u8t= 0x03; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
-		u8t= 0x00; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
-		readSpiSubAddress(0x2D,0x0A,buf_32,4);
+		buf_16[0] = DWM1000_OTP_ADDR_V;
+		buf_16[1] = DWM1000_OTP_OFFSET_V33; 
+		writeSpiSubAddress(DWM1000_REGISTER_OTP, DWM1000_REGISTER_OFFSET_OTP_ADDR, buf_16, 2);
+		
+		u8t= 0x03; writeSpiSubAddress(DWM1000_REGISTER_OTP, DWM1000_REGISTER_OFFSET_OTP_CTRL, &u8t, 1);
+		u8t= 0x00; writeSpiSubAddress(DWM1000_REGISTER_OTP, DWM1000_REGISTER_OFFSET_OTP_CTRL, &u8t, 1);
+		
+		readSpiSubAddress(DWM1000_REGISTER_OTP,DWM1000_REGISTER_OFFSET_OTP_RDAT,buf_32,4);
 		
 		
 	}
 	raw_v = (float)getVoltageRaw();
 	v33 =  (float) buf_32[0];
-	v =  ( ( raw_v - v33 ) / 173) + 3.3; 
+	v =  ( ( raw_v - v33 ) / 173) + 3.3; // DWM1000 user manual page 158
 		
 		
-
-	// Temperature (°C )= (SAR_LTEMP - (OTP_READ(Vtemp @ 23°C )) x 1.14) + 23
-	// Todo: what is OTP_READ(Vtemp @ 23°C ) ?
 
 	return v;
 
