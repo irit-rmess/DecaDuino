@@ -6,6 +6,7 @@
 #include <SPI.h>
 #include "DecaDuino.h"
 #include "printfToSerial.h"
+
 #ifdef ARDUINO_DWM1001_DEV
 #define SPI SPI1
 static inline uint32_t begin_atomic()
@@ -1949,11 +1950,11 @@ float DecaDuino::getNLOSIndication(void) {
 	//compute LOS/NLOS indicator
 	indicator = 131072.0*C/(F1*F1 + F2*F2 + F3*F3);
 #ifdef DECADUINO_DEBUG 
-	Serial.printf("%d\n",C);
-	Serial.printf("%d\n",F1);
-	Serial.printf("%d\n",F2);
-	Serial.printf("%d\n",F3);
-	Serial.printf("i=%f\n",indicator);
+	printf("%d\n",C);
+	printf("%d\n",F1);
+	printf("%d\n",F2);
+	printf("%d\n",F3);
+	printf("i=%f\n",indicator);
 #endif
 	return indicator;
 }
