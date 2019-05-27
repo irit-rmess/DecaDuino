@@ -5,6 +5,7 @@
 
 #include <SPI.h>
 #include "DecaDuino.h"
+#include "printfToSerial.h"
 #ifdef ARDUINO_DWM1001_DEV
 #define SPI SPI1
 static inline uint32_t begin_atomic()
@@ -1168,7 +1169,7 @@ uint16_t DecaDuino::getRxPacc(void) {
  	uint32_t ui32t;
 
 	ui32t = readSpiUint32(DW1000_REGISTER_RX_FINFO);
-	ui32t = ( ui32t & DW1000_REGISTER_RX_FINFO_RXPACC_MASK) >> 20;
+	ui32t = ( ui32t & DW1000_REGISTER_RX_FINFO_RXPACC_MASK) >> DW1000_REGISTER_RX_FINFO_RXPACC_SHIFT;
 	return (uint16_t)ui32t;
 }
 
@@ -1819,6 +1820,75 @@ float DecaDuino::getVoltage(void) {
 	return v;
 
 	
+}
+
+
+RXTime_t DecaDuino::getRxTimeRegister(){
+    uint8_t buf[14] = {0} ;
+    readSpi(DW1000_REGISTER_RX_TIME, buf, 14);
+
+    RXTime_t data;
+    data.RX_STAMP = decodeUint40(&(buf[0]));
+    data.FP_INDEX = decodeUint16(&(buf[5]));
+    data.FP_AMPL1 = decodeUint16(&(buf[7]));
+    data.RX_RAWST = decodeUint40(&(buf[9]));
+    return data;
+}
+
+int DecaDuino::getRxTimeRegisterAsJSon(char *buf, int maxlen){
+    char stamp[20];
+    char coarse[20];
+    RXTime_t data = getRxTimeRegister();
+    return snprintf(buf, maxlen,"{\"RX_STAMP\": %s,\"FP_INDEX\": %u, \"FP_AMPL1\": %u, \"RX_RAWST\": %s}",
+            ulltoa(data.RX_STAMP,stamp,sizeof(stamp)),
+            data.FP_INDEX,
+            data.FP_AMPL1,
+            ulltoa(data.RX_RAWST,coarse,sizeof(coarse)));
+}
+
+RXFQual_t DecaDuino::getRxQualityRegister(){
+    uint8_t buf[8] = {0} ;
+    readSpi(DW1000_REGISTER_RX_RFQUAL, buf, 8);
+    RXFQual_t data;
+    data.STD_NOISE = decodeUint16(&(buf[0]));
+    data.FP_AMPL2 = decodeUint16(&(buf[2]));
+    data.FP_AMPL3= decodeUint16(&(buf[4]));
+    data.CIR_PWR= decodeUint16(&(buf[6]));
+    return data;
+}
+
+int DecaDuino::getRxQualityRegisterAsJSon(char *buf, int maxlen){
+    RXFQual_t data = getRxQualityRegister();
+    return snprintf(buf, maxlen,"{\"STD_NOISE\": %lu,\"FP_AMPL2\": %lu, \"FP_AMPL3\": %lu, \"CIR_PWR\": %lu}",
+                    data.STD_NOISE,
+                    data.FP_AMPL2,
+                    data.FP_AMPL3,
+                    data.CIR_PWR);
+}
+
+RXFInfo_t DecaDuino::getRxFrameInfoRegister(){
+    uint32_t buf = readSpiUint32(DW1000_REGISTER_RX_FINFO);
+    RXFInfo_t data;
+    data.RXFLEN = (buf & DW1000_REGISTER_RX_FINFO_RXFLEN_MASK) >> DW1000_REGISTER_RX_FINFO_RXFLEN_SHIFT;
+    data.RXNSPL = (buf & DW1000_REGISTER_RX_FINFO_RXFNSPL_MASK) >> DW1000_REGISTER_RX_FINFO_RXFNSPL_SHIFT;
+    data.RXBR   = (buf & DW1000_REGISTER_RX_FINFO_RXBR_MASK) >> DW1000_REGISTER_RX_FINFO_RXBR_SHIFT;
+    data.RNG    = (buf & DW1000_REGISTER_RX_FINFO_RNG_MASK) >> DW1000_REGISTER_RX_FINFO_RNG_SHIFT;
+    data.RXPRFR = (buf & DW1000_REGISTER_RX_FINFO_RXPRFR_MASK) >> DW1000_REGISTER_RX_FINFO_RXPRFR_SHIFT;
+    data.RXPSR  = (buf & DW1000_REGISTER_RX_FINFO_RXPSR_MASK) >> DW1000_REGISTER_RX_FINFO_RXPSR_SHIFT;
+    data.RXPACC = (buf & DW1000_REGISTER_RX_FINFO_RXPACC_MASK) >> DW1000_REGISTER_RX_FINFO_RXPACC_SHIFT;
+    return data;
+}
+
+int DecaDuino::getRxFrameInfoRegisterAsJSon(char *buf, int maxlen){
+    RXFInfo_t data = getRxFrameInfoRegister();
+    return snprintf(buf, maxlen,"{\"RXFLEN\": %" PRIu16 ",\"RXNSPL\": %u, \"RXBR\": %u, \"RNG\": %u,\"RXPRFR\":%u, \"RXPSR\": %u, \"RXPACC\": %" PRIu16 "}",
+                data.RXFLEN,
+                data.RXNSPL,
+                data.RXBR,
+                data.RNG,
+                data.RXPRFR,
+                data.RXPSR,
+                data.RXPACC);
 }
 
 

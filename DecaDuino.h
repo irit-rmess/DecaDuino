@@ -169,7 +169,19 @@
 
 #define DW1000_REGISTER_RX_FINFO			0x10
 #define DW1000_REGISTER_RX_FINFO_RXFLEN_MASK		0x000003FF
+#define DW1000_REGISTER_RX_FINFO_RXFLEN_SHIFT       0
+#define DW1000_REGISTER_RX_FINFO_RXFNSPL_MASK       0x00000C00
+#define DW1000_REGISTER_RX_FINFO_RXFNSPL_SHIFT      11
+#define DW1000_REGISTER_RX_FINFO_RXBR_MASK          0x00003000
+#define DW1000_REGISTER_RX_FINFO_RXBR_SHIFT         13
+#define DW1000_REGISTER_RX_FINFO_RNG_MASK           0x00008000
+#define DW1000_REGISTER_RX_FINFO_RNG_SHIFT          15
+#define DW1000_REGISTER_RX_FINFO_RXPRFR_MASK        0x00030000
+#define DW1000_REGISTER_RX_FINFO_RXPRFR_SHIFT       16
+#define DW1000_REGISTER_RX_FINFO_RXPSR_MASK         0x000C0000
+#define DW1000_REGISTER_RX_FINFO_RXPSR_SHIFT        18
 #define DW1000_REGISTER_RX_FINFO_RXPACC_MASK		0xFFF00000
+#define DW1000_REGISTER_RX_FINFO_RXPACC_SHIFT       20
 
 #define DW1000_REGISTER_RX_BUFFER			0x11
 
@@ -217,6 +229,36 @@ typedef enum {
     DW1000_DATARATE_850KBPS,
     DW1000_DATARATE_6_8MBPS
 } dw1000_datarate_t;
+
+typedef struct {
+    uint16_t RXFLEN:10;         // Received Frame Length (include length extension RXFLE)
+    uint8_t RXNSPL:2;           // Receive non-standard preamble length.
+    uint8_t RXBR:2;             // Receive Bit Rate( 0b00 = 110 kbps, 0b01 =850 kbps, 0b10 = 6.8Mbps)
+    uint8_t RNG:1;              // Receiver Ranging. This reflects the ranging bit in the received PHY header
+    uint8_t RXPRFR:2;           // RX Pulse Repetition Rate report (0b01 = 16 MHz, 0b10 = 64 MHz)
+    uint8_t RXPSR:2;            // RX Preamble Repetition (0b00 = 16 symbols, 0b01 = 64 symbols, 0b10= 1024 symbols, 0b11= 4096 symbols)
+    uint16_t RXPACC:12;         // Preamble Accumulation Count
+}RXFInfo_t;  // full content of the register 0x10 : Rx Frame Information Register
+
+typedef struct {
+    uint16_t STD_NOISE; // Standard Deviation of Noise
+    uint16_t FP_AMPL2;  // First Path Amplitude point 2.
+    uint16_t FP_AMPL3;  // First Path Amplitude point 3
+    uint16_t CIR_PWR;// Channel Impulse Response Power
+}RXFQual_t;  // full content of the register 0x12 : Rx Frame Quality Information
+
+typedef struct {
+    uint64_t RX_STAMP:40;   // timestamp of reception, 40-bits value (1/ (128*499.2×10^6 ) seconds). Valid if  LDEDONE status bit is set.
+    uint16_t FP_INDEX;      // First path index
+    uint16_t FP_AMPL1;      // First path Amplitude point 1
+    uint64_t RX_RAWST:40;  // coarse timestamp of reception 40-bits value (1/ (128*499.2×10^6 ) seconds). Valid if RXPHD status bit is set
+}RXTime_t;  // full content of the register 0x15 : Receive Time Stamp
+
+typedef struct {
+    uint16_t r; // real part of a sample in CIR memory
+    uint16_t i; // imaginary part of a sample in CIR memory
+}CIRSample_t;   // single sample in CIR memory (register 0x25)
+
 
 const char DW1000_DATARATE[][9] = {
     "100 Kbps",
@@ -770,6 +812,61 @@ class DecaDuino {
 		* @todo To be implemented
 		*/
 		float getVoltage(void);
+
+
+		/**
+		* @brief Gets the content of register file: 0x15 (Receive Time Stamp).
+		* @return content of the register
+		* @date 20190527
+		* @author Quentin Vey
+		*/
+		RXTime_t getRxTimeRegister();
+
+		/**
+        * @brief Gets the content of register file: 0x15 (Receive Time Stamp) as a JSON string.
+        * @param buf address of the character array where the string will be written (should be at least 95 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        int getRxTimeRegisterAsJSon(char *buf, int maxlen);
+
+        /**
+        * @brief Gets the content of register file: 0x12 (Rx Frame Quality Information).
+        * @return content of the register
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        RXFQual_t getRxQualityRegister();
+
+        /**
+        * @brief Gets the content of register file: 0x12 (Rx Frame Quality Information) as a JSon string.
+        * @param buf address of the character array where the string will be written (should be at least 77 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        int getRxQualityRegisterAsJSon(char *buf, int maxlen);
+
+        /**
+        * @brief Gets the content of register file: 0x10 (Rx Frame Information).
+        * @return content of the register
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        RXFInfo_t getRxFrameInfoRegister();
+
+        /**
+        * @brief Gets the content of register file: 0x10 (Rx Frame Information) as a JSon string.
+        * @param buf address of the character array where the string will be written (should be at least 90 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        int getRxFrameInfoRegisterAsJSon(char *buf, int maxlen);
 
 		/**
 		* @brief Builds an uint16 value from two uint8 values
