@@ -1892,6 +1892,66 @@ int DecaDuino::getRxFrameInfoRegisterAsJSon(char *buf, int maxlen){
                 data.RXPACC);
 }
 
+void DecaDuino::enableCIRAccumulatorRead(bool enable){
+    uint8_t pmscctrl0[4];
+    readSpi(DW1000_REGISTER_PMSC_CTRL0,pmscctrl0,4);
+    if (enable){
+        // set FACE bit and RXCLKS to values required to read CIR accumulator
+        pmscctrl0[0] &= 0xB3;
+        pmscctrl0[0] |= 0x48;
+        // set ACME bit
+        pmscctrl0[1] |= 0x80;
+    }
+    else {
+        // unset FACE bit, an set RXCLKS to auto
+        pmscctrl0[0] &= 0xB3;
+        // unset ACME bit
+        pmscctrl0[1] &= (~0x80);
+    }
+    writeSpi(DW1000_REGISTER_PMSC_CTRL0,pmscctrl0,4);
+}
+
+int DecaDuino::getCIRAccumulator(CIRSample_t *buffer, size_t arrayLength){
+    unsigned int numSamples = getRxPrf() == 16 ? 992 : 1016;    // CIR contains 992 samples if PRF == 16 MHz, 1016 if PRF == 64
+    if ( numSamples > arrayLength ){                            // make sure that we will not write too much to the buffer
+        numSamples = arrayLength;
+    }
+    uint8_t buf[3];
+
+    // enable CIR accumulator read
+    enableCIRAccumulatorRead(true);
+
+    int i=0;
+    for (; i < numSamples; i++){
+        readSpiSubAddress(0x25, i*4, buf, 3);      // real part
+        buffer[i].r = buf[1] | (buf[2] << 8) ; // must drop first octet read
+        readSpiSubAddress(0x25, i*4 + 2, buf, 3);  // imaginary part
+        buffer[i].i = buf[1] | (buf[2] << 8);  // must drop first octet read
+    }
+
+    // reset CIR accumulator read
+    enableCIRAccumulatorRead(false);
+    return i;
+}
+
+int DecaDuino::getCIRAccumulatorAsJSon(char* buf, size_t maxlen){
+    CIRSample_t samples[1016];
+    int numSamples = getCIRAccumulator(samples,1016);
+    int c=0;
+    buf[c++] = '[';
+    for (int i = 0; i < numSamples && c < maxlen ; i++){
+        c += snprintf(&(buf[c]),maxlen-c,"{\"r\": %"PRId16", \"i\": %"PRId16"}, ",samples[i].r,samples[i].i);
+    }
+    if (c >= (maxlen - 2)){
+        strncpy(buf,"buf too small to hold whole representation",maxlen);
+        buf[maxlen-1] = '\0';
+        return c;
+    }
+    buf[c-2] = ']';
+    buf[c-1] = '\0';
+    return c;
+
+}
 
 void DecaDuino::sleepRequest(void) {
 

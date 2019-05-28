@@ -255,8 +255,8 @@ typedef struct {
 }RXTime_t;  // full content of the register 0x15 : Receive Time Stamp
 
 typedef struct {
-    uint16_t r; // real part of a sample in CIR memory
-    uint16_t i; // imaginary part of a sample in CIR memory
+    int16_t r; // real part of a sample in CIR memory
+    int16_t i; // imaginary part of a sample in CIR memory
 }CIRSample_t;   // single sample in CIR memory (register 0x25)
 
 
@@ -867,6 +867,35 @@ class DecaDuino {
         * @author Quentin Vey
         */
         int getRxFrameInfoRegisterAsJSon(char *buf, int maxlen);
+
+
+        /**
+        * @brief Enables/disables CIR merory read (sets/unsets the FACE and AMCE bits)
+        * @param enable true to enable CIR read, false to diable them
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        void enableCIRAccumulatorRead(bool enable);
+
+        /**
+        * @brief Gets the content of register file: 0x25 (CIR memory accumulator)
+        * @param buffer address of a CIRSample_t array
+        * @param maximum number of samples that *buffer can hold (must be at least 992 for a 16 MHz PRF, or 1016 for 64MHz PRF )
+        * @return number of samples written
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        int getCIRAccumulator(CIRSample_t *buffer, size_t arrayLength);
+
+        /**
+        * @brief Gets the content of register file: 0x25 (CIR memory accumulator) as a JSon array string.
+        * @param buf address of the character array where the string will be written (maximum required : 29464 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (or that would have been written)
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        int getCIRAccumulatorAsJSon(char* buf, size_t maxlen);
 
 		/**
 		* @brief Builds an uint16 value from two uint8 values
