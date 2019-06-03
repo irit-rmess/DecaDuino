@@ -138,6 +138,8 @@
 #define DW1000_REGISTER_SYS_CFG_RXAUTR_MASK 		0x20000000
 #define DW1000_REGISTER_SYS_CFG_PHR_MODE_MASK 		0x00030000
 #define DW1000_REGISTER_SYS_CFG_PHR_MODE_SHIFT 		16
+#define DW1000_REGISTER_SYS_CFG_RXM110K_MASK        0x00400000
+#define DW1000_REGISTER_SYS_CFG_RXM110K_SHIFT      22
 
 #define DW1000_REGISTER_SYS_TIME			0x06
 
@@ -201,10 +203,24 @@
 
 #define DW1000_REGISTER_CHAN_CTRL			0x1F
 #define DW1000_REGISTER_CHAN_CTRL_TX_CHAN_MASK		0x0000000F
+#define DW1000_REGISTER_CHAN_CTRL_TX_CHAN_SHIFT     0
 #define DW1000_REGISTER_CHAN_CTRL_RX_CHAN_MASK		0x000000F0
+#define DW1000_REGISTER_CHAN_CTRL_RX_CHAN_SHIFT     4
+#define DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK        0x00020000
+#define DW1000_REGISTER_CHAN_CTRL_DWSFD_SHIFT       17
 #define DW1000_REGISTER_CHAN_CTRL_RXPRF_MASK		0x000C0000
+#define DW1000_REGISTER_CHAN_CTRL_RXPRF_SHIFT       18
+#define DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK       0x00100000
+#define DW1000_REGISTER_CHAN_CTRL_TNSSFD_SHIFT      20
+#define DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK       0x00020000
+#define DW1000_REGISTER_CHAN_CTRL_RNSSFD_SHIFT      21
 #define DW1000_REGISTER_CHAN_CTRL_TX_PCODE_MASK		0x07C00000
+#define DW1000_REGISTER_CHAN_CTRL_TX_PCODE_SHIFT    22
 #define DW1000_REGISTER_CHAN_CTRL_RX_PCODE_MASK		0xF8000000
+#define DW1000_REGISTER_CHAN_CTRL_RX_PCODE_SHIFT    27
+
+#define DW1000_REGISTER_USR_SFD                     0x21
+#define DW1000_REGISTER_USR_SFD_LENGTH_OFFSET       0x00
 
 #define DW1000_REGISTER_AON_CTRL			0x2C
 #define DW1000_REGISTER_OFFSET_AON_CTRL			0x02
@@ -253,6 +269,17 @@ typedef struct {
     uint16_t FP_AMPL1;      // First path Amplitude point 1
     uint64_t RX_RAWST:40;  // coarse timestamp of reception 40-bits value (1/ (128*499.2×10^6 ) seconds). Valid if RXPHD status bit is set
 }RXTime_t;  // full content of the register 0x15 : Receive Time Stamp
+
+typedef struct {
+    uint8_t TX_CHAN:4;      // transmit channel
+    uint8_t RX_CHAN:4;      // receive channel
+    uint8_t DWSFD:1;        // non-standard Decawave proprietary SFD sequence
+    uint8_t RXPRF:2;        // PRF used in the receiver
+    uint8_t TNSSFD:1;       // user specified (non-standard) SFD in the transmitter
+    uint8_t RNSSFD:1;       // user specified (non-standard) SFD in the receiver
+    uint8_t TX_PCODE:5;     // preamble code used in the transmitter
+    uint8_t RX_PCODE:5;     // preamble code used in the receiver
+}channelCTRL_t;   // content of the register 0x1F : Channel control register
 
 typedef struct {
     int16_t r; // real part of a sample in CIR memory
@@ -868,6 +895,47 @@ class DecaDuino {
         */
         int getRxFrameInfoRegisterAsJSon(char *buf, int maxlen);
 
+        /**
+        * @brief Gets full content of register file: 0x1F (channel control).
+        * @return partial content of the register (only related to RX)
+        * @date 20190603
+        * @author Quentin Vey
+        */
+        channelCTRL_t getChannelControlRegister();
+
+        /**
+        * @brief Gets full content of register file: 0x1F (channel control) as a JSon string.
+        * @param buf address of the character array where the string will be written (should be at least 128 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190603
+        * @author Quentin Vey
+        */
+        int getChannelControlRegisterAsJSon(char *buf, int maxlen);
+
+        /**
+        * @brief Gets bit 22 of register 0x04.
+        * @return Receiver Mode 110 kbps data rate.
+        * @date 20190603
+        * @author Quentin Vey
+        */
+        uint8_t getRXM110K();
+
+        /**
+        * @brief Gets subregister 0x21:00.
+        * @return length of the SFD sequence used (no used for standard SFD sequences).
+        * @date 20190603
+        * @author Quentin Vey
+        */
+        uint32_t getSFD_LENGTH();
+
+        /**
+        * @brief Gets content of subregister file: 0x27:2C (Unsaturated accumulated preamble symbols).
+        * @return Unsaturated accumulated preamble symbols
+        * @date 20190603
+        * @author Quentin Vey
+        */
+        uint16_t getRXPACC_NOSAT();
 
         /**
         * @brief Enables/disables CIR merory read (sets/unsets the FACE and AMCE bits)

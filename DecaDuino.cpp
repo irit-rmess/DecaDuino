@@ -1892,6 +1892,51 @@ int DecaDuino::getRxFrameInfoRegisterAsJSon(char *buf, int maxlen){
                 data.RXPACC);
 }
 
+channelCTRL_t DecaDuino::getChannelControlRegister(){
+    uint32_t buf = readSpiUint32(DW1000_REGISTER_RX_FINFO);
+    channelCTRL_t data;
+    data.TX_CHAN = (buf & DW1000_REGISTER_CHAN_CTRL_TX_CHAN_MASK) >> DW1000_REGISTER_CHAN_CTRL_TX_CHAN_SHIFT ;
+    data.RX_CHAN = (buf & DW1000_REGISTER_CHAN_CTRL_RX_CHAN_MASK) >> DW1000_REGISTER_CHAN_CTRL_RX_CHAN_SHIFT ;
+    data.DWSFD = (buf & DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK) >> DW1000_REGISTER_CHAN_CTRL_DWSFD_SHIFT ;
+    data.RXPRF = (buf & DW1000_REGISTER_CHAN_CTRL_RXPRF_MASK) >> DW1000_REGISTER_CHAN_CTRL_RXPRF_SHIFT ;
+    data.TNSSFD = (buf & DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK) >> DW1000_REGISTER_CHAN_CTRL_TNSSFD_SHIFT ;
+    data.RNSSFD = (buf & DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK) >> DW1000_REGISTER_CHAN_CTRL_RNSSFD_SHIFT ;
+    data.TX_PCODE = (buf & DW1000_REGISTER_CHAN_CTRL_TX_PCODE_MASK) >> DW1000_REGISTER_CHAN_CTRL_TX_PCODE_SHIFT ;
+    data.RX_PCODE = (buf & DW1000_REGISTER_CHAN_CTRL_RX_PCODE_MASK) >> DW1000_REGISTER_CHAN_CTRL_RX_PCODE_SHIFT ;
+    return data;
+}
+
+int DecaDuino::getChannelControlRegisterAsJSon(char *buf, int maxlen){
+    channelCTRL_t data = getChannelControlRegister();
+    return snprintf(buf, maxlen,"{\"TX_CHAN\": %u,\"RX_CHAN\": %u, \"DWSFD\": %u, \"RXPRF\": %u,\"TNSSFD\":%u, \"RNSSFD\": %u, \"TX_PCODE\": %u, \"RX_PCODE\": %u}",
+                    data.TX_CHAN,
+                    data.RX_CHAN,
+                    data.DWSFD,
+                    data.RXPRF,
+                    data.TNSSFD,
+                    data.RNSSFD,
+                    data.TX_PCODE,
+                    data.RX_PCODE);
+}
+
+uint8_t DecaDuino::getRXM110K(){
+    uint32_t buf = readSpiUint32(DW1000_REGISTER_SYS_CFG);
+    return (buf & DW1000_REGISTER_SYS_CFG_RXM110K_MASK) >> DW1000_REGISTER_SYS_CFG_RXM110K_SHIFT;
+}
+
+
+uint32_t DecaDuino::getSFD_LENGTH(){
+    uint8_t buf[4];
+    readSpiSubAddress(DW1000_REGISTER_USR_SFD,DW1000_REGISTER_USR_SFD_LENGTH_OFFSET,buf,4);
+    return decodeUint32(buf);
+}
+
+uint16_t DecaDuino::getRXPACC_NOSAT(){
+    uint8_t buf[2];
+    readSpiSubAddress(0x27,0x2c,buf,2);
+    return decodeUint16(buf);
+}
+
 void DecaDuino::enableCIRAccumulatorRead(bool enable){
     uint8_t pmscctrl0[4];
     readSpi(DW1000_REGISTER_PMSC_CTRL0,pmscctrl0,4);
