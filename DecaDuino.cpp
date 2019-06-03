@@ -1919,6 +1919,47 @@ int DecaDuino::getChannelControlRegisterAsJSon(char *buf, int maxlen){
                     data.RX_PCODE);
 }
 
+LDEInterface_t DecaDuino::getLDEInterfaceRegister(){
+    uint8_t buf[2];
+    LDEInterface_t data;
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_THRESH_OFFSET,buf,2);
+    data.LDE_THRESH = decodeUint16(buf);
+
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
+    data.NTM = (buf[0] & DW1000_REGISTER_LDE_INTERFACE_NTM_MASK) >> DW1000_REGISTER_LDE_INTERFACE_NTM_SHIFT;
+    data.PMULT= (buf[0] & DW1000_REGISTER_LDE_INTERFACE_PMULT_MASK) >> DW1000_REGISTER_LDE_INTERFACE_PMULT_SHIFT;
+
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_PPINDX_OFFSET,buf,2);
+    data.LDE_PPINDX= decodeUint16(buf);
+
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_PPAMPL_OFFSET,buf,2);
+    data.LDE_PPAMPL = decodeUint16(buf);
+
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_RXANTD_OFFSET,buf,2);
+    data.LDE_RXANTD = decodeUint16(buf);
+
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG2_OFFSET,buf,2);
+    data.LDE_CFG2 = decodeUint16(buf);
+
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_REPC_OFFSET,buf,2);
+    data.LDE_REPC = decodeUint16(buf);
+
+    return data;
+}
+
+int DecaDuino::getChannelLDEInterfaceAsJSon(char *buf, int maxlen){
+    LDEInterface_t data = getLDEInterfaceRegister();
+    return snprintf(buf, maxlen,"{\"LDE_THRESH\": %"PRIu16",\"NTM\": %u, \"PMULT\": %"PRIu16",\"LDE_PPINDX\":%"PRIu16", \"LDE_PPAMPL\": %"PRIu16", \"LDE_RXANTD\": %"PRIu16", \"LDE_CFG2\": %"PRIu16", \"LDE_REPC\": %"PRIu16"}",
+                    data.LDE_THRESH,
+                    data.NTM,
+                    data.PMULT,
+                    data.LDE_PPINDX,
+                    data.LDE_PPAMPL,
+                    data.LDE_RXANTD,
+                    data.LDE_CFG2,
+                    data.LDE_REPC);
+}
+
 uint8_t DecaDuino::getRXM110K(){
     uint32_t buf = readSpiUint32(DW1000_REGISTER_SYS_CFG);
     return (buf & DW1000_REGISTER_SYS_CFG_RXM110K_MASK) >> DW1000_REGISTER_SYS_CFG_RXM110K_SHIFT;

@@ -234,6 +234,19 @@
 #define DW1000_REGISTER_AON_CFG0_WAKE_CNT_MASK		0x08
 #define DW1000_REGISTER_AON_CFG0_LPDIV_EN_MASK		0x10
 
+#define DW1000_REGISTER_LDE_INTERFACE                       0x2E
+#define DW1000_REGISTER_LDE_INTERFACE_LDE_THRESH_OFFSET     0x00
+#define DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET       0x0806
+#define DW1000_REGISTER_LDE_INTERFACE_NTM_MASK              0x1F
+#define DW1000_REGISTER_LDE_INTERFACE_NTM_SHIFT             0
+#define DW1000_REGISTER_LDE_INTERFACE_PMULT_MASK            0xE0
+#define DW1000_REGISTER_LDE_INTERFACE_PMULT_SHIFT           5
+#define DW1000_REGISTER_LDE_INTERFACE_LDE_PPINDX_OFFSET     0x1000
+#define DW1000_REGISTER_LDE_INTERFACE_LDE_PPAMPL_OFFSET     0x1002
+#define DW1000_REGISTER_LDE_INTERFACE_LDE_RXANTD_OFFSET     0x1804
+#define DW1000_REGISTER_LDE_INTERFACE_LDE_CFG2_OFFSET       0x1806
+#define DW1000_REGISTER_LDE_INTERFACE_LDE_REPC_OFFSET       0x2804
+
 #define DW1000_REGISTER_PMSC_CTRL0			0x36
 #define DW1000_REGISTER_OFFSET_PMSC_CTRL0		0x00
 
@@ -280,6 +293,17 @@ typedef struct {
     uint8_t TX_PCODE:5;     // preamble code used in the transmitter
     uint8_t RX_PCODE:5;     // preamble code used in the receiver
 }channelCTRL_t;   // content of the register 0x1F : Channel control register
+
+typedef struct {
+    uint16_t LDE_THRESH;    // LDE Threshold report
+    uint8_t  NTM:5;         // Noise Threshold Multiplier
+    uint8_t  PMULT:3;       // Peak Multiplier
+    uint16_t LDE_PPINDX;    // LDE Peak Path Index
+    uint16_t LDE_PPAMPL;    // LDE Peak Path Amplitude
+    uint16_t LDE_RXANTD;    // LDE Receive Antenna Delay configuration
+    uint16_t LDE_CFG2;      // LDE Configuration Register 2
+    uint16_t LDE_REPC;      // LDE Replica Coefficient configuration
+}LDEInterface_t;    // content of the register 0x2E : Leading Edge Detection Interface
 
 typedef struct {
     int16_t r; // real part of a sample in CIR memory
@@ -897,7 +921,7 @@ class DecaDuino {
 
         /**
         * @brief Gets full content of register file: 0x1F (channel control).
-        * @return partial content of the register (only related to RX)
+        * @return content of the register
         * @date 20190603
         * @author Quentin Vey
         */
@@ -913,6 +937,23 @@ class DecaDuino {
         */
         int getChannelControlRegisterAsJSon(char *buf, int maxlen);
 
+        /**
+        * @brief Gets full content of register file: 0x2E (LDE interface).
+        * @return  content of the register
+        * @date 20190603
+        * @author Quentin Vey
+        */
+        LDEInterface_t getLDEInterfaceRegister();
+
+        /**
+        * @brief Gets full content of register file: 0x1F (channel control) as a JSon string.
+        * @param buf address of the character array where the string will be written (should be at least 128 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190603
+        * @author Quentin Vey
+        */
+        int getChannelLDEInterfaceAsJSon(char *buf, int maxlen);
         /**
         * @brief Gets bit 22 of register 0x04.
         * @return Receiver Mode 110 kbps data rate.
