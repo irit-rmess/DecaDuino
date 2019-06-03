@@ -1893,7 +1893,7 @@ int DecaDuino::getRxFrameInfoRegisterAsJSon(char *buf, int maxlen){
 }
 
 channelCTRL_t DecaDuino::getChannelControlRegister(){
-    uint32_t buf = readSpiUint32(DW1000_REGISTER_RX_FINFO);
+    uint32_t buf = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
     channelCTRL_t data;
     data.TX_CHAN = (buf & DW1000_REGISTER_CHAN_CTRL_TX_CHAN_MASK) >> DW1000_REGISTER_CHAN_CTRL_TX_CHAN_SHIFT ;
     data.RX_CHAN = (buf & DW1000_REGISTER_CHAN_CTRL_RX_CHAN_MASK) >> DW1000_REGISTER_CHAN_CTRL_RX_CHAN_SHIFT ;
