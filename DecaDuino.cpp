@@ -1836,15 +1836,18 @@ RXTime_t DecaDuino::getRxTimeRegister(){
     return data;
 }
 
-int DecaDuino::getRxTimeRegisterAsJSon(char *buf, int maxlen){
+int DecaDuino::getRxTimeRegisterAsJSon(const RXTime_t &data, char *buf, int maxlen){
     char stamp[20];
     char coarse[20];
-    RXTime_t data = getRxTimeRegister();
     return snprintf(buf, maxlen,"{\"RX_STAMP\": %s,\"FP_INDEX\": %u, \"FP_AMPL1\": %u, \"RX_RAWST\": %s}",
             ulltoa(data.RX_STAMP,stamp,sizeof(stamp)),
             data.FP_INDEX,
             data.FP_AMPL1,
             ulltoa(data.RX_RAWST,coarse,sizeof(coarse)));
+}
+int DecaDuino::getRxTimeRegisterAsJSon(char *buf, int maxlen){
+    RXTime_t data = getRxTimeRegister();
+    return getRxTimeRegisterAsJSon(data, buf, maxlen);
 }
 
 RXFQual_t DecaDuino::getRxQualityRegister(){
@@ -1858,14 +1861,19 @@ RXFQual_t DecaDuino::getRxQualityRegister(){
     return data;
 }
 
-int DecaDuino::getRxQualityRegisterAsJSon(char *buf, int maxlen){
-    RXFQual_t data = getRxQualityRegister();
+int DecaDuino::getRxQualityRegisterAsJSon(const RXFQual_t &data, char *buf, int maxlen){
     return snprintf(buf, maxlen,"{\"STD_NOISE\": %lu,\"FP_AMPL2\": %lu, \"FP_AMPL3\": %lu, \"CIR_PWR\": %lu}",
                     data.STD_NOISE,
                     data.FP_AMPL2,
                     data.FP_AMPL3,
                     data.CIR_PWR);
 }
+
+int DecaDuino::getRxQualityRegisterAsJSon(char *buf, int maxlen){
+    RXFQual_t data = getRxQualityRegister();
+    return getRxQualityRegisterAsJSon(data, buf, maxlen);
+}
+
 
 RXFInfo_t DecaDuino::getRxFrameInfoRegister(){
     uint32_t buf = readSpiUint32(DW1000_REGISTER_RX_FINFO);
@@ -1880,8 +1888,7 @@ RXFInfo_t DecaDuino::getRxFrameInfoRegister(){
     return data;
 }
 
-int DecaDuino::getRxFrameInfoRegisterAsJSon(char *buf, int maxlen){
-    RXFInfo_t data = getRxFrameInfoRegister();
+int DecaDuino::getRxFrameInfoRegisterAsJSon(const RXFInfo_t &data,char *buf, int maxlen){
     return snprintf(buf, maxlen,"{\"RXFLEN\": %" PRIu16 ",\"RXNSPL\": %u, \"RXBR\": %u, \"RNG\": %u,\"RXPRFR\":%u, \"RXPSR\": %u, \"RXPACC\": %" PRIu16 "}",
                 data.RXFLEN,
                 data.RXNSPL,
@@ -1890,6 +1897,10 @@ int DecaDuino::getRxFrameInfoRegisterAsJSon(char *buf, int maxlen){
                 data.RXPRFR,
                 data.RXPSR,
                 data.RXPACC);
+}
+int DecaDuino::getRxFrameInfoRegisterAsJSon(char *buf, int maxlen){
+    RXFInfo_t data = getRxFrameInfoRegister();
+    return getRxFrameInfoRegisterAsJSon(data, buf, maxlen);
 }
 
 channelCTRL_t DecaDuino::getChannelControlRegister(){
@@ -1906,8 +1917,7 @@ channelCTRL_t DecaDuino::getChannelControlRegister(){
     return data;
 }
 
-int DecaDuino::getChannelControlRegisterAsJSon(char *buf, int maxlen){
-    channelCTRL_t data = getChannelControlRegister();
+int DecaDuino::getChannelControlRegisterAsJSon(const channelCTRL_t &data, char *buf, int maxlen){
     return snprintf(buf, maxlen,"{\"TX_CHAN\": %u,\"RX_CHAN\": %u, \"DWSFD\": %u, \"RXPRF\": %u,\"TNSSFD\":%u, \"RNSSFD\": %u, \"TX_PCODE\": %u, \"RX_PCODE\": %u}",
                     data.TX_CHAN,
                     data.RX_CHAN,
@@ -1917,6 +1927,10 @@ int DecaDuino::getChannelControlRegisterAsJSon(char *buf, int maxlen){
                     data.RNSSFD,
                     data.TX_PCODE,
                     data.RX_PCODE);
+}
+int DecaDuino::getChannelControlRegisterAsJSon(char *buf, int maxlen){
+    channelCTRL_t data = getChannelControlRegister();
+    return getChannelControlRegisterAsJSon(data, buf, maxlen);
 }
 
 LDEInterface_t DecaDuino::getLDEInterfaceRegister(){
@@ -1947,8 +1961,7 @@ LDEInterface_t DecaDuino::getLDEInterfaceRegister(){
     return data;
 }
 
-int DecaDuino::getChannelLDEInterfaceAsJSon(char *buf, int maxlen){
-    LDEInterface_t data = getLDEInterfaceRegister();
+int DecaDuino::getChannelLDEInterfaceAsJSon(const LDEInterface_t &data, char *buf, int maxlen){
     return snprintf(buf, maxlen,"{\"LDE_THRESH\": %"PRIu16",\"NTM\": %u, \"PMULT\": %"PRIu16",\"LDE_PPINDX\":%"PRIu16", \"LDE_PPAMPL\": %"PRIu16", \"LDE_RXANTD\": %"PRIu16", \"LDE_CFG2\": %"PRIu16", \"LDE_REPC\": %"PRIu16"}",
                     data.LDE_THRESH,
                     data.NTM,
@@ -1958,6 +1971,10 @@ int DecaDuino::getChannelLDEInterfaceAsJSon(char *buf, int maxlen){
                     data.LDE_RXANTD,
                     data.LDE_CFG2,
                     data.LDE_REPC);
+}
+int DecaDuino::getChannelLDEInterfaceAsJSon(char *buf, int maxlen){
+    LDEInterface_t data = getLDEInterfaceRegister();
+    return getChannelLDEInterfaceAsJSon(data, buf, maxlen);
 }
 
 uint8_t DecaDuino::getRXM110K(){
@@ -2020,9 +2037,7 @@ int DecaDuino::getCIRAccumulator(CIRSample_t *buffer, size_t arrayLength){
     return i;
 }
 
-int DecaDuino::getCIRAccumulatorAsJSon(char* buf, size_t maxlen){
-    CIRSample_t samples[1016];
-    int numSamples = getCIRAccumulator(samples,1016);
+int DecaDuino::getCIRAccumulatorAsJSon(CIRSample_t *samples, uint8_t numSamples, char* buf, size_t maxlen){
     int c=0;
     buf[c++] = '[';
     for (int i = 0; i < numSamples && c < maxlen ; i++){
@@ -2036,9 +2051,13 @@ int DecaDuino::getCIRAccumulatorAsJSon(char* buf, size_t maxlen){
     buf[c-2] = ']';
     buf[c-1] = '\0';
     return c;
-
 }
 
+int DecaDuino::getCIRAccumulatorAsJSon(char* buf, size_t maxlen){
+    CIRSample_t samples[1016];
+    int numSamples = getCIRAccumulator(samples,1016);
+    getCIRAccumulatorAsJSon(samples, numSamples, buf, maxlen);
+}
 void DecaDuino::sleepRequest(void) {
 
 	uint8_t ui8t;

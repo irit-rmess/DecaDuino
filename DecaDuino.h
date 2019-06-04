@@ -884,6 +884,17 @@ class DecaDuino {
         int getRxTimeRegisterAsJSon(char *buf, int maxlen);
 
         /**
+        * @brief Gets the content of register file: 0x15 (Receive Time Stamp) as a JSON string.
+        * @param data data to print
+        * @param buf address of the character array where the string will be written (should be at least 95 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        int getRxTimeRegisterAsJSon(const RXTime_t &data, char *buf, int maxlen);
+
+        /**
         * @brief Gets the content of register file: 0x12 (Rx Frame Quality Information).
         * @return content of the register
         * @date 20190527
@@ -902,6 +913,17 @@ class DecaDuino {
         int getRxQualityRegisterAsJSon(char *buf, int maxlen);
 
         /**
+        * @brief Gets the content of register file: 0x12 (Rx Frame Quality Information) as a JSon string.
+        * @param data data to print
+        * @param buf address of the character array where the string will be written (should be at least 77 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        int getRxQualityRegisterAsJSon(const RXFQual_t &data, char *buf, int maxlen);
+
+        /**
         * @brief Gets the content of register file: 0x10 (Rx Frame Information).
         * @return content of the register
         * @date 20190527
@@ -918,6 +940,18 @@ class DecaDuino {
         * @author Quentin Vey
         */
         int getRxFrameInfoRegisterAsJSon(char *buf, int maxlen);
+
+
+        /**
+        * @brief Gets the content of register file: 0x10 (Rx Frame Information) as a JSon string.
+        * @param data data to print
+        * @param buf address of the character array where the string will be written (should be at least 90 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        int getRxFrameInfoRegisterAsJSon(const RXFInfo_t &data, char *buf, int maxlen);
 
         /**
         * @brief Gets full content of register file: 0x1F (channel control).
@@ -938,6 +972,16 @@ class DecaDuino {
         int getChannelControlRegisterAsJSon(char *buf, int maxlen);
 
         /**
+        * @brief Gets full content of register file: 0x1F (channel control) as a JSon string.
+        * @param data data to print
+        * @param buf address of the character array where the string will be written (should be at least 128 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190603
+        * @author Quentin Vey
+        */
+        int getChannelControlRegisterAsJSon(const channelCTRL_t &data, char *buf, int maxlen);
+        /**
         * @brief Gets full content of register file: 0x2E (LDE interface).
         * @return  content of the register
         * @date 20190603
@@ -946,7 +990,7 @@ class DecaDuino {
         LDEInterface_t getLDEInterfaceRegister();
 
         /**
-        * @brief Gets full content of register file: 0x1F (channel control) as a JSon string.
+        * @brief Gets full content of register file: 0x2E (channel control) as a JSon string.
         * @param buf address of the character array where the string will be written (should be at least 128 bytes long)
         * @param maxlen size of the character array
         * @return numbers of characters written (excluding the trailing null byte)
@@ -954,6 +998,18 @@ class DecaDuino {
         * @author Quentin Vey
         */
         int getChannelLDEInterfaceAsJSon(char *buf, int maxlen);
+
+        /**
+        * @brief Gets full content of register file: 0x2E (channel control) as a JSon string.
+        * @param data data to print
+        * @param buf address of the character array where the string will be written (should be at least 128 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190603
+        * @author Quentin Vey
+        */
+        int getChannelLDEInterfaceAsJSon(const LDEInterface_t &data, char *buf, int maxlen);
+
         /**
         * @brief Gets bit 22 of register 0x04.
         * @return Receiver Mode 110 kbps data rate.
@@ -980,7 +1036,7 @@ class DecaDuino {
 
         /**
         * @brief Enables/disables CIR merory read (sets/unsets the FACE and AMCE bits)
-        * @param enable true to enable CIR read, false to diable them
+        * @param enable true to enable CIR read, false to disable them
         * @date 20190527
         * @author Quentin Vey
         */
@@ -1005,6 +1061,18 @@ class DecaDuino {
         * @author Quentin Vey
         */
         int getCIRAccumulatorAsJSon(char* buf, size_t maxlen);
+
+        /**
+        * @brief Gets the content of register file: 0x25 (CIR memory accumulator) as a JSon array string.
+        * @param data adress of the data to write
+        * @param dataLength number of samples to print
+        * @param buf address of the character array where the string will be written (maximum required : 29464 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (or that would have been written)
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        int getCIRAccumulatorAsJSon(CIRSample_t *samples, uint8_t numSamples, char* buf, size_t maxlen);
 
 		/**
 		* @brief Builds an uint16 value from two uint8 values
