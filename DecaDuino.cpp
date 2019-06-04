@@ -2024,7 +2024,7 @@ int DecaDuino::getCIRAccumulator(CIRSample_t *buffer, size_t arrayLength){
     // enable CIR accumulator read
     enableCIRAccumulatorRead(true);
 
-    int i=0;
+    unsigned int i=0;
     for (; i < numSamples; i++){
         readSpiSubAddress(0x25, i*4, buf, 3);      // real part
         buffer[i].r = buf[1] | (buf[2] << 8) ; // must drop first octet read
@@ -2036,12 +2036,12 @@ int DecaDuino::getCIRAccumulator(CIRSample_t *buffer, size_t arrayLength){
     enableCIRAccumulatorRead(false);
     return i;
 }
-
-int DecaDuino::getCIRAccumulatorAsJSon(CIRSample_t *samples, uint8_t numSamples, char* buf, size_t maxlen){
-    int c=0;
+int DecaDuino::getCIRAccumulatorAsJSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen){
+    unsigned int c=0;
     buf[c++] = '[';
-    for (int i = 0; i < numSamples && c < maxlen ; i++){
-        c += snprintf(&(buf[c]),maxlen-c,"{\"r\": %"PRId16", \"i\": %"PRId16"}, ",samples[i].r,samples[i].i);
+    unsigned int i = 0;
+    for (; i < numSamples && c < maxlen ; i++){
+        c += snprintf(&(buf[c]),maxlen-c,"{\"r\": %" PRId16 ", \"i\": %" PRId16 "}, ",samples[i].r,samples[i].i);
     }
     if (c >= (maxlen - 2)){
         strncpy(buf,"buf too small to hold whole representation",maxlen);
@@ -2053,7 +2053,7 @@ int DecaDuino::getCIRAccumulatorAsJSon(CIRSample_t *samples, uint8_t numSamples,
     return c;
 }
 
-int DecaDuino::getCIRAccumulatorAsJSon(char* buf, size_t maxlen){
+int DecaDuino::getCIRAccumulatorAsJSon(char* buf, uint16_t maxlen){
     CIRSample_t samples[1016];
     int numSamples = getCIRAccumulator(samples,1016);
     getCIRAccumulatorAsJSon(samples, numSamples, buf, maxlen);

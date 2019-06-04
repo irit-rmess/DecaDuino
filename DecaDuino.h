@@ -1060,7 +1060,7 @@ class DecaDuino {
         * @date 20190527
         * @author Quentin Vey
         */
-        int getCIRAccumulatorAsJSon(char* buf, size_t maxlen);
+        int getCIRAccumulatorAsJSon(char* buf, uint16_t maxlen);
 
         /**
         * @brief Gets the content of register file: 0x25 (CIR memory accumulator) as a JSon array string.
@@ -1072,7 +1072,7 @@ class DecaDuino {
         * @date 20190527
         * @author Quentin Vey
         */
-        int getCIRAccumulatorAsJSon(CIRSample_t *samples, uint8_t numSamples, char* buf, size_t maxlen);
+        int getCIRAccumulatorAsJSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen);
 
 		/**
 		* @brief Builds an uint16 value from two uint8 values
