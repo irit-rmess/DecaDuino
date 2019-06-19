@@ -2071,14 +2071,14 @@ int DecaDuino::getCIRAccumulatorAsBase64JSon(char* buf, uint16_t maxlen){
 
 int DecaDuino::getCIRAccumulatorAsBase64JSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen){
     unsigned int c=0; // total character count
-    // print number of samples
     buf[c++] = '"';
-    unsigned int i = 0;
+
     // If necessary, rewrite samples to network byte order, i.e. big endian
 #ifndef BYTE_ORDER
     #error "BYTE_ORDER must be defined"
 #endif
 #if BYTE_ORDER==LITTLE_ENDIAN
+    unsigned int i = 0;
     for (; i < numSamples ; i += 1){
         // poor man's htons :
         samples[i].r = ( (samples[i].r & 0xff00) >> 8) | ((samples[i].r & 0x00ff) << 8) ;
@@ -2086,9 +2086,8 @@ int DecaDuino::getCIRAccumulatorAsBase64JSon(CIRSample_t *samples, uint16_t numS
     }
 #endif
 
-
     // check if there is enough space to store the whole string
-    if ( (c + base64_enc_len(numSamples*4)) >= (maxlen - 3) ){
+    if ( (c + base64_enc_len(numSamples*4)) >= (maxlen - 2) ){
         strncpy(buf,"buf too small to hold whole representation",maxlen);
         buf[maxlen-1] = '\0';
         return c;
