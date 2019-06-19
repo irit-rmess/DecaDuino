@@ -10,6 +10,7 @@
 #include <machine/endian.h>
 
 #ifdef ARDUINO_DWM1001_DEV
+
 #define SPI SPI1
 static inline uint32_t begin_atomic()
 {
@@ -2071,19 +2072,21 @@ int DecaDuino::getCIRAccumulatorAsBase64JSon(char* buf, uint16_t maxlen){
 int DecaDuino::getCIRAccumulatorAsBase64JSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen){
     unsigned int c=0; // total character count
     // print number of samples
-    c += snprintf( &(buf[c]), maxlen-c, "{\"sampleCount\": %" PRIu16 ", \"rawData64\": \"", numSamples );
+    buf[c++] = '"';
     unsigned int i = 0;
     // If necessary, rewrite samples to network byte order, i.e. big endian
 #ifndef BYTE_ORDER
     #error "BYTE_ORDER must be defined"
 #endif
-#if BYTE_ORDER == __LITTLE_ENDIAN
+#if BYTE_ORDER==LITTLE_ENDIAN
     for (; i < numSamples ; i += 1){
         // poor man's htons :
         samples[i].r = ( (samples[i].r & 0xff00) >> 8) | ((samples[i].r & 0x00ff) << 8) ;
         samples[i].i = ( (samples[i].i & 0xff00) >> 8) | ((samples[i].i & 0x00ff) << 8) ;
     }
 #endif
+
+
     // check if there is enough space to store the whole string
     if ( (c + base64_enc_len(numSamples*4)) >= (maxlen - 3) ){
         strncpy(buf,"buf too small to hold whole representation",maxlen);
@@ -2092,7 +2095,6 @@ int DecaDuino::getCIRAccumulatorAsBase64JSon(CIRSample_t *samples, uint16_t numS
     }
     c += base64_encode( &(buf[c]), (char*)samples, numSamples*4);   // 4 bytes per sample, struct should be packed because 16-bits fields.
     buf[c++] = '"';
-    buf[c++] = '}';
     buf[c++] = '\0';
     return c;
 }

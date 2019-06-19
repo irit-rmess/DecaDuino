@@ -1086,6 +1086,13 @@ class DecaDuino {
 
         /**
         * @brief Gets the content of register file: 0x25 (CIR memory accumulator) as a JSon array string but with values encoded in base64.
+        * The data is an array of int16_t values written in big-endian, grouped by pairs (real part, imaginary part) :
+        * byte  bit
+        *       0-------------------7---------------------15-----------------------23------------------------31
+        *    0  | sample_0_real_low |  sample_0_real_high | sample_0_imaginary_low | sample_0_imaginary_high |
+        *    4  | sample_2_real_low |  sample_2_real_high | sample_2_imaginary_low | sample_2_imaginary_high |
+        *                                                ...
+        *    4n | sample_n_real_low |  sample_n_real_high | sample_n_imaginary_low | sample_n_imaginary_high |
         * @param data adress of the data to write
         * @param dataLength number of samples to print
         * @param buf address of the character array where the string will be written (maximum required : 29464 bytes long)
