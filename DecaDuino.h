@@ -386,13 +386,6 @@ class DecaDuino {
 		*/
 		uint8_t getPHRMode(void);
 
-		/**
-        * @brief Returns the content of TX_POWER register
-        * @author Quentin Vey
-        * @date 20190628
-        */
-        uint32_t getTX_POWER();
-
         /**
         * @brief Set power mode to smart (i.e. allows power boost for short frames).
         * TX_POWER are set to their manufacturer default values
@@ -427,6 +420,13 @@ class DecaDuino {
         * @date 20190628
         */
         bool isTxPowerManual();
+
+        /**
+        * @brief Returns the content of TX_POWER register
+        * @author Quentin Vey
+        * @date 20190628
+        */
+        uint32_t getTX_POWER();
 
 		/**
 		* @brief Stores the System Time Counter value in the variable referenced by the pointer passed as an input parameter
