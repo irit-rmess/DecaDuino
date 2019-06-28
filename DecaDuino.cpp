@@ -1741,33 +1741,32 @@ uint8_t DecaDuino::getVoltageRaw() {
 
 
 float DecaDuino::getTemperature(void) {
-	
-	
 	uint8_t u8t;
 	uint8_t buf_16[2];
 	uint8_t buf_32[4];
 	float temp,diff;
 	uint8_t t23,raw_temp;
-	
+
+	#ifdef ARDUINO_DWM1001_DEV
+    uint32_t prim = begin_atomic();
+    {
+    #else
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-		
+    #endif
 		buf_16[0] = 0x09;buf_16[1] = 0x00; writeSpiSubAddress(0x2D, 0x04, buf_16, 2);
 		u8t= 0x03; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
 		u8t= 0x00; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
 		readSpiSubAddress(0x2D,0x0A,buf_32,4);
-		
-		
 	}
+
+    #ifdef ARDUINO_DWM1001_DEV
+    end_atomic(prim);
+    #endif
+
 	raw_temp = getTemperatureRaw();
 	t23 =   buf_32[0];
 	diff = (float) (raw_temp - t23);
 	temp =   diff * 1.14 + 23.0; 
-		
-		
-
-	// Temperature (°C )= (SAR_LTEMP - (OTP_READ(Vtemp @ 23°C )) x 1.14) + 23
-	// Todo: what is OTP_READ(Vtemp @ 23°C ) ?
-
 	return temp;
 }
 
@@ -1782,28 +1781,28 @@ float DecaDuino::getVoltage(void) {
 	uint8_t buf_32[4];
 	float raw_v;
 	float v33,v;
-	
+
+	#ifdef ARDUINO_DWM1001_DEV
+    uint32_t prim = begin_atomic();
+    {
+    #else
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-		
+    #endif
 		buf_16[0] = 0x08;buf_16[1] = 0x00; writeSpiSubAddress(0x2D, 0x04, buf_16, 2);
 		u8t= 0x03; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
 		u8t= 0x00; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
 		readSpiSubAddress(0x2D,0x0A,buf_32,4);
-		
-		
 	}
+
+    #ifdef ARDUINO_DWM1001_DEV
+    end_atomic(prim);
+    #endif
+
 	raw_v = (float)getVoltageRaw();
 	v33 =  (float) buf_32[0];
 	v =  ( ( raw_v - v33 ) / 173) + 3.3; 
-		
-		
-
-	// Temperature (°C )= (SAR_LTEMP - (OTP_READ(Vtemp @ 23°C )) x 1.14) + 23
-	// Todo: what is OTP_READ(Vtemp @ 23°C ) ?
 
 	return v;
-
-	
 }
 
 
