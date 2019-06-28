@@ -1001,6 +1001,73 @@ uint8_t DecaDuino::getPHRMode(void) {
 		return (uint8_t)ui32t;
 }
 
+
+void DecaDuino::setSmartTxPower(){
+    // get SYS_CFG register
+    uint32_t u32;
+    u32 = readSpiUint32(DW1000_REGISTER_SYS_CFG);
+
+    // set DIS_SXTP to 0
+    u32 &= ~DW1000_REGISTER_SYS_CFG_DIS_SXTP_MASK;
+
+    // write value back
+    writeSpiUint32(DW1000_REGISTER_SYS_CFG,u32);
+
+    // re-set the default power values to the registers
+    uint8_t *p = (uint8_t*)&u32;
+    p[0] = 0x22;
+    p[1] = 0x02;
+    p[2] = 0x08;
+    p[3] = 0x0E;
+
+    writeSpiUint32(DW1000_REGISTER_TX_POWER,u32);
+}
+
+bool DecaDuino::isTxPowerSmart(){
+    // get SYS_CFG register
+    uint32_t u32;
+    u32 = readSpiUint32(DW1000_REGISTER_SYS_CFG);
+    return ! (u32 & DW1000_REGISTER_SYS_CFG_DIS_SXTP_MASK);
+}
+
+void DecaDuino::setManualTxPower(COARSE_POWER_SETTING coarse, unsigned int fine){
+    // get SYS_CFG register
+    uint32_t u32;
+    u32 = readSpiUint32(DW1000_REGISTER_SYS_CFG);
+
+    // set DIS_SXTP to 1
+    u32 |= DW1000_REGISTER_SYS_CFG_DIS_SXTP_MASK;
+
+    // write value back
+    writeSpiUint32(DW1000_REGISTER_SYS_CFG,u32);
+
+    // compute the power value according to the specs
+    fine = fine < 31 ? fine : 31;   // coerce fine to the interval [ 0, 31 ]
+    uint8_t power = (uint8_t)coarse << 5 | fine;
+
+    // set the power values to the registers
+    u32 = readSpiUint32(DW1000_REGISTER_TX_POWER);
+    uint8_t *p = (uint8_t*)&u32;
+    // p[0]  Not applicable, so we leave previous value
+    p[1] = power;
+    p[2] = power;
+    // p[3] Not applicable, so we leave previous value
+
+    writeSpiUint32(DW1000_REGISTER_TX_POWER,u32);
+
+}
+
+bool DecaDuino::isTxPowerManual(){
+    return !isTxPowerSmart();
+}
+
+
+uint32_t DecaDuino::getTX_POWER(){
+    uint32_t u32;
+    u32 = readSpiUint32(DW1000_REGISTER_TX_POWER);
+    return u32;
+}
+
 uint64_t DecaDuino::getSystemTimeCounter ( void ) {
 
 	uint64_t p;

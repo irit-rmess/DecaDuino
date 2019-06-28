@@ -139,7 +139,9 @@
 #define DW1000_REGISTER_SYS_CFG_PHR_MODE_MASK 		0x00030000
 #define DW1000_REGISTER_SYS_CFG_PHR_MODE_SHIFT 		16
 #define DW1000_REGISTER_SYS_CFG_RXM110K_MASK        0x00400000
-#define DW1000_REGISTER_SYS_CFG_RXM110K_SHIFT      22
+#define DW1000_REGISTER_SYS_CFG_RXM110K_SHIFT       22
+#define DW1000_REGISTER_SYS_CFG_DIS_SXTP_MASK       0x0040000
+#define DW1000_REGISTER_SYS_CFG_DIS_SXTP_SHIFT      18
 
 #define DW1000_REGISTER_SYS_TIME			0x06
 
@@ -200,6 +202,8 @@
 #define DW1000_REGISTER_TX_TIME				0x17
 
 #define DW1000_REGISTER_TX_ANTD				0x18
+
+#define DW1000_REGISTER_TX_POWER            0x1E
 
 #define DW1000_REGISTER_CHAN_CTRL			0x1F
 #define DW1000_REGISTER_CHAN_CTRL_TX_CHAN_MASK		0x0000000F
@@ -310,6 +314,17 @@ typedef struct {
     int16_t i; // imaginary part of a sample in CIR memory
 }CIRSample_t;   // single sample in CIR memory (register 0x25)
 
+enum class COARSE_POWER_SETTING : uint8_t { // see DW1000 user manual 7.2.31.1
+                                            // WARNING : order is very important
+    COARSE_POWER_GAIN_18db = 0,
+    COARSE_POWER_GAIN_15db,
+    COARSE_POWER_GAIN_12db,
+    COARSE_POWER_GAIN_9db,
+    COARSE_POWER_GAIN_6db,
+    COARSE_POWER_GAIN_3db,
+    COARSE_POWER_GAIN_0db,
+    COARSE_POWER_GAIN_OFF,
+};
 
 const char DW1000_DATARATE[][9] = {
     "100 Kbps",
@@ -370,6 +385,48 @@ class DecaDuino {
 		* @date 20170329
 		*/
 		uint8_t getPHRMode(void);
+
+		/**
+        * @brief Returns the content of TX_POWER register
+        * @author Quentin Vey
+        * @date 20190628
+        */
+        uint32_t getTX_POWER();
+
+        /**
+        * @brief Set power mode to smart (i.e. allows power boost for short frames).
+        * TX_POWER are set to their manufacturer default values
+        * @return No return
+        * @author Quentin Vey
+        * @date 20190628
+        */
+        void setSmartTxPower();
+
+        /**
+        * @brief Check if TX power mode is smart.
+        * @return true if DIS_STXP if set to 1, false otherwise
+        * @author Quentin Vey
+        * @date 20190628
+        */
+        bool isTxPowerSmart();
+
+        /**
+        * @brief Set power Mode to a manual value (same value for PHY header, SFD portion and data portion)
+        * @param coarse : sets the coarse (DA) power setting. See DW1000 user manual, 7.2.31.1.
+        * @param fine : expressed in half-db. Allowed values : 0 (0 dB) to 31 (15.5 dB). Sets the fine (mixer) power setting. See DW1000 user manual, 7.2.31.1.
+        * @return No return
+        * @author Quentin Vey
+        * @date 20190628
+        */
+        void setManualTxPower(COARSE_POWER_SETTING coarse, unsigned int fine);
+
+        /**
+        * @brief Check if TX power mode is manual.
+        * @return true if DIS_STXP if set to 0, false otherwise
+        * @author Quentin Vey
+        * @date 20190628
+        */
+        bool isTxPowerManual();
 
 		/**
 		* @brief Stores the System Time Counter value in the variable referenced by the pointer passed as an input parameter
