@@ -326,6 +326,8 @@ enum class COARSE_POWER_SETTING : uint8_t { // see DW1000 user manual 7.2.31.1
     COARSE_POWER_GAIN_OFF,
 };
 
+uint8_t powerSettingsToRegisterValue(COARSE_POWER_SETTING coarse, uint8_t fine);
+
 const char DW1000_DATARATE[][9] = {
     "100 Kbps",
     "850 Kbps",

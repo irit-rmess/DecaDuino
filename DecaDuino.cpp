@@ -33,6 +33,11 @@ static inline void end_atomic(uint32_t prim)
 
 DecaDuino* DecaDuino::_DecaDuinoInterrupt[MAX_NB_DW1000_FOR_INTERRUPTS] = {0, 0, 0};
 
+uint8_t powerSettingsToRegisterValue(COARSE_POWER_SETTING coarse, uint8_t fine){
+    fine = fine < 31 ? fine : 31;   // coerce fine to the interval [ 0, 31 ]
+    return (uint8_t)coarse << 5 | fine;
+}
+
 DecaDuino::DecaDuino(uint8_t slaveSelectPin, uint8_t interruptPin) {
 
 	_slaveSelectPin = slaveSelectPin;
@@ -1042,8 +1047,7 @@ void DecaDuino::setManualTxPower(COARSE_POWER_SETTING coarse, unsigned int fine)
     writeSpiUint32(DW1000_REGISTER_SYS_CFG,u32);
 
     // compute the power value according to the specs
-    fine = fine < 31 ? fine : 31;   // coerce fine to the interval [ 0, 31 ]
-    uint8_t power = (uint8_t)coarse << 5 | fine;
+    uint8_t power = powerSettingsToRegisterValue(coarse, fine);
 
     // set the power values to the registers
     u32 = readSpiUint32(DW1000_REGISTER_TX_POWER);
