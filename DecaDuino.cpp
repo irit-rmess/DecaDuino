@@ -1036,6 +1036,15 @@ bool DecaDuino::isTxPowerSmart(){
 }
 
 void DecaDuino::setManualTxPower(COARSE_POWER_SETTING coarse, unsigned int fine){
+
+    // compute the power value according to the specs
+    uint8_t power = powerSettingsToRegisterValue(coarse, fine);
+
+    setManualTxPowerRaw(power);
+}
+
+
+void DecaDuino::setManualTxPowerRaw(uint8_t registerValue){
     // get SYS_CFG register
     uint32_t u32;
     u32 = readSpiUint32(DW1000_REGISTER_SYS_CFG);
@@ -1046,19 +1055,15 @@ void DecaDuino::setManualTxPower(COARSE_POWER_SETTING coarse, unsigned int fine)
     // write value back
     writeSpiUint32(DW1000_REGISTER_SYS_CFG,u32);
 
-    // compute the power value according to the specs
-    uint8_t power = powerSettingsToRegisterValue(coarse, fine);
-
     // set the power values to the registers
     u32 = readSpiUint32(DW1000_REGISTER_TX_POWER);
     uint8_t *p = (uint8_t*)&u32;
     // p[0]  Not applicable, so we leave previous value
-    p[1] = power;
-    p[2] = power;
+    p[1] = registerValue;
+    p[2] = registerValue;
     // p[3] Not applicable, so we leave previous value
 
     writeSpiUint32(DW1000_REGISTER_TX_POWER,u32);
-
 }
 
 bool DecaDuino::isTxPowerManual(){
