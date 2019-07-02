@@ -2098,18 +2098,24 @@ int DecaDuino::getCIRAccumulator(CIRSample_t *buffer, size_t arrayLength){
     if ( numSamples > arrayLength ){                            // make sure that we will not write too much to the buffer
         numSamples = arrayLength;
     }
-    uint8_t buf[3];
-
     // enable CIR accumulator read
     enableCIRAccumulatorRead(true);
 
-    unsigned int i=0;
-    for (; i < numSamples; i++){
-        readSpiSubAddress(0x25, i*4, buf, 3);      // real part
-        buffer[i].r = buf[1] | (buf[2] << 8) ; // must drop first octet read
-        readSpiSubAddress(0x25, i*4 + 2, buf, 3);  // imaginary part
-        buffer[i].i = buf[1] | (buf[2] << 8);  // must drop first octet read
+    // extreme bulk reading : read everything in (almost) one call, use destination buffer as temporary buffer.
+    int i;
+    uint8_t *buff = (uint8_t*)buffer;   // in place reading
+    readSpiSubAddress(0x25, 0, buff, numSamples*4);  // read everything directly into  buf
+    uint8_t lastOne[2];
+    readSpiSubAddress(0x25, numSamples*4 - 1 , lastOne, 2);  // read last byte (due to first byte to be dropped
+    // discard first byte, and handle byte order (in place)
+    for (i = 0; i < numSamples-1; i++){
+        buffer[i].r = buff[ i*4 + 1] | buff[ i*4 + 2] << 8;
+        buffer[i].i = buff[ i*4 + 3] | buff[ i*4 + 4] << 8;
     }
+    // hand-processing of last one
+    buffer[i].r = buff[ i*4 + 1] | buff[ i*4 + 2] << 8;
+    buffer[i].i = buff[ i*4 + 3] | lastOne[2] << 8;
+    i++;
 
     // reset CIR accumulator read
     enableCIRAccumulatorRead(false);
