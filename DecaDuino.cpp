@@ -2095,30 +2095,42 @@ void DecaDuino::enableCIRAccumulatorRead(bool enable){
 
 int DecaDuino::getCIRAccumulator(CIRSample_t *buffer, size_t arrayLength){
     unsigned int numSamples = getRxPrf() == 16 ? 992 : 1016;    // CIR contains 992 samples if PRF == 16 MHz, 1016 if PRF == 64
-    if ( numSamples > arrayLength ){                            // make sure that we will not write too much to the buffer
+    unsigned int bulkBonus;
+    if ( numSamples >= arrayLength ){                            // make sure that we will not write too much to the buffer
         numSamples = arrayLength;
+        bulkBonus = 0;
     }
+    else {
+        // there is some space left in the buffer : read everything in one single pass
+        bulkBonus = 0;
+    }
+
     // enable CIR accumulator read
     enableCIRAccumulatorRead(true);
 
     // extreme bulk reading : read everything in (almost) one call, use destination buffer as temporary buffer.
     int i;
     uint8_t *buff = (uint8_t*)buffer;   // in place reading
-    readSpiSubAddress(0x25, 0, buff, numSamples*4);  // read everything directly into  buf
+    readSpiSubAddress(0x25, 0, buff, numSamples*4  + bulkBonus);  // read everything directly into  buf
     uint8_t lastOne[2];
-    readSpiSubAddress(0x25, numSamples*4 - 1 , lastOne, 2);  // read last byte (due to first byte to be dropped
+    if (!bulkBonus) {
+        readSpiSubAddress(0x25, numSamples*4 - 1 , lastOne, 2);  // read last byte (due to first byte to be dropped
+    }
     // discard first byte, and handle byte order (in place)
-    for (i = 0; i < numSamples-1; i++){
+    for (i = 0; i < numSamples - 1 + bulkBonus; i++){
         buffer[i].r = buff[ i*4 + 1] | buff[ i*4 + 2] << 8;
         buffer[i].i = buff[ i*4 + 3] | buff[ i*4 + 4] << 8;
     }
-    // hand-processing of last one
-    buffer[i].r = buff[ i*4 + 1] | buff[ i*4 + 2] << 8;
-    buffer[i].i = buff[ i*4 + 3] | lastOne[2] << 8;
-    i++;
+    if (!bulkBonus){
+        // hand-processing of last one if we had to read it separately
+        buffer[i].r = buff[ i*4 + 1] | buff[ i*4 + 2] << 8;
+        buffer[i].i = buff[ i*4 + 3] | lastOne[2] << 8;
+        i++;
+    }
 
     // reset CIR accumulator read
     enableCIRAccumulatorRead(false);
+
     return i;
 }
 

@@ -1121,7 +1121,7 @@ class DecaDuino {
         /**
         * @brief Gets the content of register file: 0x25 (CIR memory accumulator)
         * @param buffer address of a CIRSample_t array
-        * @param maximum number of samples that *buffer can hold (must be at least 992 for a 16 MHz PRF, or 1016 for 64MHz PRF )
+        * @param maximum number of samples that *buffer can hold (must be at least 992 for a 16 MHz PRF, or 1016 for 64MHz PRF, ideally these values + 1 )
         * @return number of samples written
         * @date 20190527
         * @author Quentin Vey
