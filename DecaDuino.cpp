@@ -33,11 +33,6 @@ static inline void end_atomic(uint32_t prim)
 
 DecaDuino* DecaDuino::_DecaDuinoInterrupt[MAX_NB_DW1000_FOR_INTERRUPTS] = {0, 0, 0};
 
-uint8_t powerSettingsToRegisterValue(COARSE_POWER_SETTING coarse, uint8_t fine){
-    fine = fine < 31 ? fine : 31;   // coerce fine to the interval [ 0, 31 ]
-    return (uint8_t)coarse << 5 | fine;
-}
-
 DecaDuino::DecaDuino(uint8_t slaveSelectPin, uint8_t interruptPin) {
 
 	_slaveSelectPin = slaveSelectPin;
@@ -436,6 +431,7 @@ void DecaDuino::handleInterrupt() {
 	}
 
 	// Acknoledge by writing '1' in all set bits in the System Event Status Register
+
 	writeSpiUint32(DW1000_REGISTER_SYS_STATUS, ack);
 
 #ifdef DECADUINO_DEBUG 
@@ -1006,6 +1002,10 @@ uint8_t DecaDuino::getPHRMode(void) {
 		return (uint8_t)ui32t;
 }
 
+uint8_t DecaDuino::powerSettingsToRegisterValue(COARSE_POWER_SETTING coarse, uint8_t fine){
+    fine = fine < 31 ? fine : 31;   // coerce fine to the interval [ 0, 31 ]
+    return (uint8_t)coarse << 5 | fine;
+}
 
 void DecaDuino::setSmartTxPower(){
     // get SYS_CFG register

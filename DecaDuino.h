@@ -326,15 +326,6 @@ enum class COARSE_POWER_SETTING : uint8_t { // see DW1000 user manual 7.2.31.1
     COARSE_POWER_GAIN_OFF,
 };
 
-/**
-* @brief Converts power settings to the register value for manual power setting
-* @param coarse : sets the coarse (DA) power setting. See DW1000 user manual, 7.2.31.1.
-* @param fine : expressed in half-db. Allowed values : 0 (0 dB) to 31 (15.5 dB). Sets the fine (mixer) power setting. See DW1000 user manual, 7.2.31.1.
-* @return Value to write into the register TXPOWSD or TXPOWPHR
-* @author Quentin Vey
-* @date 20190701
-*/
-uint8_t powerSettingsToRegisterValue(COARSE_POWER_SETTING coarse, uint8_t fine);
 
 const char DW1000_DATARATE[][9] = {
     "100 Kbps",
@@ -395,6 +386,16 @@ class DecaDuino {
 		* @date 20170329
 		*/
 		uint8_t getPHRMode(void);
+
+        /**
+        * @brief Converts power settings to the register value for manual power setting
+        * @param coarse : sets the coarse (DA) power setting. See DW1000 user manual, 7.2.31.1.
+        * @param fine : expressed in half-db. Sets the fine (mixer) power setting. See DW1000 user manual, 7.2.31.1. Allowed values : 0 (0 dB) to 31 (15.5 dB). Any value above 31 will be capped to 31.
+        * @return Value to write into the register TXPOWSD or TXPOWPHR
+        * @author Quentin Vey
+        * @date 20190701
+        */
+        static uint8_t powerSettingsToRegisterValue(COARSE_POWER_SETTING coarse, uint8_t fine);
 
         /**
         * @brief Set power mode to smart (i.e. allows power boost for short frames).
