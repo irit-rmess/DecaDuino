@@ -67,10 +67,14 @@ void setup()
     case 0x847d584201108686: myAddress = 106; break; // 106
     case 0x9eaea872f9d6b996: myAddress = 107; break; // 107
     case 0x5ef583659124cdd6: myAddress = 108; break; // 108
+    case 0x6e27f809be495edd: myAddress = 109; break; // 109
     case 0x5f20a93050af01b5: myAddress = 110; break; // 110
     case 0xde32acf71c29add6: myAddress = 111; break; // 111
     case 0xcefb49379bde4411: myAddress = 115; break; // 115
+    //case 0x: myAddress = 116; break; // 116
     case 0x5cd8c0b8a1af863a: myAddress = 117; break; // 117
+    case 0x9313b1f763fac473: myAddress = 118; break; // 118
+    case 0x6b6c03e429789c24: myAddress = 119; break; // 119
     case 0x9984c78adfe8c818: myAddress = 142; break; // 142
     case 0xbe1a2bcb17af5e71: myAddress = 143; break; // 143
     case 0xde9b67ae2c99f3d5: myAddress = 144; break; // 144
@@ -85,7 +89,7 @@ void setup()
     case 0x7368bfea8acf8003: myAddress = 153; break; // 153
 
     default:
-      delay(1000);
+      delay(3000);
       decaduino.printUint64(getDwMacAddrUint64()); Serial.println(); Serial.flush();
       while(1) { digitalWrite(LED_BUILTIN, LED_ON); delay(200); digitalWrite(LED_BUILTIN, LED_OFF); delay(200); }
   }
@@ -137,10 +141,12 @@ void loop()
 {
   char c;
 
+  // Pull one char in Serial Buffer per Arduino loop
   if ( pullSerialBuffer(&c) )
   {
     Serial.print(c);
   }
+
   // If it is time to send a beacon
   if ( millis() > beacon_send_time )
   {
@@ -167,6 +173,8 @@ void loop()
     uint16_t addr = decaduino.decodeUint16(&rxData[0]);
     uint16_t nseq = decaduino.decodeUint16(&rxData[2]);
 
+    /*
+    // Do not use direct Serial Printing
     int debut = micros();
     Serial.print("{");
     Serial.print("\"message_type\":\"rx_frame\"");
@@ -178,8 +186,9 @@ void loop()
     Serial.print(",\"snr\":"); Serial.print(decaduino.getSNR());
     Serial.print(",\"serial_time\":"); Serial.print(micros()-debut);
     Serial.println("}");
+    */
 
-    /*
+    // Use Serial Buffer instead
     sprintf(str,"{"); pushSerialBuffer(str);
     sprintf(str,"\"message_type\":\"rx_frame\""); pushSerialBuffer(str);
     sprintf(str,",\"rx_addr\":%d", addr); pushSerialBuffer(str);
@@ -189,7 +198,7 @@ void loop()
     sprintf(str,",\"rssi\":"); pushSerialBuffer(str); pushFloatInSerialBuffer(decaduino.getRSSI());
     sprintf(str,",\"snr\":"); pushSerialBuffer(str); pushFloatInSerialBuffer(decaduino.getSNR());
     sprintf(str,"}\n"); pushSerialBuffer(str);
-    */
+
     decaduino.plmeRxEnableRequest(); // Always renable RX after a frame reception
     digitalWrite(LED_BUILTIN, LED_OFF);
   }
