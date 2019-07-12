@@ -6,7 +6,7 @@
 #include <SPI.h>
 #include "DecaDuino.h"
 #include "printfToSerial.h"
-#include "Base64.h"
+#include "base64.hpp"
 #include <machine/endian.h>
 
 #ifdef ARDUINO_DWM1001_DEV
@@ -2181,12 +2181,12 @@ int DecaDuino::getCIRAccumulatorAsBase64JSon(CIRSample_t *samples, uint16_t numS
 #endif
 
     // check if there is enough space to store the whole string
-    if ( (c + base64_enc_len(numSamples*4)) >= (maxlen - 2) ){
+    if ( (c + encode_base64_length(numSamples*4)) >= (maxlen - 2) ){
         strncpy(buf,"buf too small to hold whole representation",maxlen);
         buf[maxlen-1] = '\0';
         return c;
     }
-    c += base64_encode( &(buf[c]), (char*)samples, numSamples*4);   // 4 bytes per sample, struct should be packed because 16-bits fields.
+    c += encode_base64( (unsigned char*)samples, numSamples*4, (unsigned char *)&(buf[c]));   // 4 bytes per sample, struct should be packed because 16-bits fields.
     buf[c++] = '"';
     buf[c++] = '\0';
     return c;
