@@ -138,6 +138,8 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 	// setXXX methods will do the fine-tuning that is proposed in DW1000 user manual section 2.5.5
 	setChannel(5);
 	setSmartTxPower();
+	setPrf(16);
+	setDataRate(DW1000_DATARATE_6_8MBPS);
 
 	// other fine tuning for default config
 	setNTM(0x0D);
