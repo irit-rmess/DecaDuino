@@ -147,6 +147,8 @@
 
 #define DW1000_REGISTER_TX_FCTRL			0x08
 #define DW1000_REGISTER_TX_FCTRL_FRAME_LENGTH_MASK	0x000003FF
+#define DW1000_REGISTER_TX_FCTRL_TX_PRF_MASK        0x00030000
+#define DW1000_REGISTER_TX_FCTRL_TX_PRF_SHIFT       16
 
 #define DW1000_REGISTER_TX_BUFFER			0x09
 
@@ -226,6 +228,13 @@
 #define DW1000_REGISTER_USR_SFD                     0x21
 #define DW1000_REGISTER_USR_SFD_LENGTH_OFFSET       0x00
 
+#define DW1000_REGISTER_DRX_CONF                    0x27
+#define DW1000_REGISTER_OFFSET_RXPACC_NOSAT         0x2C
+#define DW1000_REGISTER_OFFSET_DRX_TUNE2            0x08
+
+#define DW1000_REGISTER_AGC_CTRL                            0x23
+#define DW1000_REGISTER_OFFSET_AGC_TUNE1                    0x04
+#define DW1000_REGISTER_OFFSET_AGC_TUNE2                    0x0C
 
 #define DW1000_REGISTER_TX_CAL                  0x2A
 #define DW1000_REGISTER_OFFSET_TC_PGDELAY       0x0B
@@ -243,8 +252,6 @@
 #define DW1000_REGISTER_AON_CFG0_WAKE_CNT_MASK		0x08
 #define DW1000_REGISTER_AON_CFG0_LPDIV_EN_MASK		0x10
 
-#define DW1000_REGISTER_AGC_CTRL                            0x23
-#define DW1000_REGISTER_OFFSET_AGC_TUNE2                    0x0C
 
 
 #define DW1000_REGISTER_LDE_INTERFACE                       0x2E
@@ -568,6 +575,14 @@ class DecaDuino {
 		*/
 		uint8_t getRxPrf(void);
 
+        /**
+        * @brief Returns the currently configured Pulse Repetition Frequency
+        * @return The PRF value as an unsigned byte
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        uint8_t getTxPrf(void);
+
 		/**
 		* @brief Returns the currently configured Tx Preamble Code
 		* @return The Preamble Code value as an unsigned byte
@@ -681,14 +696,14 @@ class DecaDuino {
 		*/
  		bool setChannel(uint8_t channel);
 
- 		/**
-		* @brief Sets the Pulse Repetition Frequency
-		* @param prf The PRF value to set. Valid values are: 1, 2.
-		* @return Indicates whether configuration went well or not
-		* @author Réjane Dalce
-		* @date 20160310
-		*/
-		bool setRxPrf(uint8_t prf);
+		/**
+        * @brief Sets the Pulse Repetition Frequency for both TX and RX
+        * @param prf The PRF value to set. Valid values are: 16, 64
+        * @return Indicates whether configuration went well or not
+        * @author Quentin Vey
+        * @date 20190717
+        */
+		bool setPrf(uint8_t prf);
 
  		/**
 		* @brief Sets the Tx Preamble Code
@@ -1413,6 +1428,24 @@ class DecaDuino {
 
 	private:
 
+
+        /**
+        * @brief Sets the Pulse Repetition Frequency for RX
+        * @param prf The PRF value to set. Valid values are: 16, 64.
+        * @return Indicates whether configuration went well or not
+        * @author Réjane Dalce
+        * @date 20160310
+        */
+        bool setRxPrf(uint8_t prf);
+
+        /**
+        * @brief Sets the Pulse Repetition Frequency for TX
+        * @param prf The PRF value to set. Valid values are: 16, 64
+        * @return Indicates whether configuration went well or not
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        bool setTxPrf(uint8_t prf);
 
         /**
         * @brief returns the recommended PAC size
