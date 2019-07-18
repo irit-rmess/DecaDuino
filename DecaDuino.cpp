@@ -134,6 +134,16 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 
 	lastTxOK = false;
 
+	// dummy channel config set-up : we set up these elements with the same values as the defaults, so that the
+	// setXXX methods will do the fine-tuning that is proposed in DW1000 user manual section 2.5.5
+	setChannel(5);
+	setSmartTxPower();
+
+	// other fine tuning for default config
+	setNTM(0x0D);
+	encodeUint32(0X2502A907,buf);
+	writeSpiSubAddress(DW1000_REGISTER_AGC_CTRL, DW1000_REGISTER_OFFSET_AGC_TUNE2, buf, 4);
+
 	// Return true if everything OK
 	return true;
 
@@ -1042,10 +1052,10 @@ void DecaDuino::setSmartTxPower(){
 
     // re-set the default power values to the registers
     uint8_t *p = (uint8_t*)&u32;
-    p[0] = 0x22;
-    p[1] = 0x02;
-    p[2] = 0x08;
-    p[3] = 0x0E;
+    p[0] = 0x48;        // see 2.5.5 "Default Configurations that should be modified"
+    p[1] = 0x28;        // see 2.5.5 "Default Configurations that should be modified"
+    p[2] = 0x08;        // see 2.5.5 "Default Configurations that should be modified"
+    p[3] = 0x0E;        // see 2.5.5 "Default Configurations that should be modified"
 
     writeSpiUint32(DW1000_REGISTER_TX_POWER,u32);
 }
