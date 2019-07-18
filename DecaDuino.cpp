@@ -2409,9 +2409,7 @@ bool DecaDuino::setNTM(uint8_t NTM){
     if (NTM > 31) return false;
     uint8_t buf[1];
     readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
-    Serial.println(buf[0]);
     buf[0] = (buf[0] & ~DW1000_REGISTER_LDE_INTERFACE_NTM_MASK) | (NTM << DW1000_REGISTER_LDE_INTERFACE_NTM_SHIFT);
-    Serial.println(buf[0]);
     writeSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
     delay(100);
     readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
