@@ -2152,7 +2152,7 @@ int DecaDuino::getCIRAccumulator(CIRSample_t *buffer, size_t arrayLength){
     if (!bulkBonus){
         // hand-processing of last one if we had to read it separately
         buffer[i].r = buff[ i*4 + 1] | buff[ i*4 + 2] << 8;
-        buffer[i].i = buff[ i*4 + 3] | lastOne[2] << 8;
+        buffer[i].i = buff[ i*4 + 3] | lastOne[1] << 8;
         i++;
     }
 
