@@ -1618,6 +1618,14 @@ bool DecaDuino::setRxPrf(uint8_t prf) {
 }
 
 
+uint8_t DecaDuino::recommendedPACSize(uint16_t preamble_len){
+    if (preamble_len <= 128) return 8;
+    if (preamble_len <= 512) return 16;
+    if (preamble_len <= 1024) return 32;
+    else return 64;
+}
+
+
 bool DecaDuino::setTxPcode(uint8_t pcode) {
 
 	uint32_t ui32t;

@@ -1413,6 +1413,16 @@ class DecaDuino {
 
 	private:
 
+
+        /**
+        * @brief returns the recommended PAC size
+        * @param preamble_len the expected length of the received preamble
+        * @return recommened PAC size
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        uint8_t recommendedPACSize(uint16_t preamble_len);
+
 		/**
 		* @brief Reads len bytes on SPI at given address, and store data in buf
 		* @param address The source address
