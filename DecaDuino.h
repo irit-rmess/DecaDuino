@@ -1426,6 +1426,35 @@ class DecaDuino {
         */
         void setDecaWaveSFD();
 
+        /**
+        * @brief sets the channel settings to the defaults values
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        void setDefaultChannelConfig();
+
+        /**
+        * @brief changes the tuning of some parameters to improve NLOS performance
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        void enableNLOSTunings();
+
+        /**
+        * @brief Disables NLOS improvements
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        void disableNLOSTunings();
+
+        /**
+        * @brief returns true if NLOS tunings are enabled
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        bool getNLOSTunings();
+
+
 	private:
 
 
@@ -1546,6 +1575,7 @@ class DecaDuino {
 
 		uint16_t antennaDelay;
 		bool _DWSFD = false;    // use decawave-recommended SFD settings
+		bool _NLOSOptims = false;   // enables NLOS optimizations recommended by decawave
 	
 	protected:
 

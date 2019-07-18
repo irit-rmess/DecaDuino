@@ -136,10 +136,7 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 
 	// dummy channel config set-up : we set up these elements with the same values as the defaults, so that the
 	// setXXX methods will do the fine-tuning that is proposed in DW1000 user manual section 2.5.5
-	setChannel(5);
-	setSmartTxPower();
-	setPrf(16);
-	setDataRate(DW1000_DATARATE_6_8MBPS);
+	setDefaultChannelConfig();
 
 	// other fine tuning for default config
 	setNTM(0x0D);
@@ -1647,7 +1644,7 @@ bool DecaDuino::setRxPrf(uint8_t prf) {
             default: encodeUint32(0x371A011D, drx_tun2); break;
             }
             // LDE_CFG2
-            encodeUint16(0x1607,lde_cfg2);  // todo : take into account NLOS optimizations
+            encodeUint16(_NLOSOptims ? 0x0003 : 0x1607,lde_cfg2);
         }
         else { //64MHz
             // DRX_TUNE2
@@ -2553,6 +2550,36 @@ void DecaDuino::setDecaWaveSFD(){
     writeSpiUint32(DW1000_REGISTER_CHAN_CTRL,chanCtrlBuf);
 
     if (sfdLength) setSFD_LENGTH(sfdLength);
+}
+
+
+void DecaDuino::setDefaultChannelConfig(){
+    disableNLOSTunings();
+    setChannel(5);
+    setTxPcode(4);
+    setRxPcode(4);
+    setPrf(16);
+    setDataRate(DW1000_DATARATE_6_8MBPS);
+    setSmartTxPower();
+    setPreambleLength(128);
+}
+
+void DecaDuino::enableNLOSTunings(){
+    _NLOSOptims = true;
+    setRxPrf(getRxPrf()); // will set the optim for NLOS if appropriate
+    setNTM(7);
+    setPMULT(0);
+}
+
+void DecaDuino::disableNLOSTunings(){
+    _NLOSOptims = false;
+    setRxPrf(getRxPrf()); // will unset the optim for NLOS if appropriate
+    setNTM(13);
+    setPMULT(3);
+}
+
+bool DecaDuino::getNLOSTunings(){
+ return _NLOSOptims;
 }
 
 uint32_t DecaDuino::getDevID(void) {
