@@ -840,9 +840,31 @@ void DecaDuino::writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t
         #endif
 
 	} else {
+	    // This is a 3-bytes header SPI transaction
 
-		// This is a 3-bytes header SPI transaction
-		/** @todo implement writeSpiSubAddress in case of a 3-bytes header SPI transaction */
+        uint8_t sub_addrL, sub_addrH;
+
+        sub_addrL = 0x80 | (subAddress & 0x7F); // Extension Address Indicator (0x80) + low-order 7 bits of sub address
+        sub_addrH = 0 | ((subAddress>>7) & 0xFF); // high-order 8 bits of sub address
+
+        #ifdef ARDUINO_DWM1001_DEV
+        uint32_t prim = begin_atomic();
+        {
+        #else
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        #endif
+            SPI.beginTransaction(currentSPISettings);
+            digitalWrite(_slaveSelectPin, LOW);
+            spi_send(addr);
+            spi_send(sub_addrL);
+            spi_send(sub_addrH);
+            spi_send(buf,len);
+            digitalWrite(_slaveSelectPin, HIGH);
+            SPI.endTransaction();
+        }
+        #ifdef ARDUINO_DWM1001_DEV
+        end_atomic(prim);
+        #endif
 	}
 }
 
@@ -2330,6 +2352,43 @@ void DecaDuino::setDataRate(dw1000_datarate_t rate) {
     tx_fctrl &= ~TX_FCTRL_TXBR_MASK;
     tx_fctrl |= TX_FCTRL_TXBR[rate];
     writeSpiUint32(DW1000_REGISTER_TX_FCTRL, tx_fctrl);
+}
+
+uint8_t DecaDuino::getNTM(void){
+    uint8_t buf[1];
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
+    return (buf[0] & DW1000_REGISTER_LDE_INTERFACE_NTM_MASK) >> DW1000_REGISTER_LDE_INTERFACE_NTM_SHIFT;
+}
+
+bool DecaDuino::setNTM(uint8_t NTM){
+    if (NTM > 31) return false;
+    uint8_t buf[1];
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
+    Serial.println(buf[0]);
+    buf[0] = (buf[0] & ~DW1000_REGISTER_LDE_INTERFACE_NTM_MASK) | (NTM << DW1000_REGISTER_LDE_INTERFACE_NTM_SHIFT);
+    Serial.println(buf[0]);
+    writeSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
+    delay(100);
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
+    Serial.println(buf[0]);
+    return true;
+}
+
+uint8_t DecaDuino::getPMULT(void){
+    uint8_t buf[1];
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
+    return (buf[0] & DW1000_REGISTER_LDE_INTERFACE_PMULT_MASK) >> DW1000_REGISTER_LDE_INTERFACE_PMULT_SHIFT;
+}
+
+bool DecaDuino::setPMULT(uint8_t PMULT){
+    if (PMULT > 7) return false;
+    uint8_t buf[1];
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
+    Serial.println(buf[0]);
+    buf[0] = (buf[0] & ~DW1000_REGISTER_LDE_INTERFACE_PMULT_MASK) | (PMULT << DW1000_REGISTER_LDE_INTERFACE_PMULT_SHIFT);
+    Serial.println(buf[0]);
+    writeSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
+    return true;
 }
 
 uint32_t DecaDuino::getDevID(void) {

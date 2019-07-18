@@ -1348,6 +1348,38 @@ class DecaDuino {
          */
         void setDataRate(dw1000_datarate_t rate);
 
+        /**
+        * @brief returns the NTM (LDE's Noise Threshold Multiplier)
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        uint8_t getNTM(void);
+
+        /**
+        * @brief Sets the NTM (LDE's Noise Threshold Multiplier)
+        * @param NTM value to set. Must be between 0 and 31
+        * @return Indicates whether configuration went well or not
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        bool setNTM(uint8_t NTM);
+
+        /**
+        * @brief returns the PMULT (LDE's peak multiplier)
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        uint8_t getPMULT(void);
+
+        /**
+        * @brief sets the PMULT (LDE's peak multiplier)
+        * @param PMULT value to set. Must be between 0 and 7
+        * @return Indicates whether configuration went well or not
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        bool setPMULT(uint8_t PMULT);
+
 	private:
 
 		/**
