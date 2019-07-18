@@ -2090,6 +2090,12 @@ uint32_t DecaDuino::getSFD_LENGTH(){
     return decodeUint32(buf);
 }
 
+void DecaDuino::setSFD_LENGTH(uint32_t SFD_LENGTH){
+    uint8_t buf[4];
+    encodeUint32(SFD_LENGTH,buf);
+    writeSpiSubAddress(DW1000_REGISTER_USR_SFD,DW1000_REGISTER_USR_SFD_LENGTH_OFFSET,buf,4);
+}
+
 uint16_t DecaDuino::getRXPACC_NOSAT(){
     uint8_t buf[2];
     readSpiSubAddress(0x27,0x2c,buf,2);
@@ -2352,6 +2358,13 @@ void DecaDuino::setDataRate(dw1000_datarate_t rate) {
     tx_fctrl &= ~TX_FCTRL_TXBR_MASK;
     tx_fctrl |= TX_FCTRL_TXBR[rate];
     writeSpiUint32(DW1000_REGISTER_TX_FCTRL, tx_fctrl);
+
+    if (_DWSFD) {
+        setDecaWaveSFD();
+    }
+    else {
+        setStandardSFD();
+    }
 }
 
 uint8_t DecaDuino::getNTM(void){
@@ -2389,6 +2402,47 @@ bool DecaDuino::setPMULT(uint8_t PMULT){
     Serial.println(buf[0]);
     writeSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
     return true;
+}
+
+
+void DecaDuino::setStandardSFD(){
+    _DWSFD = false;
+    uint32_t buf;
+    buf = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
+    buf = buf & (~( DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK) );
+    writeSpiUint32(DW1000_REGISTER_CHAN_CTRL,buf);
+}
+
+void DecaDuino::setDecaWaveSFD(){
+    _DWSFD = true;
+    uint32_t cfgSet;
+    uint32_t cfgUnset;
+    uint8_t sfdLength = 0;
+    dw1000_datarate_t datarate = getDataRate();
+    switch (datarate){
+    case DW1000_DATARATE_6_8MBPS :
+        cfgSet = 0x0;
+        cfgUnset = DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK;
+        break;
+
+    case DW1000_DATARATE_850KBPS :
+        cfgSet = DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK;
+        cfgUnset = 0x0;
+        sfdLength = 16;
+        break;
+
+    case DW1000_DATARATE_110KBPS :
+        cfgSet = DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK;
+        cfgUnset = DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK ;
+        break;
+    }
+
+    uint32_t chanCtrlBuf = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
+    chanCtrlBuf = chanCtrlBuf & ~cfgUnset;
+    chanCtrlBuf = chanCtrlBuf | cfgSet;
+    writeSpiUint32(DW1000_REGISTER_CHAN_CTRL,chanCtrlBuf);
+
+    if (sfdLength) setSFD_LENGTH(sfdLength);
 }
 
 uint32_t DecaDuino::getDevID(void) {

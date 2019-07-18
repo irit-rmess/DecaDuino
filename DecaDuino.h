@@ -1097,11 +1097,19 @@ class DecaDuino {
 
         /**
         * @brief Gets subregister 0x21:00.
-        * @return length of the SFD sequence used (no used for standard SFD sequences).
+        * @return length of the SFD sequence used (not used for standard SFD sequences).
         * @date 20190603
         * @author Quentin Vey
         */
         uint32_t getSFD_LENGTH();
+
+        /**
+        * @brief sets subregister 0x21:00.
+        * @param length of the SFD sequence used (not used for standard SFD sequences).
+        * @date 20190717
+        * @author Quentin Vey
+        */
+        void setSFD_LENGTH(uint32_t SFD_LENGTH);
 
         /**
         * @brief Gets content of subregister file: 0x27:2C (Unsaturated accumulated preamble symbols).
@@ -1380,6 +1388,20 @@ class DecaDuino {
         */
         bool setPMULT(uint8_t PMULT);
 
+        /**
+        * @brief Makes use of the standard SFD in TX and RX
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        void setStandardSFD();
+
+        /**
+        * @brief Makes use DecaWave-recommended SFD in TX and RX (see Table 21: Recommended SFD sequence configurations for best performance in DW1000 user manual)
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        void setDecaWaveSFD();
+
 	private:
 
 		/**
@@ -1471,6 +1493,7 @@ class DecaDuino {
 		void spi_receive ( uint8_t* buf, uint16_t len );
 
 		uint16_t antennaDelay;
+		bool _DWSFD = false;    // use decawave-recommended SFD settings
 	
 	protected:
 
