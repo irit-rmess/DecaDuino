@@ -1493,6 +1493,16 @@ static const uint16_t LDE_REPC[] = {
     0x3850
 };
 
+// Transmitter Calibration - Pulse Generator Delay
+static const uint8_t TC_PGDELAY[] = {
+    0xC9,
+    0xC2,
+    0xC5,
+    0x95,
+    0xC0,
+    0x93
+};
+
 bool DecaDuino::setChannel(uint8_t channel) {
     if ( ( channel != 6 ) && ( channel <= 7 ) && ( channel >= 1 ) ) {
         // PLL configuration
@@ -1517,6 +1527,10 @@ bool DecaDuino::setChannel(uint8_t channel) {
         // Analog TX control configuration
         writeSpiSubAddress(RF_CONF_ID, RF_TXCTRL_OFFSET,
                 (uint8_t*)&RF_TXCTRL[channel], RF_TXCTRL_LEN);
+
+        // Transmitter Calibration - Pulse Generator Delay
+        writeSpiSubAddress(DW1000_REGISTER_TX_CAL, DW1000_REGISTER_OFFSET_TC_PGDELAY,
+                        (uint8_t*)&TC_PGDELAY[CHANNEL[channel]], sizeof(TC_PGDELAY[0]));
 
 		// select corresponding preamble code among valid values for selected (channel, PRF) pair; at least two values are available for each selection
         uint8_t pcode = 0;
