@@ -2490,7 +2490,6 @@ bool DecaDuino::setNTM(uint8_t NTM){
     writeSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
     delay(100);
     readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
-    Serial.println(buf[0]);
     return true;
 }
 
@@ -2504,9 +2503,7 @@ bool DecaDuino::setPMULT(uint8_t PMULT){
     if (PMULT > 7) return false;
     uint8_t buf[1];
     readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
-    Serial.println(buf[0]);
     buf[0] = (buf[0] & ~DW1000_REGISTER_LDE_INTERFACE_PMULT_MASK) | (PMULT << DW1000_REGISTER_LDE_INTERFACE_PMULT_SHIFT);
-    Serial.println(buf[0]);
     writeSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
     return true;
 }
