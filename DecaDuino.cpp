@@ -1675,7 +1675,7 @@ bool DecaDuino::setTxPrf(uint8_t prf){
         ui32t = ui32t & (~DW1000_REGISTER_TX_FCTRL_TX_PRF_MASK);
         prf = prf == 16 ? 1 : 2;    // converts PRF value to the value required in the register
         ui32t |= prf << DW1000_REGISTER_TX_FCTRL_TX_PRF_SHIFT;
-        writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
+        writeSpiUint32(DW1000_REGISTER_TX_FCTRL, ui32t);
 
         uint8_t agc_tun1[2];
         uint8_t pac = recommendedPACSize(getPreambleLength());
