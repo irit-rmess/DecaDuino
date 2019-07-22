@@ -1629,10 +1629,6 @@ bool DecaDuino::setRxPrf(uint8_t prf) {
 		ui32t |= prf << DW1000_REGISTER_CHAN_CTRL_RXPRF_SHIFT;
 		writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
 
-
-        ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
-		Serial.println( (ui32t & DW1000_REGISTER_CHAN_CTRL_RXPRF_MASK) >> DW1000_REGISTER_CHAN_CTRL_RXPRF_SHIFT);
-
         // other tuning related to PRF
 		uint8_t drx_tun1a[2];
 		uint8_t drx_tun2[4];
