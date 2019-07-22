@@ -2244,7 +2244,7 @@ int DecaDuino::getCIRAccumulator(CIRSample_t *buffer, size_t arrayLength){
     }
     else {
         // there is some space left in the buffer : read everything in one single pass
-        bulkBonus = 0;
+        bulkBonus = 1;
     }
 
     // enable CIR accumulator read
