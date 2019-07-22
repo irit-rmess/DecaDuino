@@ -1721,7 +1721,7 @@ bool DecaDuino::setTxPcode(uint8_t pcode) {
 
 		ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
 		ui32t = ui32t & (~DW1000_REGISTER_CHAN_CTRL_TX_PCODE_MASK);
-		ui32t |= pcode << 22; 
+		ui32t |= (pcode << DW1000_REGISTER_CHAN_CTRL_TX_PCODE_SHIFT);
 		writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
 		return true;
 
@@ -1737,7 +1737,7 @@ bool DecaDuino::setRxPcode(uint8_t pcode) {
 
 		ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
 		ui32t = ui32t & (~DW1000_REGISTER_CHAN_CTRL_RX_PCODE_MASK);
-		ui32t |= pcode << 27; 
+		ui32t |= pcode << DW1000_REGISTER_CHAN_CTRL_RX_PCODE_SHIFT;
 		writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
 		return true;
 
