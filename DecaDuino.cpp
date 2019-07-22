@@ -1688,7 +1688,6 @@ bool DecaDuino::setTxPrf(uint8_t prf){
         writeSpiUint32(DW1000_REGISTER_TX_FCTRL, ui32t);
 
         uint8_t agc_tun1[2];
-        uint8_t pac = recommendedPACSize(getPreambleLength());
         // other tuning related to PRF
         if (prf == 1){  //16MHz
             // AGC_TUNE1
