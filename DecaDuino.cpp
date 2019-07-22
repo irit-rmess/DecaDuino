@@ -1849,6 +1849,7 @@ bool DecaDuino::setPreambleLength (int plength) {
 		default:
 			return false;			
 	}
+
 	ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
 	ui32t = ui32t & 0xFFC3FFFF; // bits 21, 20, 19, 18 to zero
 	ui32t |= mask;
@@ -1857,6 +1858,22 @@ bool DecaDuino::setPreambleLength (int plength) {
     int prf_index = getRxPrf() == 16 ? 0 : 1;
     writeSpiSubAddress(DRX_CONF_ID, DRX_TUNE2_OFFSET,
             (uint8_t*)&DRX_TUNE2[recommended_pac_size_index][prf_index], DRX_TUNE2_LEN);
+
+    dw1000_datarate_t datarate = getDataRate();
+    uint8_t drx_tun1b[2];
+    if (datarate == DW1000_DATARATE_110KBPS){
+        encodeUint16(0x064, drx_tun1b);
+    }
+    else {
+        if (plength == 64){
+            encodeUint16(0x0010, drx_tun1b);
+        }
+        else {
+            encodeUint16(0x0020, drx_tun1b);
+        }
+    }
+    writeSpiSubAddress(DW1000_REGISTER_DRX_CONF, DW1000_REGISTER_OFFSET_DRX_TUNE1B,
+                drx_tun1b, 2);
 
     uint16_t tune4h;
     if (plength > 64)
