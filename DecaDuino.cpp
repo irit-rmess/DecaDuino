@@ -1625,16 +1625,22 @@ bool DecaDuino::setRxPrf(uint8_t prf) {
 
 		ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
 		ui32t = ui32t & (~DW1000_REGISTER_CHAN_CTRL_RXPRF_MASK);
-		prf = prf == 16 ? 1 : 2;
+		prf = (prf == 16 ? 1 : 2);
 		ui32t |= prf << DW1000_REGISTER_CHAN_CTRL_RXPRF_SHIFT;
 		writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
 
 
+        ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
+		Serial.println( (ui32t & DW1000_REGISTER_CHAN_CTRL_RXPRF_MASK) >> DW1000_REGISTER_CHAN_CTRL_RXPRF_SHIFT);
+
         // other tuning related to PRF
+		uint8_t drx_tun1a[2];
 		uint8_t drx_tun2[4];
         uint8_t lde_cfg2[2];
         uint8_t pac = recommendedPACSize(getPreambleLength());
         if (prf == 1){  //16MHz
+            // DRX_TUNE1A
+            encodeUint16(0x0087, drx_tun1a);
             // DRX_TUNE2
             switch (pac) {
             case 8: encodeUint32(0x311A002D, drx_tun2); break;
@@ -1647,6 +1653,8 @@ bool DecaDuino::setRxPrf(uint8_t prf) {
             encodeUint16(_NLOSOptims ? 0x0003 : 0x1607,lde_cfg2);
         }
         else { //64MHz
+            // DRX_TUNE1A
+            encodeUint16(0x008D, drx_tun1a);
             // DRX_TUNE2
             switch (pac) {
             case 8: encodeUint32(0x313B006B, drx_tun2); break;
@@ -1658,9 +1666,11 @@ bool DecaDuino::setRxPrf(uint8_t prf) {
             // LDE_CFG2
             encodeUint16(0x0607,lde_cfg2);
         }
+        writeSpiSubAddress(DW1000_REGISTER_DRX_CONF, DW1000_REGISTER_OFFSET_DRX_TUNE1A, drx_tun1a, 2);
         writeSpiSubAddress(DW1000_REGISTER_DRX_CONF, DW1000_REGISTER_OFFSET_DRX_TUNE2, drx_tun2, 4);
+        writeSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE, DW1000_REGISTER_LDE_INTERFACE_LDE_CFG2_OFFSET, lde_cfg2, 2);
 
-		return true;
+        return true;
 
 	} else return false;
 }

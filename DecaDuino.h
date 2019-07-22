@@ -230,6 +230,8 @@
 
 #define DW1000_REGISTER_DRX_CONF                    0x27
 #define DW1000_REGISTER_OFFSET_RXPACC_NOSAT         0x2C
+#define DW1000_REGISTER_OFFSET_DRX_TUNE1A           0x04
+#define DW1000_REGISTER_OFFSET_DRX_TUNE1B           0x06
 #define DW1000_REGISTER_OFFSET_DRX_TUNE2            0x08
 
 #define DW1000_REGISTER_AGC_CTRL                            0x23
