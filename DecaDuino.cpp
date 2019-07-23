@@ -1541,7 +1541,7 @@ bool DecaDuino::setChannel(uint8_t channel) {
         }
         else
         {
-            rxctrlh = RF_RXCTRLH_WBW;
+            rxctrlh = RF_RXCTRLH_NBW;
         }
         writeSpiSubAddress(RF_CONF_ID, RF_RXCTRLH_OFFSET,
                 &rxctrlh, RF_RXCTRLH_LEN);
