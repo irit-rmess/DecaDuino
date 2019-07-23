@@ -1548,7 +1548,7 @@ bool DecaDuino::setChannel(uint8_t channel) {
 
         // Analog TX control configuration
         writeSpiSubAddress(RF_CONF_ID, RF_TXCTRL_OFFSET,
-                (uint8_t*)&RF_TXCTRL[channel], RF_TXCTRL_LEN);
+                (uint8_t*)&RF_TXCTRL[CHANNEL[channel]], RF_TXCTRL_LEN);
 
         // Transmitter Calibration - Pulse Generator Delay
         writeSpiSubAddress(DW1000_REGISTER_TX_CAL, DW1000_REGISTER_OFFSET_TC_PGDELAY,
