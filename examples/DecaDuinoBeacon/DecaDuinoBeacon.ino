@@ -4,6 +4,7 @@
 
 #include <SPI.h>
 #include <DecaDuino.h>
+#include <DWM100x_id.h>
 
 #define BEACON_PERIOD 2000
 #define MAX_FRAME_LEN 15
@@ -28,12 +29,6 @@ uint16_t myAddress = 0;
 uint16_t myNseq = 0;
 
 
-uint64_t getDwMacAddrUint64()
-{
-  return (NRF_FICR->DEVICEADDR[1] * 0x100000000) | NRF_FICR->DEVICEADDR[0];
-}
-
-
 void setup()
 {
   pinMode(LED_BUILTIN, OUTPUT); // Internal LED (pin LED_BUILTIN on DecaWiNo board)
@@ -56,40 +51,9 @@ void setup()
 
   decaduino.printUint64(getDwMacAddrUint64()); Serial.println(); Serial.flush();
 
-  switch ( dwMacAddr )
-  {
-    case 0xfc55bd52582b4543: myAddress = 100; break; // 100
-    case 0x43145fe1013ae4c3: myAddress = 101; break; // 101
-    case 0x99398ce627393b5c: myAddress = 102; break; // 102
-    case 0x103514eac0ab0d9d: myAddress = 103; break; // 103
-    case 0x2b8f349bbcb0aabd: myAddress = 104; break; // 104
-    case 0x7bd99bc4bae559fc: myAddress = 105; break; // 105
-    case 0x847d584201108686: myAddress = 106; break; // 106
-    case 0x9eaea872f9d6b996: myAddress = 107; break; // 107
-    case 0x5ef583659124cdd6: myAddress = 108; break; // 108
-    case 0x6e27f809be495edd: myAddress = 109; break; // 109
-    case 0x5f20a93050af01b5: myAddress = 110; break; // 110
-    case 0xde32acf71c29add6: myAddress = 111; break; // 111
-    case 0xcefb49379bde4411: myAddress = 115; break; // 115
-    //case 0x: myAddress = 116; break; // 116
-    case 0x5cd8c0b8a1af863a: myAddress = 117; break; // 117
-    case 0x9313b1f763fac473: myAddress = 118; break; // 118
-    case 0x6b6c03e429789c24: myAddress = 119; break; // 119
-    case 0x9984c78adfe8c818: myAddress = 142; break; // 142
-    case 0xbe1a2bcb17af5e71: myAddress = 143; break; // 143
-    case 0xde9b67ae2c99f3d5: myAddress = 144; break; // 144
-    case 0xa06723f28aa6aa4e: myAddress = 145; break; // 145
-    case 0x34df5388fb866553: myAddress = 146; break; // 146
-    case 0x139e9dbae75ee553: myAddress = 147; break; // 147
-    case 0xa12ed9bcb2237c12: myAddress = 148; break; // 148
-    case 0x7c3dce7f589baeeb: myAddress = 149; break; // 149
-    case 0xedb0988610994ea3: myAddress = 150; break; // 150
-    case 0x53fd46cf48102b52: myAddress = 151; break; // 151
-    case 0xf0a46ff55426ba69: myAddress = 152; break; // 152
-    case 0x7368bfea8acf8003: myAddress = 153; break; // 153
-
-    default:
-      delay(3000);
+  myAddress = toNodeID(getDwMacAddrUint64());
+  if (myAddress == 0){
+      Serial.print("NRF chip ID not registered ind DWM100x_id.cpp : ");
       decaduino.printUint64(getDwMacAddrUint64()); Serial.println(); Serial.flush();
       while(1) { digitalWrite(LED_BUILTIN, LED_ON); delay(200); digitalWrite(LED_BUILTIN, LED_OFF); delay(200); }
   }
