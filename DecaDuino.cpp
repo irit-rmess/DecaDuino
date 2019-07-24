@@ -2434,11 +2434,11 @@ float DecaDuino::getNLOSIndication(void) {
 #define SYS_CFG_RXM110K         0x00400000UL    /* Receiver Mode 110 kbps data rate */
 
 // SFD Threshold
-static const uint16_t DRX_TUNE0b[] =
+static const uint16_t DRX_TUNE0b[][2] =         /* [bitrate][SFD], with SFD == 0 for standard SFD, SFD == 1 for decawave-recommended SFD*/
 {
-    0x000A,                                     /* 100 kbps */
-    0x0001,                                     /* 850 kbps */
-    0x0001                                      /* 6.8 Mbps */
+    {0x000A, 0x0016},                                     /* 100 kbps */
+    {0x0001, 0x0006},                                     /* 850 kbps */
+    {0x0001, 0x0002}                                      /* 6.8 Mbps */
 };
 
 #define TX_FCTRL_TXBR_MASK      0x00006000UL    /* bit mask to access Transmit Bit Rate */
@@ -2459,8 +2459,9 @@ dw1000_datarate_t DecaDuino::getDataRate() {
 
 void DecaDuino::setDataRate(dw1000_datarate_t rate) {
     // DTUNE0
+    int SFDIndex = _DWSFD ? 1 : 0;
     writeSpiSubAddress(DRX_CONF_ID, DRX_TUNE0b_OFFSET,
-            (uint8_t*)&DRX_TUNE0b[rate], DRX_TUNE0b_LEN);
+            (uint8_t*)&DRX_TUNE0b[rate][SFDIndex], DRX_TUNE0b_LEN);
 
     uint32_t tune1b;
 	uint32_t sys_cfg = readSpiUint32(DW1000_REGISTER_SYS_CFG);
@@ -2537,29 +2538,36 @@ void DecaDuino::setStandardSFD(){
     buf = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
     buf = buf & (~( DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK) );
     writeSpiUint32(DW1000_REGISTER_CHAN_CTRL,buf);
+    int rate = getDataRate();
+    writeSpiSubAddress(DRX_CONF_ID, DRX_TUNE0b_OFFSET,
+            (uint8_t*)&DRX_TUNE0b[rate][0], DRX_TUNE0b_LEN);
 }
 
 void DecaDuino::setDecaWaveSFD(){
     _DWSFD = true;
     uint32_t cfgSet;
     uint32_t cfgUnset;
+    uint16_t drx_tun0;
     uint8_t sfdLength = 0;
     dw1000_datarate_t datarate = getDataRate();
     switch (datarate){
     case DW1000_DATARATE_6_8MBPS :
         cfgSet = 0x0;
         cfgUnset = DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK;
+        drx_tun0 = DRX_TUNE0b[0][1];
         break;
 
     case DW1000_DATARATE_850KBPS :
         cfgSet = DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK;
         cfgUnset = 0x0;
         sfdLength = 16;
+        drx_tun0 = DRX_TUNE0b[1][1];
         break;
 
     case DW1000_DATARATE_110KBPS :
         cfgSet = DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK;
         cfgUnset = DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK ;
+        drx_tun0 = DRX_TUNE0b[2][1];
         break;
     }
 
@@ -2567,6 +2575,9 @@ void DecaDuino::setDecaWaveSFD(){
     chanCtrlBuf = chanCtrlBuf & ~cfgUnset;
     chanCtrlBuf = chanCtrlBuf | cfgSet;
     writeSpiUint32(DW1000_REGISTER_CHAN_CTRL,chanCtrlBuf);
+
+    writeSpiSubAddress(DRX_CONF_ID, DRX_TUNE0b_OFFSET,
+            (uint8_t*)&drx_tun0, DRX_TUNE0b_LEN);
 
     if (sfdLength) setSFD_LENGTH(sfdLength);
 }
