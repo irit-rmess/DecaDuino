@@ -229,10 +229,11 @@
 #define DW1000_REGISTER_USR_SFD_LENGTH_OFFSET       0x00
 
 #define DW1000_REGISTER_DRX_CONF                    0x27
-#define DW1000_REGISTER_OFFSET_RXPACC_NOSAT         0x2C
 #define DW1000_REGISTER_OFFSET_DRX_TUNE1A           0x04
 #define DW1000_REGISTER_OFFSET_DRX_TUNE1B           0x06
 #define DW1000_REGISTER_OFFSET_DRX_TUNE2            0x08
+#define DW1000_REGISTER_OFFSET_DRX_SFDTOC           0x20
+#define DW1000_REGISTER_OFFSET_RXPACC_NOSAT         0x2C
 
 #define DW1000_REGISTER_AGC_CTRL                            0x23
 #define DW1000_REGISTER_OFFSET_AGC_TUNE1                    0x04
@@ -1136,6 +1137,14 @@ class DecaDuino {
         * @author Quentin Vey
         */
         void setSFD_LENGTH(uint32_t SFD_LENGTH);
+
+        /**
+        * @brief sets subregister 0x27:20 DRX_STDTOC.
+        * @param timeout for SFD detection (in units of preamble symbols).
+        * @date 20190724
+        * @author Quentin Vey
+        */
+        void setSFDTimeout(uint16_t timeout);
 
         /**
         * @brief Gets content of subregister file: 0x27:2C (Unsaturated accumulated preamble symbols).

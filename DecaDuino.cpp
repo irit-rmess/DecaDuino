@@ -2227,6 +2227,12 @@ void DecaDuino::setSFD_LENGTH(uint32_t SFD_LENGTH){
     writeSpiSubAddress(DW1000_REGISTER_USR_SFD,DW1000_REGISTER_USR_SFD_LENGTH_OFFSET,buf,4);
 }
 
+void DecaDuino::setSFDTimeout(uint16_t timeout){
+    uint8_t buf[2];
+    encodeUint16(timeout,buf);
+    writeSpiSubAddress(DW1000_REGISTER_DRX_CONF,DW1000_REGISTER_OFFSET_DRX_SFDTOC,buf,2);
+}
+
 uint16_t DecaDuino::getRXPACC_NOSAT(){
     uint8_t buf[2];
     readSpiSubAddress(DW1000_REGISTER_DRX_CONF,DW1000_REGISTER_OFFSET_RXPACC_NOSAT,buf,2);
@@ -2592,6 +2598,7 @@ void DecaDuino::setDefaultChannelConfig(){
     setDataRate(DW1000_DATARATE_6_8MBPS);
     setSmartTxPower();
     setPreambleLength(128);
+    setSFDTimeout(4161); // default sensible value
 }
 
 void DecaDuino::enableNLOSTunings(){
