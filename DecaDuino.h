@@ -138,11 +138,17 @@
 #define DW1000_REGISTER_SYS_CFG_RXAUTR_MASK 		0x20000000
 #define DW1000_REGISTER_SYS_CFG_PHR_MODE_MASK 		0x00030000
 #define DW1000_REGISTER_SYS_CFG_PHR_MODE_SHIFT 		16
+#define DW1000_REGISTER_SYS_CFG_RXM110K_MASK        0x00400000
+#define DW1000_REGISTER_SYS_CFG_RXM110K_SHIFT       22
+#define DW1000_REGISTER_SYS_CFG_DIS_SXTP_MASK       0x0040000
+#define DW1000_REGISTER_SYS_CFG_DIS_SXTP_SHIFT      18
 
 #define DW1000_REGISTER_SYS_TIME			0x06
 
 #define DW1000_REGISTER_TX_FCTRL			0x08
 #define DW1000_REGISTER_TX_FCTRL_FRAME_LENGTH_MASK	0x000003FF
+#define DW1000_REGISTER_TX_FCTRL_TX_PRF_MASK        0x00030000
+#define DW1000_REGISTER_TX_FCTRL_TX_PRF_SHIFT       16
 
 #define DW1000_REGISTER_TX_BUFFER			0x09
 
@@ -169,7 +175,19 @@
 
 #define DW1000_REGISTER_RX_FINFO			0x10
 #define DW1000_REGISTER_RX_FINFO_RXFLEN_MASK		0x000003FF
+#define DW1000_REGISTER_RX_FINFO_RXFLEN_SHIFT       0
+#define DW1000_REGISTER_RX_FINFO_RXFNSPL_MASK       0x00000C00
+#define DW1000_REGISTER_RX_FINFO_RXFNSPL_SHIFT      11
+#define DW1000_REGISTER_RX_FINFO_RXBR_MASK          0x00003000
+#define DW1000_REGISTER_RX_FINFO_RXBR_SHIFT         13
+#define DW1000_REGISTER_RX_FINFO_RNG_MASK           0x00008000
+#define DW1000_REGISTER_RX_FINFO_RNG_SHIFT          15
+#define DW1000_REGISTER_RX_FINFO_RXPRFR_MASK        0x00030000
+#define DW1000_REGISTER_RX_FINFO_RXPRFR_SHIFT       16
+#define DW1000_REGISTER_RX_FINFO_RXPSR_MASK         0x000C0000
+#define DW1000_REGISTER_RX_FINFO_RXPSR_SHIFT        18
 #define DW1000_REGISTER_RX_FINFO_RXPACC_MASK		0xFFF00000
+#define DW1000_REGISTER_RX_FINFO_RXPACC_SHIFT       20
 
 #define DW1000_REGISTER_RX_BUFFER			0x11
 
@@ -187,12 +205,43 @@
 
 #define DW1000_REGISTER_TX_ANTD				0x18
 
+#define DW1000_REGISTER_TX_POWER            0x1E
+
 #define DW1000_REGISTER_CHAN_CTRL			0x1F
 #define DW1000_REGISTER_CHAN_CTRL_TX_CHAN_MASK		0x0000000F
+#define DW1000_REGISTER_CHAN_CTRL_TX_CHAN_SHIFT     0
 #define DW1000_REGISTER_CHAN_CTRL_RX_CHAN_MASK		0x000000F0
+#define DW1000_REGISTER_CHAN_CTRL_RX_CHAN_SHIFT     4
+#define DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK        0x00020000
+#define DW1000_REGISTER_CHAN_CTRL_DWSFD_SHIFT       17
 #define DW1000_REGISTER_CHAN_CTRL_RXPRF_MASK		0x000C0000
+#define DW1000_REGISTER_CHAN_CTRL_RXPRF_SHIFT       18
+#define DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK       0x00100000
+#define DW1000_REGISTER_CHAN_CTRL_TNSSFD_SHIFT      20
+#define DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK       0x00200000
+#define DW1000_REGISTER_CHAN_CTRL_RNSSFD_SHIFT      21
 #define DW1000_REGISTER_CHAN_CTRL_TX_PCODE_MASK		0x07C00000
+#define DW1000_REGISTER_CHAN_CTRL_TX_PCODE_SHIFT    22
 #define DW1000_REGISTER_CHAN_CTRL_RX_PCODE_MASK		0xF8000000
+#define DW1000_REGISTER_CHAN_CTRL_RX_PCODE_SHIFT    27
+
+#define DW1000_REGISTER_USR_SFD                     0x21
+#define DW1000_REGISTER_USR_SFD_LENGTH_OFFSET       0x00
+
+#define DW1000_REGISTER_DRX_CONF                    0x27
+#define DW1000_REGISTER_OFFSET_DRX_TUNE1A           0x04
+#define DW1000_REGISTER_OFFSET_DRX_TUNE1B           0x06
+#define DW1000_REGISTER_OFFSET_DRX_TUNE2            0x08
+#define DW1000_REGISTER_OFFSET_DRX_SFDTOC           0x20
+#define DW1000_REGISTER_OFFSET_RXPACC_NOSAT         0x2C
+
+#define DW1000_REGISTER_AGC_CTRL                            0x23
+#define DW1000_REGISTER_OFFSET_AGC_TUNE1                    0x04
+#define DW1000_REGISTER_OFFSET_AGC_TUNE2                    0x0C
+
+#define DW1000_REGISTER_TX_CAL                  0x2A
+#define DW1000_REGISTER_OFFSET_TC_PGDELAY       0x0B
+
 
 #define DW1000_REGISTER_AON_CTRL			0x2C
 #define DW1000_REGISTER_OFFSET_AON_CTRL			0x02
@@ -206,6 +255,21 @@
 #define DW1000_REGISTER_AON_CFG0_WAKE_CNT_MASK		0x08
 #define DW1000_REGISTER_AON_CFG0_LPDIV_EN_MASK		0x10
 
+
+
+#define DW1000_REGISTER_LDE_INTERFACE                       0x2E
+#define DW1000_REGISTER_LDE_INTERFACE_LDE_THRESH_OFFSET     0x00
+#define DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET       0x0806
+#define DW1000_REGISTER_LDE_INTERFACE_NTM_MASK              0x1F
+#define DW1000_REGISTER_LDE_INTERFACE_NTM_SHIFT             0
+#define DW1000_REGISTER_LDE_INTERFACE_PMULT_MASK            0xE0
+#define DW1000_REGISTER_LDE_INTERFACE_PMULT_SHIFT           5
+#define DW1000_REGISTER_LDE_INTERFACE_LDE_PPINDX_OFFSET     0x1000
+#define DW1000_REGISTER_LDE_INTERFACE_LDE_PPAMPL_OFFSET     0x1002
+#define DW1000_REGISTER_LDE_INTERFACE_LDE_RXANTD_OFFSET     0x1804
+#define DW1000_REGISTER_LDE_INTERFACE_LDE_CFG2_OFFSET       0x1806
+#define DW1000_REGISTER_LDE_INTERFACE_LDE_REPC_OFFSET       0x2804
+
 #define DW1000_REGISTER_PMSC_CTRL0			0x36
 #define DW1000_REGISTER_OFFSET_PMSC_CTRL0		0x00
 
@@ -213,10 +277,74 @@
 #define DW1000_REGISTER_OFFSET_PMSC_CTRL1		0x04
 
 typedef enum {
-    DW1000_DATARATE_110KBPS,
+    DW1000_DATARATE_110KBPS = 0,    // MUST be 0
     DW1000_DATARATE_850KBPS,
     DW1000_DATARATE_6_8MBPS
 } dw1000_datarate_t;
+
+typedef struct {
+    uint16_t RXFLEN:10;         // Received Frame Length (include length extension RXFLE)
+    uint8_t RXNSPL:2;           // Receive non-standard preamble length.
+    uint8_t RXBR:2;             // Receive Bit Rate( 0b00 = 110 kbps, 0b01 =850 kbps, 0b10 = 6.8Mbps)
+    uint8_t RNG:1;              // Receiver Ranging. This reflects the ranging bit in the received PHY header
+    uint8_t RXPRFR:2;           // RX Pulse Repetition Rate report (0b01 = 16 MHz, 0b10 = 64 MHz)
+    uint8_t RXPSR:2;            // RX Preamble Repetition (0b00 = 16 symbols, 0b01 = 64 symbols, 0b10= 1024 symbols, 0b11= 4096 symbols)
+    uint16_t RXPACC:12;         // Preamble Accumulation Count
+}RXFInfo_t;  // full content of the register 0x10 : Rx Frame Information Register
+
+typedef struct {
+    uint16_t STD_NOISE; // Standard Deviation of Noise
+    uint16_t FP_AMPL2;  // First Path Amplitude point 2.
+    uint16_t FP_AMPL3;  // First Path Amplitude point 3
+    uint16_t CIR_PWR;// Channel Impulse Response Power
+}RXFQual_t;  // full content of the register 0x12 : Rx Frame Quality Information
+
+typedef struct {
+    uint64_t RX_STAMP:40;   // timestamp of reception, 40-bits value (1/ (128*499.2×10^6 ) seconds). Valid if  LDEDONE status bit is set.
+    uint16_t FP_INDEX;      // First path index
+    uint16_t FP_AMPL1;      // First path Amplitude point 1
+    uint64_t RX_RAWST:40;  // coarse timestamp of reception 40-bits value (1/ (128*499.2×10^6 ) seconds). Valid if RXPHD status bit is set
+}RXTime_t;  // full content of the register 0x15 : Receive Time Stamp
+
+typedef struct {
+    uint8_t TX_CHAN:4;      // transmit channel
+    uint8_t RX_CHAN:4;      // receive channel
+    uint8_t DWSFD:1;        // non-standard Decawave proprietary SFD sequence
+    uint8_t RXPRF:2;        // PRF used in the receiver
+    uint8_t TNSSFD:1;       // user specified (non-standard) SFD in the transmitter
+    uint8_t RNSSFD:1;       // user specified (non-standard) SFD in the receiver
+    uint8_t TX_PCODE:5;     // preamble code used in the transmitter
+    uint8_t RX_PCODE:5;     // preamble code used in the receiver
+}channelCTRL_t;   // content of the register 0x1F : Channel control register
+
+typedef struct {
+    uint16_t LDE_THRESH;    // LDE Threshold report
+    uint8_t  NTM:5;         // Noise Threshold Multiplier
+    uint8_t  PMULT:3;       // Peak Multiplier
+    uint16_t LDE_PPINDX;    // LDE Peak Path Index
+    uint16_t LDE_PPAMPL;    // LDE Peak Path Amplitude
+    uint16_t LDE_RXANTD;    // LDE Receive Antenna Delay configuration
+    uint16_t LDE_CFG2;      // LDE Configuration Register 2
+    uint16_t LDE_REPC;      // LDE Replica Coefficient configuration
+}LDEInterface_t;    // content of the register 0x2E : Leading Edge Detection Interface
+
+typedef struct {
+    int16_t r; // real part of a sample in CIR memory
+    int16_t i; // imaginary part of a sample in CIR memory
+}CIRSample_t;   // single sample in CIR memory (register 0x25)
+
+enum class COARSE_POWER_SETTING : uint8_t { // see DW1000 user manual 7.2.31.1
+                                            // WARNING : order is very important
+    COARSE_POWER_GAIN_18db = 0,
+    COARSE_POWER_GAIN_15db,
+    COARSE_POWER_GAIN_12db,
+    COARSE_POWER_GAIN_9db,
+    COARSE_POWER_GAIN_6db,
+    COARSE_POWER_GAIN_3db,
+    COARSE_POWER_GAIN_0db,
+    COARSE_POWER_GAIN_OFF,
+};
+
 
 const char DW1000_DATARATE[][9] = {
     "100 Kbps",
@@ -277,6 +405,67 @@ class DecaDuino {
 		* @date 20170329
 		*/
 		uint8_t getPHRMode(void);
+
+        /**
+        * @brief Converts power settings to the register value for manual power setting
+        * @param coarse : sets the coarse (DA) power setting. See DW1000 user manual, 7.2.31.1.
+        * @param fine : expressed in half-db. Sets the fine (mixer) power setting. See DW1000 user manual, 7.2.31.1. Allowed values : 0 (0 dB) to 31 (15.5 dB). Any value above 31 will be capped to 31.
+        * @return Value to write into the register TXPOWSD or TXPOWPHR
+        * @author Quentin Vey
+        * @date 20190701
+        */
+        static uint8_t powerSettingsToRegisterValue(COARSE_POWER_SETTING coarse, uint8_t fine);
+
+        /**
+        * @brief Set power mode to smart (i.e. allows power boost for short frames).
+        * TX_POWER are set to their manufacturer default values
+        * @return No return
+        * @author Quentin Vey
+        * @date 20190628
+        */
+        void setSmartTxPower();
+
+        /**
+        * @brief Check if TX power mode is smart.
+        * @return true if DIS_STXP if set to 1, false otherwise
+        * @author Quentin Vey
+        * @date 20190628
+        */
+        bool isTxPowerSmart();
+
+        /**
+        * @brief Set power Mode to a manual value (same value for PHY header, SFD portion and data portion)
+        * @param coarse : sets the coarse (DA) power setting. See DW1000 user manual, 7.2.31.1.
+        * @param fine : expressed in half-db. Allowed values : 0 (0 dB) to 31 (15.5 dB). Sets the fine (mixer) power setting. See DW1000 user manual, 7.2.31.1.
+        * @return No return
+        * @author Quentin Vey
+        * @date 20190628
+        */
+        void setManualTxPower(COARSE_POWER_SETTING coarse, unsigned int fine);
+
+        /**
+        * @brief Set power Mode to a manual value (same value for PHY header, SFD portion and data portion)
+        * @param TX_POWER : value to write directly into registers TXPOWSD or TXPOWPHR
+        * @return No return
+        * @author Quentin Vey
+        * @date 20190701
+        */
+        void setManualTxPowerRaw(uint8_t registerValue);
+
+        /**
+        * @brief Check if TX power mode is manual.
+        * @return true if DIS_STXP if set to 0, false otherwise
+        * @author Quentin Vey
+        * @date 20190628
+        */
+        bool isTxPowerManual();
+
+        /**
+        * @brief Returns the content of TX_POWER register
+        * @author Quentin Vey
+        * @date 20190628
+        */
+        uint32_t getTX_POWER();
 
 		/**
 		* @brief Stores the System Time Counter value in the variable referenced by the pointer passed as an input parameter
@@ -388,6 +577,14 @@ class DecaDuino {
 		* @date 20161003
 		*/
 		uint8_t getRxPrf(void);
+
+        /**
+        * @brief Returns the currently configured Pulse Repetition Frequency
+        * @return The PRF value as an unsigned byte
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        uint8_t getTxPrf(void);
 
 		/**
 		* @brief Returns the currently configured Tx Preamble Code
@@ -502,14 +699,23 @@ class DecaDuino {
 		*/
  		bool setChannel(uint8_t channel);
 
- 		/**
-		* @brief Sets the Pulse Repetition Frequency
-		* @param prf The PRF value to set. Valid values are: 1, 2.
-		* @return Indicates whether configuration went well or not
-		* @author Réjane Dalce
-		* @date 20160310
-		*/
-		bool setRxPrf(uint8_t prf);
+		/**
+        * @brief Sets the Pulse Repetition Frequency for both TX and RX
+        * @param prf The PRF value to set. Valid values are: 16, 64
+        * @return Indicates whether configuration went well or not
+        * @author Quentin Vey
+        * @date 20190717
+        */
+		bool setPrf(uint8_t prf);
+
+        /**
+        * @brief Sets the Tx and Rx Preamble Codes
+        * @param pcode The Preamble Code to set. Valid values are: 1-20.
+        * @return Indicates whether configuration went well or not
+        * @author Quentin Vey
+        * @date 20190724
+        */
+        bool setPcode(uint8_t pcode);
 
  		/**
 		* @brief Sets the Tx Preamble Code
@@ -771,6 +977,261 @@ class DecaDuino {
 		*/
 		float getVoltage(void);
 
+
+		/**
+		* @brief Gets the content of register file: 0x15 (Receive Time Stamp).
+		* @return content of the register
+		* @date 20190527
+		* @author Quentin Vey
+		*/
+		RXTime_t getRxTimeRegister();
+
+		/**
+        * @brief Gets the content of register file: 0x15 (Receive Time Stamp) as a JSON string.
+        * @param buf address of the character array where the string will be written (should be at least 95 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        int getRxTimeRegisterAsJSon(char *buf, int maxlen);
+
+        /**
+        * @brief Gets the content of register file: 0x15 (Receive Time Stamp) as a JSON string.
+        * @param data data to print
+        * @param buf address of the character array where the string will be written (should be at least 95 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        int getRxTimeRegisterAsJSon(const RXTime_t &data, char *buf, int maxlen);
+
+        /**
+        * @brief Gets the content of register file: 0x12 (Rx Frame Quality Information).
+        * @return content of the register
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        RXFQual_t getRxQualityRegister();
+
+        /**
+        * @brief Gets the content of register file: 0x12 (Rx Frame Quality Information) as a JSon string.
+        * @param buf address of the character array where the string will be written (should be at least 77 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        int getRxQualityRegisterAsJSon(char *buf, int maxlen);
+
+        /**
+        * @brief Gets the content of register file: 0x12 (Rx Frame Quality Information) as a JSon string.
+        * @param data data to print
+        * @param buf address of the character array where the string will be written (should be at least 77 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        int getRxQualityRegisterAsJSon(const RXFQual_t &data, char *buf, int maxlen);
+
+        /**
+        * @brief Gets the content of register file: 0x10 (Rx Frame Information).
+        * @return content of the register
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        RXFInfo_t getRxFrameInfoRegister();
+
+        /**
+        * @brief Gets the content of register file: 0x10 (Rx Frame Information) as a JSon string.
+        * @param buf address of the character array where the string will be written (should be at least 90 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        int getRxFrameInfoRegisterAsJSon(char *buf, int maxlen);
+
+
+        /**
+        * @brief Gets the content of register file: 0x10 (Rx Frame Information) as a JSon string.
+        * @param data data to print
+        * @param buf address of the character array where the string will be written (should be at least 90 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        int getRxFrameInfoRegisterAsJSon(const RXFInfo_t &data, char *buf, int maxlen);
+
+        /**
+        * @brief Gets full content of register file: 0x1F (channel control).
+        * @return content of the register
+        * @date 20190603
+        * @author Quentin Vey
+        */
+        channelCTRL_t getChannelControlRegister();
+
+        /**
+        * @brief Gets full content of register file: 0x1F (channel control) as a JSon string.
+        * @param buf address of the character array where the string will be written (should be at least 128 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190603
+        * @author Quentin Vey
+        */
+        int getChannelControlRegisterAsJSon(char *buf, int maxlen);
+
+        /**
+        * @brief Gets full content of register file: 0x1F (channel control) as a JSon string.
+        * @param data data to print
+        * @param buf address of the character array where the string will be written (should be at least 128 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190603
+        * @author Quentin Vey
+        */
+        int getChannelControlRegisterAsJSon(const channelCTRL_t &data, char *buf, int maxlen);
+        /**
+        * @brief Gets full content of register file: 0x2E (LDE interface).
+        * @return  content of the register
+        * @date 20190603
+        * @author Quentin Vey
+        */
+        LDEInterface_t getLDEInterfaceRegister();
+
+        /**
+        * @brief Gets full content of register file: 0x2E (channel control) as a JSon string.
+        * @param buf address of the character array where the string will be written (should be at least 128 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190603
+        * @author Quentin Vey
+        */
+        int getChannelLDEInterfaceAsJSon(char *buf, int maxlen);
+
+        /**
+        * @brief Gets full content of register file: 0x2E (channel control) as a JSon string.
+        * @param data data to print
+        * @param buf address of the character array where the string will be written (should be at least 128 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (excluding the trailing null byte)
+        * @date 20190603
+        * @author Quentin Vey
+        */
+        int getChannelLDEInterfaceAsJSon(const LDEInterface_t &data, char *buf, int maxlen);
+
+        /**
+        * @brief Gets bit 22 of register 0x04.
+        * @return Receiver Mode 110 kbps data rate.
+        * @date 20190603
+        * @author Quentin Vey
+        */
+        uint8_t getRXM110K();
+
+        /**
+        * @brief Gets subregister 0x21:00.
+        * @return length of the SFD sequence used (not used for standard SFD sequences).
+        * @date 20190603
+        * @author Quentin Vey
+        */
+        uint32_t getSFD_LENGTH();
+
+        /**
+        * @brief sets subregister 0x21:00.
+        * @param length of the SFD sequence used (not used for standard SFD sequences).
+        * @date 20190717
+        * @author Quentin Vey
+        */
+        void setSFD_LENGTH(uint32_t SFD_LENGTH);
+
+        /**
+        * @brief sets subregister 0x27:20 DRX_STDTOC.
+        * @param timeout for SFD detection (in units of preamble symbols).
+        * @date 20190724
+        * @author Quentin Vey
+        */
+        void setSFDTimeout(uint16_t timeout);
+
+        /**
+        * @brief Gets content of subregister file: 0x27:2C (Unsaturated accumulated preamble symbols).
+        * @return Unsaturated accumulated preamble symbols
+        * @date 20190603
+        * @author Quentin Vey
+        */
+        uint16_t getRXPACC_NOSAT();
+
+        /**
+        * @brief Enables/disables CIR merory read (sets/unsets the FACE and AMCE bits)
+        * @param enable true to enable CIR read, false to disable them
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        void enableCIRAccumulatorRead(bool enable);
+
+        /**
+        * @brief Gets the content of register file: 0x25 (CIR memory accumulator)
+        * @param buffer address of a CIRSample_t array
+        * @param maximum number of samples that *buffer can hold (must be at least 992 for a 16 MHz PRF, or 1016 for 64MHz PRF, ideally these values + 1 )
+        * @return number of samples written
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        int getCIRAccumulator(CIRSample_t *buffer, size_t arrayLength);
+
+        /**
+        * @brief Gets the content of register file: 0x25 (CIR memory accumulator) as a JSon array string.
+        * @param buf address of the character array where the string will be written (maximum required : 29464 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (or that would have been written)
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        int getCIRAccumulatorAsJSon(char* buf, uint16_t maxlen);
+
+        /**
+        * @brief Gets the content of register file: 0x25 (CIR memory accumulator) as a JSon array string.
+        * @param data adress of the data to write
+        * @param dataLength number of samples to print
+        * @param buf address of the character array where the string will be written (maximum required : 29464 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (or that would have been written)
+        * @date 20190527
+        * @author Quentin Vey
+        */
+        int getCIRAccumulatorAsJSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen);
+
+        /**
+        * @brief Gets the content of register file: 0x25 (CIR memory accumulator) as a JSon array string, but with values encoded in base64.
+        * @param buf address of the character array where the string will be written (maximum required : 29464 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (or that would have been written)
+        * @date 20190611
+        * @author Quentin Vey
+        */
+        int getCIRAccumulatorAsBase64JSon(char* buf, uint16_t maxlen);
+
+        /**
+        * @brief Gets the content of register file: 0x25 (CIR memory accumulator) as a JSon array string but with values encoded in base64.
+        * The data is an array of int16_t values written in big-endian, grouped by pairs (real part, imaginary part) :
+        * byte  bit
+        *       0-------------------7---------------------15-----------------------23------------------------31
+        *    0  | sample_0_real_low |  sample_0_real_high | sample_0_imaginary_low | sample_0_imaginary_high |
+        *    4  | sample_2_real_low |  sample_2_real_high | sample_2_imaginary_low | sample_2_imaginary_high |
+        *                                                ...
+        *    4n | sample_n_real_low |  sample_n_real_high | sample_n_imaginary_low | sample_n_imaginary_high |
+        * @param data adress of the data to write
+        * @param dataLength number of samples to print
+        * @param buf address of the character array where the string will be written (maximum required : 29464 bytes long)
+        * @param maxlen size of the character array
+        * @return numbers of characters written (or that would have been written)
+        * @date 20190611
+        * @author Quentin Vey
+        */
+        int getCIRAccumulatorAsBase64JSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen);
+
 		/**
 		* @brief Builds an uint16 value from two uint8 values
 		* @param data The address of the uint8_t buffer
@@ -939,7 +1400,110 @@ class DecaDuino {
          */
         void setDataRate(dw1000_datarate_t rate);
 
+        /**
+        * @brief returns the NTM (LDE's Noise Threshold Multiplier)
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        uint8_t getNTM(void);
+
+        /**
+        * @brief Sets the NTM (LDE's Noise Threshold Multiplier)
+        * @param NTM value to set. Must be between 0 and 31
+        * @return Indicates whether configuration went well or not
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        bool setNTM(uint8_t NTM);
+
+        /**
+        * @brief returns the PMULT (LDE's peak multiplier)
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        uint8_t getPMULT(void);
+
+        /**
+        * @brief sets the PMULT (LDE's peak multiplier)
+        * @param PMULT value to set. Must be between 0 and 7
+        * @return Indicates whether configuration went well or not
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        bool setPMULT(uint8_t PMULT);
+
+        /**
+        * @brief Makes use of the standard SFD in TX and RX
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        void setStandardSFD();
+
+        /**
+        * @brief Makes use DecaWave-recommended SFD in TX and RX (see Table 21: Recommended SFD sequence configurations for best performance in DW1000 user manual)
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        void setDecaWaveSFD();
+
+        /**
+        * @brief sets the channel settings to the defaults values
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        void setDefaultChannelConfig();
+
+        /**
+        * @brief changes the tuning of some parameters to improve NLOS performance
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        void enableNLOSTunings();
+
+        /**
+        * @brief Disables NLOS improvements
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        void disableNLOSTunings();
+
+        /**
+        * @brief returns true if NLOS tunings are enabled
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        bool getNLOSTunings();
+
+
 	private:
+
+
+        /**
+        * @brief Sets the Pulse Repetition Frequency for RX
+        * @param prf The PRF value to set. Valid values are: 16, 64.
+        * @return Indicates whether configuration went well or not
+        * @author Réjane Dalce
+        * @date 20160310
+        */
+        bool setRxPrf(uint8_t prf);
+
+        /**
+        * @brief Sets the Pulse Repetition Frequency for TX
+        * @param prf The PRF value to set. Valid values are: 16, 64
+        * @return Indicates whether configuration went well or not
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        bool setTxPrf(uint8_t prf);
+
+        /**
+        * @brief returns the recommended PAC size
+        * @param preamble_len the expected length of the received preamble
+        * @return recommened PAC size
+        * @author Quentin Vey
+        * @date 20190717
+        */
+        uint8_t recommendedPACSize(uint16_t preamble_len);
 
 		/**
 		* @brief Reads len bytes on SPI at given address, and store data in buf
@@ -1030,6 +1594,8 @@ class DecaDuino {
 		void spi_receive ( uint8_t* buf, uint16_t len );
 
 		uint16_t antennaDelay;
+		bool _DWSFD = false;    // use decawave-recommended SFD settings
+		bool _NLOSOptims = false;   // enables NLOS optimizations recommended by decawave
 	
 	protected:
 

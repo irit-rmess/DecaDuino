@@ -12,6 +12,9 @@ documentation here: https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/)
 ## Installation
 You have to put this library in your Arduino libraries directory.
 
+### dependencies
+You need to have the library printfToSerial in your Arduino libraries directory (https://github.com/quent8192/printfToSerial).
+
 ### DecaWino (Teensy)
 
 Instructions here: https://wino.cc/tutorials/teensywino-installing-software-development-tools/

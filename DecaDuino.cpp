@@ -5,7 +5,12 @@
 
 #include <SPI.h>
 #include "DecaDuino.h"
+#include "printfToSerial.h"
+#include "base64.hpp"
+#include <machine/endian.h>
+
 #ifdef ARDUINO_DWM1001_DEV
+
 #define SPI SPI1
 static inline uint32_t begin_atomic()
 {
@@ -128,6 +133,15 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 	// --- End of DW1000 configuration ------------------------------------------------------------------------------
 
 	lastTxOK = false;
+
+	// dummy channel config set-up : we set up these elements with the same values as the defaults, so that the
+	// setXXX methods will do the fine-tuning that is proposed in DW1000 user manual section 2.5.5
+	setDefaultChannelConfig();
+
+	// other fine tuning for default config
+	setNTM(0x0D);
+	encodeUint32(0X2502A907,buf);
+	writeSpiSubAddress(DW1000_REGISTER_AGC_CTRL, DW1000_REGISTER_OFFSET_AGC_TUNE2, buf, 4);
 
 	// Return true if everything OK
 	return true;
@@ -834,9 +848,31 @@ void DecaDuino::writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t
         #endif
 
 	} else {
+	    // This is a 3-bytes header SPI transaction
 
-		// This is a 3-bytes header SPI transaction
-		/** @todo implement writeSpiSubAddress in case of a 3-bytes header SPI transaction */
+        uint8_t sub_addrL, sub_addrH;
+
+        sub_addrL = 0x80 | (subAddress & 0x7F); // Extension Address Indicator (0x80) + low-order 7 bits of sub address
+        sub_addrH = 0 | ((subAddress>>7) & 0xFF); // high-order 8 bits of sub address
+
+        #ifdef ARDUINO_DWM1001_DEV
+        uint32_t prim = begin_atomic();
+        {
+        #else
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        #endif
+            SPI.beginTransaction(currentSPISettings);
+            digitalWrite(_slaveSelectPin, LOW);
+            spi_send(addr);
+            spi_send(sub_addrL);
+            spi_send(sub_addrH);
+            spi_send(buf,len);
+            digitalWrite(_slaveSelectPin, HIGH);
+            SPI.endTransaction();
+        }
+        #ifdef ARDUINO_DWM1001_DEV
+        end_atomic(prim);
+        #endif
 	}
 }
 
@@ -996,6 +1032,81 @@ uint8_t DecaDuino::getPHRMode(void) {
 		return (uint8_t)ui32t;
 }
 
+uint8_t DecaDuino::powerSettingsToRegisterValue(COARSE_POWER_SETTING coarse, uint8_t fine){
+    fine = fine < 31 ? fine : 31;   // coerce fine to the interval [ 0, 31 ]
+    return (uint8_t)coarse << 5 | fine;
+}
+
+void DecaDuino::setSmartTxPower(){
+    // get SYS_CFG register
+    uint32_t u32;
+    u32 = readSpiUint32(DW1000_REGISTER_SYS_CFG);
+
+    // set DIS_SXTP to 0
+    u32 &= ~DW1000_REGISTER_SYS_CFG_DIS_SXTP_MASK;
+
+    // write value back
+    writeSpiUint32(DW1000_REGISTER_SYS_CFG,u32);
+
+    // re-set the default power values to the registers
+    uint8_t *p = (uint8_t*)&u32;
+    p[0] = 0x48;        // see 2.5.5 "Default Configurations that should be modified"
+    p[1] = 0x28;        // see 2.5.5 "Default Configurations that should be modified"
+    p[2] = 0x08;        // see 2.5.5 "Default Configurations that should be modified"
+    p[3] = 0x0E;        // see 2.5.5 "Default Configurations that should be modified"
+
+    writeSpiUint32(DW1000_REGISTER_TX_POWER,u32);
+}
+
+bool DecaDuino::isTxPowerSmart(){
+    // get SYS_CFG register
+    uint32_t u32;
+    u32 = readSpiUint32(DW1000_REGISTER_SYS_CFG);
+    return ! (u32 & DW1000_REGISTER_SYS_CFG_DIS_SXTP_MASK);
+}
+
+void DecaDuino::setManualTxPower(COARSE_POWER_SETTING coarse, unsigned int fine){
+
+    // compute the power value according to the specs
+    uint8_t power = powerSettingsToRegisterValue(coarse, fine);
+
+    setManualTxPowerRaw(power);
+}
+
+
+void DecaDuino::setManualTxPowerRaw(uint8_t registerValue){
+    // get SYS_CFG register
+    uint32_t u32;
+    u32 = readSpiUint32(DW1000_REGISTER_SYS_CFG);
+
+    // set DIS_SXTP to 1
+    u32 |= DW1000_REGISTER_SYS_CFG_DIS_SXTP_MASK;
+
+    // write value back
+    writeSpiUint32(DW1000_REGISTER_SYS_CFG,u32);
+
+    // set the power values to the registers
+    u32 = readSpiUint32(DW1000_REGISTER_TX_POWER);
+    uint8_t *p = (uint8_t*)&u32;
+    // p[0]  Not applicable, so we leave previous value
+    p[1] = registerValue;
+    p[2] = registerValue;
+    // p[3] Not applicable, so we leave previous value
+
+    writeSpiUint32(DW1000_REGISTER_TX_POWER,u32);
+}
+
+bool DecaDuino::isTxPowerManual(){
+    return !isTxPowerSmart();
+}
+
+
+uint32_t DecaDuino::getTX_POWER(){
+    uint32_t u32;
+    u32 = readSpiUint32(DW1000_REGISTER_TX_POWER);
+    return u32;
+}
+
 uint64_t DecaDuino::getSystemTimeCounter ( void ) {
 
 	uint64_t p;
@@ -1128,6 +1239,19 @@ uint8_t DecaDuino::getRxPrf(void) {
 	return 0;
 }
 
+
+uint8_t DecaDuino::getTxPrf(void){
+    uint32_t ui32t;
+
+    ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
+    ui32t = ( ui32t & DW1000_REGISTER_TX_FCTRL_TX_PRF_MASK) >> DW1000_REGISTER_TX_FCTRL_TX_PRF_SHIFT;
+    switch ((uint8_t)ui32t) {
+        case 1: return 16;
+        case 2: return 64;
+    }
+    return 0;
+}
+
 uint8_t DecaDuino::getFpAmpl1(void) {
 	
 	
@@ -1168,7 +1292,7 @@ uint16_t DecaDuino::getRxPacc(void) {
  	uint32_t ui32t;
 
 	ui32t = readSpiUint32(DW1000_REGISTER_RX_FINFO);
-	ui32t = ( ui32t & DW1000_REGISTER_RX_FINFO_RXPACC_MASK) >> 20;
+	ui32t = ( ui32t & DW1000_REGISTER_RX_FINFO_RXPACC_MASK) >> DW1000_REGISTER_RX_FINFO_RXPACC_SHIFT;
 	return (uint16_t)ui32t;
 }
 
@@ -1390,6 +1514,16 @@ static const uint16_t LDE_REPC[] = {
     0x3850
 };
 
+// Transmitter Calibration - Pulse Generator Delay
+static const uint8_t TC_PGDELAY[] = {
+    0xC9,
+    0xC2,
+    0xC5,
+    0x95,
+    0xC0,
+    0x93
+};
+
 bool DecaDuino::setChannel(uint8_t channel) {
     if ( ( channel != 6 ) && ( channel <= 7 ) && ( channel >= 1 ) ) {
         // PLL configuration
@@ -1406,16 +1540,21 @@ bool DecaDuino::setChannel(uint8_t channel) {
         }
         else
         {
-            rxctrlh = RF_RXCTRLH_WBW;
+            rxctrlh = RF_RXCTRLH_NBW;
         }
         writeSpiSubAddress(RF_CONF_ID, RF_RXCTRLH_OFFSET,
                 &rxctrlh, RF_RXCTRLH_LEN);
 
         // Analog TX control configuration
         writeSpiSubAddress(RF_CONF_ID, RF_TXCTRL_OFFSET,
-                (uint8_t*)&RF_TXCTRL[channel], RF_TXCTRL_LEN);
+                (uint8_t*)&RF_TXCTRL[CHANNEL[channel]], RF_TXCTRL_LEN);
+
+        // Transmitter Calibration - Pulse Generator Delay
+        writeSpiSubAddress(DW1000_REGISTER_TX_CAL, DW1000_REGISTER_OFFSET_TC_PGDELAY,
+                        (uint8_t*)&TC_PGDELAY[CHANNEL[channel]], sizeof(TC_PGDELAY[0]));
 
 		// select corresponding preamble code among valid values for selected (channel, PRF) pair; at least two values are available for each selection
+        uint8_t currentPcode = getTxPcode();
         uint8_t pcode = 0;
 		switch(channel){
 			case 1:
@@ -1474,22 +1613,103 @@ bool DecaDuino::setChannel(uint8_t channel) {
     return false;
 }
 
+bool DecaDuino::setPrf(uint8_t prf) {
+    return setTxPrf(prf) && setRxPrf(prf);
+}
 
 bool DecaDuino::setRxPrf(uint8_t prf) {
 
 	uint32_t ui32t;
 
-	if ( ( prf == 1 ) || ( prf == 2 ) ) {
+	if ( ( prf == 16 ) || ( prf == 64 ) ) {
 
 		ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
 		ui32t = ui32t & (~DW1000_REGISTER_CHAN_CTRL_RXPRF_MASK);
-		ui32t |= prf << 18; 
+		prf = (prf == 16 ? 1 : 2);
+		ui32t |= prf << DW1000_REGISTER_CHAN_CTRL_RXPRF_SHIFT;
 		writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
-		return true;
+
+        // other tuning related to PRF
+		uint8_t drx_tun1a[2];
+		uint8_t drx_tun2[4];
+        uint8_t lde_cfg2[2];
+        uint8_t pac = recommendedPACSize(getPreambleLength());
+        if (prf == 1){  //16MHz
+            // DRX_TUNE1A
+            encodeUint16(0x0087, drx_tun1a);
+            // DRX_TUNE2
+            switch (pac) {
+            case 8: encodeUint32(0x311A002D, drx_tun2); break;
+            case 16: encodeUint32(0x331A0052, drx_tun2); break;
+            case 32: encodeUint32(0x351A009A, drx_tun2); break;
+            case 64:
+            default: encodeUint32(0x371A011D, drx_tun2); break;
+            }
+            // LDE_CFG2
+            encodeUint16(_NLOSOptims ? 0x0003 : 0x1607,lde_cfg2);
+        }
+        else { //64MHz
+            // DRX_TUNE1A
+            encodeUint16(0x008D, drx_tun1a);
+            // DRX_TUNE2
+            switch (pac) {
+            case 8: encodeUint32(0x313B006B, drx_tun2); break;
+            case 16: encodeUint32(0x333B00BE, drx_tun2); break;
+            case 32: encodeUint32(0x353B015E, drx_tun2); break;
+            case 64:
+            default: encodeUint32(0x373B0296, drx_tun2); break;
+            }
+            // LDE_CFG2
+            encodeUint16(0x0607,lde_cfg2);
+        }
+        writeSpiSubAddress(DW1000_REGISTER_DRX_CONF, DW1000_REGISTER_OFFSET_DRX_TUNE1A, drx_tun1a, 2);
+        writeSpiSubAddress(DW1000_REGISTER_DRX_CONF, DW1000_REGISTER_OFFSET_DRX_TUNE2, drx_tun2, 4);
+        writeSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE, DW1000_REGISTER_LDE_INTERFACE_LDE_CFG2_OFFSET, lde_cfg2, 2);
+
+        return true;
 
 	} else return false;
 }
 
+bool DecaDuino::setTxPrf(uint8_t prf){
+    uint32_t ui32t;
+
+    if ( ( prf == 16 ) || ( prf == 64 ) ) {
+
+        // sets PRF
+        ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
+        ui32t = ui32t & (~DW1000_REGISTER_TX_FCTRL_TX_PRF_MASK);
+        prf = prf == 16 ? 1 : 2;    // converts PRF value to the value required in the register
+        ui32t |= prf << DW1000_REGISTER_TX_FCTRL_TX_PRF_SHIFT;
+        writeSpiUint32(DW1000_REGISTER_TX_FCTRL, ui32t);
+
+        uint8_t agc_tun1[2];
+        // other tuning related to PRF
+        if (prf == 1){  //16MHz
+            // AGC_TUNE1
+            encodeUint16(0x8870, agc_tun1);
+        }
+        else {
+            // AGC_TUNE1
+            encodeUint16(0x889B, agc_tun1);
+        }
+        writeSpiSubAddress(DW1000_REGISTER_AGC_CTRL, DW1000_REGISTER_OFFSET_AGC_TUNE1, agc_tun1, 2);
+        return true;
+
+    }
+    else return false;
+}
+
+uint8_t DecaDuino::recommendedPACSize(uint16_t preamble_len){
+    if (preamble_len <= 128) return 8;
+    if (preamble_len <= 512) return 16;
+    if (preamble_len <= 1024) return 32;
+    else return 64;
+}
+
+bool DecaDuino::setPcode(uint8_t pcode){
+    return setTxPcode(pcode) && setRxPcode(pcode);
+}
 
 bool DecaDuino::setTxPcode(uint8_t pcode) {
 
@@ -1499,7 +1719,7 @@ bool DecaDuino::setTxPcode(uint8_t pcode) {
 
 		ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
 		ui32t = ui32t & (~DW1000_REGISTER_CHAN_CTRL_TX_PCODE_MASK);
-		ui32t |= pcode << 22; 
+		ui32t |= (pcode << DW1000_REGISTER_CHAN_CTRL_TX_PCODE_SHIFT);
 		writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
 		return true;
 
@@ -1515,7 +1735,7 @@ bool DecaDuino::setRxPcode(uint8_t pcode) {
 
 		ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
 		ui32t = ui32t & (~DW1000_REGISTER_CHAN_CTRL_RX_PCODE_MASK);
-		ui32t |= pcode << 27; 
+		ui32t |= pcode << DW1000_REGISTER_CHAN_CTRL_RX_PCODE_SHIFT;
 		writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
 		return true;
 
@@ -1632,6 +1852,7 @@ bool DecaDuino::setPreambleLength (int plength) {
 		default:
 			return false;			
 	}
+
 	ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
 	ui32t = ui32t & 0xFFC3FFFF; // bits 21, 20, 19, 18 to zero
 	ui32t |= mask;
@@ -1640,6 +1861,22 @@ bool DecaDuino::setPreambleLength (int plength) {
     int prf_index = getRxPrf() == 16 ? 0 : 1;
     writeSpiSubAddress(DRX_CONF_ID, DRX_TUNE2_OFFSET,
             (uint8_t*)&DRX_TUNE2[recommended_pac_size_index][prf_index], DRX_TUNE2_LEN);
+
+    dw1000_datarate_t datarate = getDataRate();
+    uint8_t drx_tun1b[2];
+    if (datarate == DW1000_DATARATE_110KBPS){
+        encodeUint16(0x064, drx_tun1b);
+    }
+    else {
+        if (plength == 64){
+            encodeUint16(0x0010, drx_tun1b);
+        }
+        else {
+            encodeUint16(0x0020, drx_tun1b);
+        }
+    }
+    writeSpiSubAddress(DW1000_REGISTER_DRX_CONF, DW1000_REGISTER_OFFSET_DRX_TUNE1B,
+                drx_tun1b, 2);
 
     uint16_t tune4h;
     if (plength > 64)
@@ -1746,13 +1983,14 @@ float DecaDuino::getTemperature(void) {
 	uint8_t buf_32[4];
 	float temp,diff;
 	uint8_t t23,raw_temp;
-
+	
 	#ifdef ARDUINO_DWM1001_DEV
-    uint32_t prim = begin_atomic();
-    {
-    #else
+	uint32_t prim = begin_atomic();
+	{
+	#else
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-    #endif
+	#endif
+		
 		buf_16[0] = 0x09;buf_16[1] = 0x00; writeSpiSubAddress(0x2D, 0x04, buf_16, 2);
 		u8t= 0x03; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
 		u8t= 0x00; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
@@ -1792,17 +2030,320 @@ float DecaDuino::getVoltage(void) {
 		u8t= 0x03; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
 		u8t= 0x00; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
 		readSpiSubAddress(0x2D,0x0A,buf_32,4);
+		
 	}
-
-    #ifdef ARDUINO_DWM1001_DEV
-    end_atomic(prim);
-    #endif
-
+	#ifdef ARDUINO_DWM1001_DEV
+	end_atomic(prim);
+	#endif
 	raw_v = (float)getVoltageRaw();
 	v33 =  (float) buf_32[0];
 	v =  ( ( raw_v - v33 ) / 173) + 3.3; 
 
 	return v;
+
+	
+}
+
+
+RXTime_t DecaDuino::getRxTimeRegister(){
+    uint8_t buf[14] = {0} ;
+    readSpi(DW1000_REGISTER_RX_TIME, buf, 14);
+
+    RXTime_t data;
+    data.RX_STAMP = decodeUint40(&(buf[0]));
+    data.FP_INDEX = decodeUint16(&(buf[5]));
+    data.FP_AMPL1 = decodeUint16(&(buf[7]));
+    data.RX_RAWST = decodeUint40(&(buf[9]));
+    return data;
+}
+
+int DecaDuino::getRxTimeRegisterAsJSon(const RXTime_t &data, char *buf, int maxlen){
+    char stamp[20];
+    char coarse[20];
+    return snprintf(buf, maxlen,"{\"RX_STAMP\": %s,\"FP_INDEX\": %u, \"FP_AMPL1\": %u, \"RX_RAWST\": %s}",
+            ulltoa(data.RX_STAMP,stamp,sizeof(stamp)),
+            data.FP_INDEX,
+            data.FP_AMPL1,
+            ulltoa(data.RX_RAWST,coarse,sizeof(coarse)));
+}
+int DecaDuino::getRxTimeRegisterAsJSon(char *buf, int maxlen){
+    RXTime_t data = getRxTimeRegister();
+    return getRxTimeRegisterAsJSon(data, buf, maxlen);
+}
+
+RXFQual_t DecaDuino::getRxQualityRegister(){
+    uint8_t buf[8] = {0} ;
+    readSpi(DW1000_REGISTER_RX_RFQUAL, buf, 8);
+    RXFQual_t data;
+    data.STD_NOISE = decodeUint16(&(buf[0]));
+    data.FP_AMPL2 = decodeUint16(&(buf[2]));
+    data.FP_AMPL3= decodeUint16(&(buf[4]));
+    data.CIR_PWR= decodeUint16(&(buf[6]));
+    return data;
+}
+
+int DecaDuino::getRxQualityRegisterAsJSon(const RXFQual_t &data, char *buf, int maxlen){
+    return snprintf(buf, maxlen,"{\"STD_NOISE\": %lu,\"FP_AMPL2\": %lu, \"FP_AMPL3\": %lu, \"CIR_PWR\": %lu}",
+                    data.STD_NOISE,
+                    data.FP_AMPL2,
+                    data.FP_AMPL3,
+                    data.CIR_PWR);
+}
+
+int DecaDuino::getRxQualityRegisterAsJSon(char *buf, int maxlen){
+    RXFQual_t data = getRxQualityRegister();
+    return getRxQualityRegisterAsJSon(data, buf, maxlen);
+}
+
+
+RXFInfo_t DecaDuino::getRxFrameInfoRegister(){
+    uint32_t buf = readSpiUint32(DW1000_REGISTER_RX_FINFO);
+    RXFInfo_t data;
+    data.RXFLEN = (buf & DW1000_REGISTER_RX_FINFO_RXFLEN_MASK) >> DW1000_REGISTER_RX_FINFO_RXFLEN_SHIFT;
+    data.RXNSPL = (buf & DW1000_REGISTER_RX_FINFO_RXFNSPL_MASK) >> DW1000_REGISTER_RX_FINFO_RXFNSPL_SHIFT;
+    data.RXBR   = (buf & DW1000_REGISTER_RX_FINFO_RXBR_MASK) >> DW1000_REGISTER_RX_FINFO_RXBR_SHIFT;
+    data.RNG    = (buf & DW1000_REGISTER_RX_FINFO_RNG_MASK) >> DW1000_REGISTER_RX_FINFO_RNG_SHIFT;
+    data.RXPRFR = (buf & DW1000_REGISTER_RX_FINFO_RXPRFR_MASK) >> DW1000_REGISTER_RX_FINFO_RXPRFR_SHIFT;
+    data.RXPSR  = (buf & DW1000_REGISTER_RX_FINFO_RXPSR_MASK) >> DW1000_REGISTER_RX_FINFO_RXPSR_SHIFT;
+    data.RXPACC = (buf & DW1000_REGISTER_RX_FINFO_RXPACC_MASK) >> DW1000_REGISTER_RX_FINFO_RXPACC_SHIFT;
+    return data;
+}
+
+int DecaDuino::getRxFrameInfoRegisterAsJSon(const RXFInfo_t &data,char *buf, int maxlen){
+    return snprintf(buf, maxlen,"{\"RXFLEN\": %" PRIu16 ",\"RXNSPL\": %u, \"RXBR\": %u, \"RNG\": %u,\"RXPRFR\":%u, \"RXPSR\": %u, \"RXPACC\": %" PRIu16 "}",
+                data.RXFLEN,
+                data.RXNSPL,
+                data.RXBR,
+                data.RNG,
+                data.RXPRFR,
+                data.RXPSR,
+                data.RXPACC);
+}
+int DecaDuino::getRxFrameInfoRegisterAsJSon(char *buf, int maxlen){
+    RXFInfo_t data = getRxFrameInfoRegister();
+    return getRxFrameInfoRegisterAsJSon(data, buf, maxlen);
+}
+
+channelCTRL_t DecaDuino::getChannelControlRegister(){
+    uint32_t buf = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
+    channelCTRL_t data;
+    data.TX_CHAN = (buf & DW1000_REGISTER_CHAN_CTRL_TX_CHAN_MASK) >> DW1000_REGISTER_CHAN_CTRL_TX_CHAN_SHIFT ;
+    data.RX_CHAN = (buf & DW1000_REGISTER_CHAN_CTRL_RX_CHAN_MASK) >> DW1000_REGISTER_CHAN_CTRL_RX_CHAN_SHIFT ;
+    data.DWSFD = (buf & DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK) >> DW1000_REGISTER_CHAN_CTRL_DWSFD_SHIFT ;
+    data.RXPRF = (buf & DW1000_REGISTER_CHAN_CTRL_RXPRF_MASK) >> DW1000_REGISTER_CHAN_CTRL_RXPRF_SHIFT ;
+    data.TNSSFD = (buf & DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK) >> DW1000_REGISTER_CHAN_CTRL_TNSSFD_SHIFT ;
+    data.RNSSFD = (buf & DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK) >> DW1000_REGISTER_CHAN_CTRL_RNSSFD_SHIFT ;
+    data.TX_PCODE = (buf & DW1000_REGISTER_CHAN_CTRL_TX_PCODE_MASK) >> DW1000_REGISTER_CHAN_CTRL_TX_PCODE_SHIFT ;
+    data.RX_PCODE = (buf & DW1000_REGISTER_CHAN_CTRL_RX_PCODE_MASK) >> DW1000_REGISTER_CHAN_CTRL_RX_PCODE_SHIFT ;
+    return data;
+}
+
+int DecaDuino::getChannelControlRegisterAsJSon(const channelCTRL_t &data, char *buf, int maxlen){
+    return snprintf(buf, maxlen,"{\"TX_CHAN\": %u,\"RX_CHAN\": %u, \"DWSFD\": %u, \"RXPRF\": %u,\"TNSSFD\":%u, \"RNSSFD\": %u, \"TX_PCODE\": %u, \"RX_PCODE\": %u}",
+                    data.TX_CHAN,
+                    data.RX_CHAN,
+                    data.DWSFD,
+                    data.RXPRF,
+                    data.TNSSFD,
+                    data.RNSSFD,
+                    data.TX_PCODE,
+                    data.RX_PCODE);
+}
+int DecaDuino::getChannelControlRegisterAsJSon(char *buf, int maxlen){
+    channelCTRL_t data = getChannelControlRegister();
+    return getChannelControlRegisterAsJSon(data, buf, maxlen);
+}
+
+LDEInterface_t DecaDuino::getLDEInterfaceRegister(){
+    uint8_t buf[2];
+    LDEInterface_t data;
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_THRESH_OFFSET,buf,2);
+    data.LDE_THRESH = decodeUint16(buf);
+
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
+    data.NTM = (buf[0] & DW1000_REGISTER_LDE_INTERFACE_NTM_MASK) >> DW1000_REGISTER_LDE_INTERFACE_NTM_SHIFT;
+    data.PMULT= (buf[0] & DW1000_REGISTER_LDE_INTERFACE_PMULT_MASK) >> DW1000_REGISTER_LDE_INTERFACE_PMULT_SHIFT;
+
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_PPINDX_OFFSET,buf,2);
+    data.LDE_PPINDX= decodeUint16(buf);
+
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_PPAMPL_OFFSET,buf,2);
+    data.LDE_PPAMPL = decodeUint16(buf);
+
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_RXANTD_OFFSET,buf,2);
+    data.LDE_RXANTD = decodeUint16(buf);
+
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG2_OFFSET,buf,2);
+    data.LDE_CFG2 = decodeUint16(buf);
+
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_REPC_OFFSET,buf,2);
+    data.LDE_REPC = decodeUint16(buf);
+
+    return data;
+}
+
+int DecaDuino::getChannelLDEInterfaceAsJSon(const LDEInterface_t &data, char *buf, int maxlen){
+    return snprintf(buf, maxlen,"{\"LDE_THRESH\": %"PRIu16",\"NTM\": %u, \"PMULT\": %"PRIu16",\"LDE_PPINDX\":%"PRIu16", \"LDE_PPAMPL\": %"PRIu16", \"LDE_RXANTD\": %"PRIu16", \"LDE_CFG2\": %"PRIu16", \"LDE_REPC\": %"PRIu16"}",
+                    data.LDE_THRESH,
+                    data.NTM,
+                    data.PMULT,
+                    data.LDE_PPINDX,
+                    data.LDE_PPAMPL,
+                    data.LDE_RXANTD,
+                    data.LDE_CFG2,
+                    data.LDE_REPC);
+}
+int DecaDuino::getChannelLDEInterfaceAsJSon(char *buf, int maxlen){
+    LDEInterface_t data = getLDEInterfaceRegister();
+    return getChannelLDEInterfaceAsJSon(data, buf, maxlen);
+}
+
+uint8_t DecaDuino::getRXM110K(){
+    uint32_t buf = readSpiUint32(DW1000_REGISTER_SYS_CFG);
+    return (buf & DW1000_REGISTER_SYS_CFG_RXM110K_MASK) >> DW1000_REGISTER_SYS_CFG_RXM110K_SHIFT;
+}
+
+
+uint32_t DecaDuino::getSFD_LENGTH(){
+    uint8_t buf[4];
+    readSpiSubAddress(DW1000_REGISTER_USR_SFD,DW1000_REGISTER_USR_SFD_LENGTH_OFFSET,buf,4);
+    return decodeUint32(buf);
+}
+
+void DecaDuino::setSFD_LENGTH(uint32_t SFD_LENGTH){
+    uint8_t buf[4];
+    encodeUint32(SFD_LENGTH,buf);
+    writeSpiSubAddress(DW1000_REGISTER_USR_SFD,DW1000_REGISTER_USR_SFD_LENGTH_OFFSET,buf,4);
+}
+
+void DecaDuino::setSFDTimeout(uint16_t timeout){
+    uint8_t buf[2];
+    encodeUint16(timeout,buf);
+    writeSpiSubAddress(DW1000_REGISTER_DRX_CONF,DW1000_REGISTER_OFFSET_DRX_SFDTOC,buf,2);
+}
+
+uint16_t DecaDuino::getRXPACC_NOSAT(){
+    uint8_t buf[2];
+    readSpiSubAddress(DW1000_REGISTER_DRX_CONF,DW1000_REGISTER_OFFSET_RXPACC_NOSAT,buf,2);
+    return decodeUint16(buf);
+}
+
+void DecaDuino::enableCIRAccumulatorRead(bool enable){
+    uint8_t pmscctrl0[4];
+    readSpi(DW1000_REGISTER_PMSC_CTRL0,pmscctrl0,4);
+    if (enable){
+        // set FACE bit and RXCLKS to values required to read CIR accumulator
+        pmscctrl0[0] &= 0xB3;
+        pmscctrl0[0] |= 0x48;
+        // set ACME bit
+        pmscctrl0[1] |= 0x80;
+    }
+    else {
+        // unset FACE bit, an set RXCLKS to auto
+        pmscctrl0[0] &= 0xB3;
+        // unset ACME bit
+        pmscctrl0[1] &= (~0x80);
+    }
+    writeSpi(DW1000_REGISTER_PMSC_CTRL0,pmscctrl0,4);
+}
+
+int DecaDuino::getCIRAccumulator(CIRSample_t *buffer, size_t arrayLength){
+    unsigned int numSamples = getRxPrf() == 16 ? 992 : 1016;    // CIR contains 992 samples if PRF == 16 MHz, 1016 if PRF == 64
+    unsigned int bulkBonus;
+    if ( numSamples >= arrayLength ){                            // make sure that we will not write too much to the buffer
+        numSamples = arrayLength;
+        bulkBonus = 0;
+    }
+    else {
+        // there is some space left in the buffer : read everything in one single pass
+        bulkBonus = 1;
+    }
+
+    // enable CIR accumulator read
+    enableCIRAccumulatorRead(true);
+
+    // extreme bulk reading : read everything in (almost) one call, use destination buffer as temporary buffer.
+    int i;
+    uint8_t *buff = (uint8_t*)buffer;   // in place reading
+    readSpiSubAddress(0x25, 0, buff, numSamples*4  + bulkBonus);  // read everything directly into  buf
+    uint8_t lastOne[2];
+    if (!bulkBonus) {
+        readSpiSubAddress(0x25, numSamples*4 - 1 , lastOne, 2);  // read last byte (due to first byte to be dropped
+    }
+    // discard first byte, and handle byte order (in place)
+    for (i = 0; i < numSamples - 1 + bulkBonus; i++){
+        buffer[i].r = buff[ i*4 + 1] | buff[ i*4 + 2] << 8;
+        buffer[i].i = buff[ i*4 + 3] | buff[ i*4 + 4] << 8;
+    }
+    if (!bulkBonus){
+        // hand-processing of last one if we had to read it separately
+        buffer[i].r = buff[ i*4 + 1] | buff[ i*4 + 2] << 8;
+        buffer[i].i = buff[ i*4 + 3] | lastOne[1] << 8;
+        i++;
+    }
+
+    // reset CIR accumulator read
+    enableCIRAccumulatorRead(false);
+
+    return i;
+}
+
+int DecaDuino::getCIRAccumulatorAsJSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen){
+    unsigned int c=0;
+    buf[c++] = '[';
+    unsigned int i = 0;
+    for (; i < numSamples && c < maxlen ; i++){
+        c += snprintf(&(buf[c]),maxlen-c,"{\"r\": %" PRId16 ", \"i\": %" PRId16 "}, ",samples[i].r,samples[i].i);
+    }
+    if (c >= (maxlen - 2)){
+        strncpy(buf,"buf too small to hold whole representation",maxlen);
+        buf[maxlen-1] = '\0';
+        return c;
+    }
+    buf[c-2] = ']';
+    buf[c-1] = '\0';
+    return c;
+}
+
+int DecaDuino::getCIRAccumulatorAsJSon(char* buf, uint16_t maxlen){
+    CIRSample_t samples[1016];
+    int numSamples = getCIRAccumulator(samples,1016);
+    return getCIRAccumulatorAsJSon(samples, numSamples, buf, maxlen);
+}
+
+int DecaDuino::getCIRAccumulatorAsBase64JSon(char* buf, uint16_t maxlen){
+    CIRSample_t samples[1016];
+    int numSamples = getCIRAccumulator(samples,1016);
+    return getCIRAccumulatorAsBase64JSon(samples, numSamples, buf, maxlen);
+}
+
+int DecaDuino::getCIRAccumulatorAsBase64JSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen){
+    unsigned int c=0; // total character count
+    buf[c++] = '"';
+
+    // If necessary, rewrite samples to network byte order, i.e. big endian
+#ifndef BYTE_ORDER
+    #error "BYTE_ORDER must be defined"
+#endif
+#if BYTE_ORDER==LITTLE_ENDIAN
+    unsigned int i = 0;
+    for (; i < numSamples ; i += 1){
+        // poor man's htons :
+        samples[i].r = ( (samples[i].r & 0xff00) >> 8) | ((samples[i].r & 0x00ff) << 8) ;
+        samples[i].i = ( (samples[i].i & 0xff00) >> 8) | ((samples[i].i & 0x00ff) << 8) ;
+    }
+#endif
+
+    // check if there is enough space to store the whole string
+    if ( (c + encode_base64_length(numSamples*4)) >= (maxlen - 2) ){
+        strncpy(buf,"buf too small to hold whole representation",maxlen);
+        buf[maxlen-1] = '\0';
+        return c;
+    }
+    c += encode_base64( (unsigned char*)samples, numSamples*4, (unsigned char *)&(buf[c]));   // 4 bytes per sample, struct should be packed because 16-bits fields.
+    buf[c++] = '"';
+    buf[c++] = '\0';
+    return c;
 }
 
 
@@ -1863,11 +2404,11 @@ float DecaDuino::getNLOSIndication(void) {
 	//compute LOS/NLOS indicator
 	indicator = 131072.0*C/(F1*F1 + F2*F2 + F3*F3);
 #ifdef DECADUINO_DEBUG 
-	Serial.printf("%d\n",C);
-	Serial.printf("%d\n",F1);
-	Serial.printf("%d\n",F2);
-	Serial.printf("%d\n",F3);
-	Serial.printf("i=%f\n",indicator);
+	printf("%d\n",C);
+	printf("%d\n",F1);
+	printf("%d\n",F2);
+	printf("%d\n",F3);
+	printf("i=%f\n",indicator);
 #endif
 	return indicator;
 }
@@ -1888,11 +2429,11 @@ float DecaDuino::getNLOSIndication(void) {
 #define SYS_CFG_RXM110K         0x00400000UL    /* Receiver Mode 110 kbps data rate */
 
 // SFD Threshold
-static const uint16_t DRX_TUNE0b[] =
+static const uint16_t DRX_TUNE0b[][2] =         /* [bitrate][SFD], with SFD == 0 for standard SFD, SFD == 1 for decawave-recommended SFD*/
 {
-    0x000A,                                     /* 100 kbps */
-    0x0001,                                     /* 850 kbps */
-    0x0001                                      /* 6.8 Mbps */
+    {0x000A, 0x0016},                                     /* 100 kbps */
+    {0x0001, 0x0006},                                     /* 850 kbps */
+    {0x0001, 0x0002}                                      /* 6.8 Mbps */
 };
 
 #define TX_FCTRL_TXBR_MASK      0x00006000UL    /* bit mask to access Transmit Bit Rate */
@@ -1913,8 +2454,9 @@ dw1000_datarate_t DecaDuino::getDataRate() {
 
 void DecaDuino::setDataRate(dw1000_datarate_t rate) {
     // DTUNE0
+    int SFDIndex = _DWSFD ? 1 : 0;
     writeSpiSubAddress(DRX_CONF_ID, DRX_TUNE0b_OFFSET,
-            (uint8_t*)&DRX_TUNE0b[rate], DRX_TUNE0b_LEN);
+            (uint8_t*)&DRX_TUNE0b[rate][SFDIndex], DRX_TUNE0b_LEN);
 
     uint32_t tune1b;
 	uint32_t sys_cfg = readSpiUint32(DW1000_REGISTER_SYS_CFG);
@@ -1943,6 +2485,126 @@ void DecaDuino::setDataRate(dw1000_datarate_t rate) {
     tx_fctrl &= ~TX_FCTRL_TXBR_MASK;
     tx_fctrl |= TX_FCTRL_TXBR[rate];
     writeSpiUint32(DW1000_REGISTER_TX_FCTRL, tx_fctrl);
+
+    if (_DWSFD) {
+        setDecaWaveSFD();
+    }
+    else {
+        setStandardSFD();
+    }
+}
+
+uint8_t DecaDuino::getNTM(void){
+    uint8_t buf[1];
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
+    return (buf[0] & DW1000_REGISTER_LDE_INTERFACE_NTM_MASK) >> DW1000_REGISTER_LDE_INTERFACE_NTM_SHIFT;
+}
+
+bool DecaDuino::setNTM(uint8_t NTM){
+    if (NTM > 31) return false;
+    uint8_t buf[1];
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
+    buf[0] = (buf[0] & ~DW1000_REGISTER_LDE_INTERFACE_NTM_MASK) | (NTM << DW1000_REGISTER_LDE_INTERFACE_NTM_SHIFT);
+    writeSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
+    delay(100);
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
+    return true;
+}
+
+uint8_t DecaDuino::getPMULT(void){
+    uint8_t buf[1];
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
+    return (buf[0] & DW1000_REGISTER_LDE_INTERFACE_PMULT_MASK) >> DW1000_REGISTER_LDE_INTERFACE_PMULT_SHIFT;
+}
+
+bool DecaDuino::setPMULT(uint8_t PMULT){
+    if (PMULT > 7) return false;
+    uint8_t buf[1];
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
+    buf[0] = (buf[0] & ~DW1000_REGISTER_LDE_INTERFACE_PMULT_MASK) | (PMULT << DW1000_REGISTER_LDE_INTERFACE_PMULT_SHIFT);
+    writeSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_CFG1_OFFSET,buf,1);
+    return true;
+}
+
+
+void DecaDuino::setStandardSFD(){
+    _DWSFD = false;
+    uint32_t buf;
+    buf = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
+    buf = buf & (~( DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK) );
+    writeSpiUint32(DW1000_REGISTER_CHAN_CTRL,buf);
+    int rate = getDataRate();
+    writeSpiSubAddress(DRX_CONF_ID, DRX_TUNE0b_OFFSET,
+            (uint8_t*)&DRX_TUNE0b[rate][0], DRX_TUNE0b_LEN);
+}
+
+void DecaDuino::setDecaWaveSFD(){
+    _DWSFD = true;
+    uint32_t cfgSet;
+    uint32_t cfgUnset;
+    uint16_t drx_tun0;
+    uint8_t sfdLength = 0;
+    dw1000_datarate_t datarate = getDataRate();
+    switch (datarate){
+    case DW1000_DATARATE_6_8MBPS :
+        cfgSet = 0x0;
+        cfgUnset = DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK;
+        drx_tun0 = DRX_TUNE0b[0][1];
+        break;
+
+    case DW1000_DATARATE_850KBPS :
+        cfgSet = DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK;
+        cfgUnset = 0x0;
+        sfdLength = 16;
+        drx_tun0 = DRX_TUNE0b[1][1];
+        break;
+
+    case DW1000_DATARATE_110KBPS :
+        cfgSet = DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK;
+        cfgUnset = DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK ;
+        drx_tun0 = DRX_TUNE0b[2][1];
+        break;
+    }
+
+    uint32_t chanCtrlBuf = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
+    chanCtrlBuf = chanCtrlBuf & ~cfgUnset;
+    chanCtrlBuf = chanCtrlBuf | cfgSet;
+    writeSpiUint32(DW1000_REGISTER_CHAN_CTRL,chanCtrlBuf);
+
+    writeSpiSubAddress(DRX_CONF_ID, DRX_TUNE0b_OFFSET,
+            (uint8_t*)&drx_tun0, DRX_TUNE0b_LEN);
+
+    if (sfdLength) setSFD_LENGTH(sfdLength);
+}
+
+
+void DecaDuino::setDefaultChannelConfig(){
+    disableNLOSTunings();
+    setChannel(5);
+    setPcode(4);
+    setPrf(16);
+    setDataRate(DW1000_DATARATE_6_8MBPS);
+    setSmartTxPower();
+    setPreambleLength(128);
+    setSFDTimeout(4161); // default sensible value
+}
+
+void DecaDuino::enableNLOSTunings(){
+    _NLOSOptims = true;
+    setRxPrf(getRxPrf()); // will set the optim for NLOS if appropriate
+    setNTM(7);
+    setPMULT(0);
+}
+
+void DecaDuino::disableNLOSTunings(){
+    _NLOSOptims = false;
+    setRxPrf(getRxPrf()); // will unset the optim for NLOS if appropriate
+    setNTM(13);
+    setPMULT(3);
+}
+
+bool DecaDuino::getNLOSTunings(){
+ return _NLOSOptims;
 }
 
 uint32_t DecaDuino::getDevID(void) {
