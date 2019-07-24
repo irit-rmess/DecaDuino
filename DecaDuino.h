@@ -708,6 +708,15 @@ class DecaDuino {
         */
 		bool setPrf(uint8_t prf);
 
+        /**
+        * @brief Sets the Tx and Rx Preamble Codes
+        * @param pcode The Preamble Code to set. Valid values are: 1-20.
+        * @return Indicates whether configuration went well or not
+        * @author Quentin Vey
+        * @date 20190724
+        */
+        bool setPcode(uint8_t pcode);
+
  		/**
 		* @brief Sets the Tx Preamble Code
 		* @param pcode The Preamble Code to set. Valid values are: 1-20.
