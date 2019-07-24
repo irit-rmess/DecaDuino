@@ -22,7 +22,6 @@ DecaDuino decaduino;
 #endif
 
 
-
 void setup()
 {
   pinMode(LED_BUILTIN, OUTPUT); // Internal LED (pin LED_BUILTIN on DecaWiNo board)
@@ -44,7 +43,7 @@ void setup()
 
 
 void loop()
-{  
+{
   // If a message has been received, print it and re-enable receiver
   if ( decaduino.rxFrameAvailable() ) {
     digitalWrite(LED_BUILTIN, LED_ON);
@@ -52,6 +51,7 @@ void loop()
     Serial.print(rxLen);
     Serial.print("bytes received: |");
     for (int i=0; i<rxLen; i++) {
+      if ( rxData[i]<16 ) Serial.print("0");
       Serial.print(rxData[i], HEX);
       Serial.print("|");
     }
