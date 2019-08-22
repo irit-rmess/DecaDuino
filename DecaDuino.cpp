@@ -2549,20 +2549,20 @@ void DecaDuino::setDecaWaveSFD(){
     case DW1000_DATARATE_6_8MBPS :
         cfgSet = 0x0;
         cfgUnset = DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK;
-        drx_tun0 = DRX_TUNE0b[0][1];
+        drx_tun0 = DRX_TUNE0b[datarate][1];
         break;
 
     case DW1000_DATARATE_850KBPS :
         cfgSet = DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK;
         cfgUnset = 0x0;
         sfdLength = 16;
-        drx_tun0 = DRX_TUNE0b[1][1];
+        drx_tun0 = DRX_TUNE0b[datarate][1];
         break;
 
     case DW1000_DATARATE_110KBPS :
         cfgSet = DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK;
         cfgUnset = DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK ;
-        drx_tun0 = DRX_TUNE0b[2][1];
+        drx_tun0 = DRX_TUNE0b[datarate][1];
         break;
     }
 
