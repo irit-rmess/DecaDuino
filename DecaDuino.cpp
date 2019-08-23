@@ -1406,9 +1406,8 @@ static const int CHANNEL[] = {
     2,
     3,
     4,
-    5,
     -1,
-    6
+    5
 };
 
 #define FS_CTRL_ID              0x2B            /* Frequency synthesiser control block */
