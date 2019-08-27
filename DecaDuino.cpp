@@ -2561,6 +2561,7 @@ void DecaDuino::setDecaWaveSFD(){
     case DW1000_DATARATE_110KBPS :
         cfgSet = DW1000_REGISTER_CHAN_CTRL_DWSFD_MASK;
         cfgUnset = DW1000_REGISTER_CHAN_CTRL_TNSSFD_MASK | DW1000_REGISTER_CHAN_CTRL_RNSSFD_MASK ;
+        sfdLength = 64; // should not matter, here to try something
         drx_tun0 = DRX_TUNE0b[datarate][1];
         break;
     }
