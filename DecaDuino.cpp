@@ -47,7 +47,6 @@ boolean DecaDuino::init() {
 }
 
 boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
-
 	uint8_t buf[8];
 	uint16_t ui16t;
 	uint32_t ui32t;
@@ -142,7 +141,6 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 	setNTM(0x0D);
 	encodeUint32(0X2502A907,buf);
 	writeSpiSubAddress(DW1000_REGISTER_AGC_CTRL, DW1000_REGISTER_OFFSET_AGC_TUNE2, buf, 4);
-
 	// Return true if everything OK
 	return true;
 
@@ -1289,11 +1287,60 @@ uint16_t DecaDuino::getFpAmpl3(void) {
 
 uint16_t DecaDuino::getRxPacc(void) {
 
- 	uint32_t ui32t;
+ 	uint32_t RXPACC ;
 
-	ui32t = readSpiUint32(DW1000_REGISTER_RX_FINFO);
-	ui32t = ( ui32t & DW1000_REGISTER_RX_FINFO_RXPACC_MASK) >> DW1000_REGISTER_RX_FINFO_RXPACC_SHIFT;
-	return (uint16_t)ui32t;
+	RXPACC = readSpiUint32(DW1000_REGISTER_RX_FINFO);
+	RXPACC = ( RXPACC & DW1000_REGISTER_RX_FINFO_RXPACC_MASK) >> DW1000_REGISTER_RX_FINFO_RXPACC_SHIFT;
+
+ 	uint16_t RXPACC_NOSAT;
+ 	uint8_t buf[2];
+	readSpiSubAddress(DW1000_REGISTER_DRX_CONF, DW1000_REGISTER_OFFSET_RXPACC_NOSAT, buf, 2);
+	RXPACC_NOSAT = decodeUint16(buf);
+
+	channelCTRL_t channel = getChannelControlRegister();
+
+	if (RXPACC != RXPACC_NOSAT) {
+            return RXPACC;
+	}
+    else {
+        if ( channel.DWSFD == 0 and channel.RNSSFD == 1){
+            // Custom SFD used for reception, not implemented yet. See See DW1000 user manual for help on how to implement this.
+            return -1;
+        }
+        else if ( channel.RNSSFD == 0 ) {
+            // standard IEEE 802.15.4 SFD adjustment
+            if ( getRXM110K() == 1 ) {
+                // 110 kb/s : long SFD
+                return RXPACC - 64;
+            }
+            else {
+                // other bitrates : short SFD
+                return RXPACC - 5;
+            }
+        }
+        else {
+            // proprietary decawave SFD
+            if ( getRXM110K() == 1 ) {
+                // 110 kb/s : long SFD
+                return RXPACC - 82;
+            }
+            else {
+                // other bitrates
+                uint8_t SFD_LENGTH = getSFD_LENGTH();
+                if ( SFD_LENGTH == 8 ){
+                    return RXPACC - 10;
+                }
+                else if ( SFD_LENGTH == 16 ) {
+                    return RXPACC - 18;
+                }
+                else {
+                    return -1; // Invalid SFD_LENGTH for this config
+                }
+            }
+        }
+    }
+
+
 }
 
 
