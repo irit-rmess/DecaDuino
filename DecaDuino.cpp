@@ -2182,7 +2182,7 @@ LDEInterface_t DecaDuino::getLDEInterfaceRegister(){
 }
 
 int DecaDuino::getChannelLDEInterfaceAsJSon(const LDEInterface_t &data, char *buf, int maxlen){
-    return snprintf(buf, maxlen,"{\"LDE_THRESH\": %"PRIu16",\"NTM\": %u, \"PMULT\": %"PRIu16",\"LDE_PPINDX\":%"PRIu16", \"LDE_PPAMPL\": %"PRIu16", \"LDE_RXANTD\": %"PRIu16", \"LDE_CFG2\": %"PRIu16", \"LDE_REPC\": %"PRIu16"}",
+    return snprintf(buf, maxlen,"{\"LDE_THRESH\": %" PRIu16 ",\"NTM\": %u, \"PMULT\": %" PRIu16 ",\"LDE_PPINDX\":%" PRIu16 ", \"LDE_PPAMPL\": %" PRIu16 ", \"LDE_RXANTD\": %" PRIu16 ", \"LDE_CFG2\": %" PRIu16 ", \"LDE_REPC\": %" PRIu16 "}",
                     data.LDE_THRESH,
                     data.NTM,
                     data.PMULT,
@@ -2203,16 +2203,15 @@ uint8_t DecaDuino::getRXM110K(){
 }
 
 
-uint32_t DecaDuino::getSFD_LENGTH(){
-    uint8_t buf[4];
-    readSpiSubAddress(DW1000_REGISTER_USR_SFD,DW1000_REGISTER_USR_SFD_LENGTH_OFFSET,buf,4);
-    return decodeUint32(buf);
+uint8_t DecaDuino::getSFD_LENGTH(){
+    uint8_t buf;
+    readSpiSubAddress(DW1000_REGISTER_USR_SFD,DW1000_REGISTER_USR_SFD_LENGTH_OFFSET,&buf,1);
+    return buf;
 }
 
-void DecaDuino::setSFD_LENGTH(uint32_t SFD_LENGTH){
-    uint8_t buf[4];
-    encodeUint32(SFD_LENGTH,buf);
-    writeSpiSubAddress(DW1000_REGISTER_USR_SFD,DW1000_REGISTER_USR_SFD_LENGTH_OFFSET,buf,4);
+void DecaDuino::setSFD_LENGTH(uint8_t SFD_LENGTH){
+    uint8_t buf  = SFD_LENGTH;
+    writeSpiSubAddress(DW1000_REGISTER_USR_SFD,DW1000_REGISTER_USR_SFD_LENGTH_OFFSET,&buf,1);
 }
 
 void DecaDuino::setSFDTimeout(uint16_t timeout){

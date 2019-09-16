@@ -98,6 +98,7 @@
 //#define DECADUINO_DEBUG
 
 #ifdef ARDUINO_DWM1001_DEV
+#include <SPI.h>
 #define DW1000_IRQ0_PIN 22
 #else
 #define DW1000_IRQ0_PIN 9
@@ -1137,7 +1138,7 @@ class DecaDuino {
         * @date 20190603
         * @author Quentin Vey
         */
-        uint32_t getSFD_LENGTH();
+        uint8_t getSFD_LENGTH();
 
         /**
         * @brief sets subregister 0x21:00.
@@ -1145,7 +1146,7 @@ class DecaDuino {
         * @date 20190717
         * @author Quentin Vey
         */
-        void setSFD_LENGTH(uint32_t SFD_LENGTH);
+        void setSFD_LENGTH(uint8_t SFD_LENGTH);
 
         /**
         * @brief sets subregister 0x27:20 DRX_STDTOC.
