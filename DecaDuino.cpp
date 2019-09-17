@@ -1947,12 +1947,21 @@ uint16_t DecaDuino::getAntennaDelay() {
 
 void DecaDuino::setAntennaDelay(uint16_t newAntennaDelay) {
 
-	setAntennaDelayReg(newAntennaDelay);
+    uint32_t tempVar;   // var to prevent overflow during computations
+
+    tempVar = newAntennaDelay*44; // TX antenna delay is 44% of the total delay (see DW doc on antenna delay calibration)
+    tempVar /= 100;
+	setTXAntennaDelayReg(tempVar);
+
+	tempVar = newAntennaDelay*56; // RX antenna delay is 56% of the total delay (see DW doc on antenna delay calibration)
+    tempVar /= 100;
+	setRXAntennaDelayReg(tempVar);
+
 	antennaDelay = newAntennaDelay;
 }
 
 
-uint16_t DecaDuino::getAntennaDelayReg(){
+uint16_t DecaDuino::getTXAntennaDelayReg(){
 
 	uint8_t buf[2];
 
@@ -1961,14 +1970,28 @@ uint16_t DecaDuino::getAntennaDelayReg(){
 }
 
 
-void DecaDuino::setAntennaDelayReg(uint16_t newAntennaDelay) {
+void DecaDuino::setTXAntennaDelayReg(uint16_t newAntennaDelay) {
 
 	uint8_t buf[2];
-
 	encodeUint16(newAntennaDelay, buf);
 	writeSpi(DW1000_REGISTER_TX_ANTD, buf, 2);
 }
 
+
+uint16_t DecaDuino::getRXAntennaDelayReg(){
+
+    uint8_t buf[2];
+
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE, DW1000_REGISTER_LDE_INTERFACE_LDE_RXANTD_OFFSET, buf, 2);
+    return decodeUint16(buf);
+}
+
+void DecaDuino::setRXAntennaDelayReg(uint16_t newAntennaDelay) {
+
+    uint8_t buf[2];
+    encodeUint16(newAntennaDelay, buf);
+    writeSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE, DW1000_REGISTER_LDE_INTERFACE_LDE_RXANTD_OFFSET, buf, 2);
+}
 
 
 uint8_t DecaDuino::getTemperatureRaw() {

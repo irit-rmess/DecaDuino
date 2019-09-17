@@ -114,7 +114,7 @@
 #define RANGING_ERROR 0x00
 
 #define DW1000_TIMEBASE 15.65E-12
-#define AIR_SPEED_OF_LIGHT 282622876.092008 // @brief Unofficial celerity value, prototype based, by Adrien van den Bossche <vandenbo at univ-tlse2.fr>
+#define AIR_SPEED_OF_LIGHT 299702547.235 // @brief speed of light in the air, defined by c/1.0003
 #define RANGING_UNIT AIR_SPEED_OF_LIGHT*DW1000_TIMEBASE
 
 #define DWM1000_DEFAULT_ANTENNA_DELAY_VALUE 32847 //@brief Calibration value for DWM1000 on IRIT's DecaWiNo, by Adrien van den Bossche <vandenbo at univ-tlse2.fr>
@@ -1577,16 +1577,32 @@ class DecaDuino {
 		* @author Adrien van den Bossche
 		* @date 20160915
 		*/
-		uint16_t getAntennaDelayReg();
+		uint16_t getTXAntennaDelayReg();
 
 		/**
-		* @brief Sets the antenna delay value in the DW1000 register
+		* @brief Sets the TX antenna delay value in the DW1000 register
 		* @param antennaDelay The antenna delay value
 		* @return No return
 		* @author Adrien van den Bossche
 		* @date 20160915
 		*/
-		void setAntennaDelayReg(uint16_t newAntennaDelay);
+		void setTXAntennaDelayReg(uint16_t newAntennaDelay);
+
+        /**
+        * @brief Returns the RX antenna delay value in the DW1000 register
+        * @return The antenna delay value in the register
+        * @author Quentin Vey
+        * @date 20190917
+        */
+        uint16_t getRXAntennaDelayReg();
+		/**
+        * @brief Sets the RX antenna delay value in the DW1000 register
+        * @param antennaDelay The antenna delay value
+        * @return No return
+        * @author Quentin Vey
+        * @date 20190917
+        */
+        void setRXAntennaDelayReg(uint16_t newAntennaDelay);
 
 		uint8_t debugStr[DEBUG_STR_LEN];
 		void spi_send ( uint8_t u8 );
