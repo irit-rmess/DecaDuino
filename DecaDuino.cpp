@@ -567,6 +567,8 @@ void DecaDuino::plmeRxEnableRequest(void) {
 	Serial.println((char*)debugStr);
 #endif
 
+	if (trxStatus == DW1000_TRX_STATUS_RX) return ;
+
 	// set rx enable bit in system control register
 	writeSpiUint32(DW1000_REGISTER_SYS_CTRL, DW1000_REGISTER_SYS_CTRL_RXENAB_MASK);
 
