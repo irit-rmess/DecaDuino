@@ -609,6 +609,8 @@ void DecaDuino::plmeRxDisableRequest(void) {
 	Serial.println((char*)debugStr);
 #endif
 
+	if ( trxStatus == DW1000_TRX_STATUS_IDLE) return;
+
 	// set transceiver off bit in system control register (go to idle mode)
 	writeSpiUint32(DW1000_REGISTER_SYS_CTRL, DW1000_REGISTER_SYS_CTRL_TRXOFF_MASK);
 
