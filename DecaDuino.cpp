@@ -359,8 +359,7 @@ void DecaDuino::handleInterrupt() {
 						ui32t |= 0xFFF80000; // negative value
 					ui32t = 0x01F00000/ui32t;
 */
-					// Drien 20150906: should we read rxttcki value in DW1000_REGISTER_RX_TTCKI?
-					rxttcki = 32505856;
+					rxttcki =  _rxPrf == 16 ? 0x01F00000 : 0x01FC0000; // we are not reading the value from the registers since they are only depending on the PRF.
 
 					// Turn rxtofs to a signed double value (RD032014)
 					if (buf[2] & 0x04 ) { // rxtofs is negative
@@ -1670,7 +1669,7 @@ bool DecaDuino::setPrf(uint8_t prf) {
 bool DecaDuino::setRxPrf(uint8_t prf) {
 
 	uint32_t ui32t;
-
+	_rxPrf = prf;
 	if ( ( prf == 16 ) || ( prf == 64 ) ) {
 
 		ui32t = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);

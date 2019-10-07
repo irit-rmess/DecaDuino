@@ -1703,6 +1703,7 @@ class DecaDuino {
 		double clkOffset;
 		uint8_t _slaveSelectPin;
 		uint8_t _interruptPin;
+		uint8_t _rxPrf = 16;
 		static DecaDuino* _DecaDuinoInterrupt[];
 };
 
