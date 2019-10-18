@@ -1173,14 +1173,19 @@ class DecaDuino {
         void enableCIRAccumulatorRead(bool enable);
 
         /**
-        * @brief Gets the content of register file: 0x25 (CIR memory accumulator)
+        * @brief Gets the content of register file: 0x25 (CIR memory accumulator). Will start reading
+        * at startIndex, and read at most arrayLength values into buffer. There is a small bonus in
+        * time (one less SPI read and one less array shift) if arrayLength is a least 1 element
+        * larger that the actually required length (992|1016 if readLength==-1, readLength otherwise).
         * @param buffer address of a CIRSample_t array
-        * @param maximum number of samples that *buffer can hold (must be at least 992 for a 16 MHz PRF, or 1016 for 64MHz PRF, ideally these values + 1 )
+        * @param maximum number of samples that *buffer can hold (should be at least 992 for a 16 MHz PRF, or 1016 for 64MHz PRF, ideally these values + 1 )
+        * @param startIndex index where to start reading CIR samples
+        * @param readLength Nomber of samples to read (-1 means read all samples)
         * @return number of samples written
         * @date 20190527
         * @author Quentin Vey
         */
-        int getCIRAccumulator(CIRSample_t *buffer, size_t arrayLength);
+        int getCIRAccumulator(CIRSample_t *buffer, size_t arrayLength, unsigned int startIndex = 0, int readLength = -1);
 
         /**
         * @brief Gets the content of register file: 0x25 (CIR memory accumulator) as a JSon array string.
