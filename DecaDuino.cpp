@@ -2338,10 +2338,10 @@ int DecaDuino::getCIRAccumulator(CIRSample_t *buffer, size_t arrayLength, unsign
     // extreme bulk reading : read everything in (almost) one call, use destination buffer as temporary buffer.
     int i;
     uint8_t *buff = (uint8_t*)buffer;   // in place reading
-    readSpiSubAddress(0x25, startIndex, buff, startIndex + numSamples*4  + bulkBonus);  // read everything directly into  buf
+    readSpiSubAddress(0x25, startIndex*4, buff, (startIndex + numSamples)*4  + bulkBonus);  // read everything directly into  buf
     uint8_t lastOne[2];
     if (!bulkBonus) {
-        readSpiSubAddress(0x25, startIndex + numSamples*4 - 1 , lastOne, 2);  // read last byte (due to first byte to be dropped
+        readSpiSubAddress(0x25, (startIndex + numSamples)*4 - 1 , lastOne, 2);  // read last byte (due to first byte to be dropped
     }
     // discard first byte, and handle byte order (in place)
     for (i = 0; i < numSamples - 1 + bulkBonus; i++){
