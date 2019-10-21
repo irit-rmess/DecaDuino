@@ -1191,15 +1191,17 @@ class DecaDuino {
         * @brief Gets the content of register file: 0x25 (CIR memory accumulator) as a JSon array string.
         * @param buf address of the character array where the string will be written (maximum required : 29464 bytes long)
         * @param maxlen size of the character array
+        * @param startIndex index where to start reading CIR samples
+        * @param readLength Nomber of samples to read (-1 means read all samples)
         * @return numbers of characters written (or that would have been written)
         * @date 20190527
         * @author Quentin Vey
         */
-        int getCIRAccumulatorAsJSon(char* buf, uint16_t maxlen);
+        int getCIRAccumulatorAsJSon(char* buf, uint16_t maxlen, unsigned int startIndex = 0, int readLength = -1);
 
         /**
-        * @brief Gets the content of register file: 0x25 (CIR memory accumulator) as a JSon array string.
-        * @param data adress of the data to write
+        * @brief Converts the content of register file: 0x25 (CIR memory accumulator) to a JSon array string.
+        * @param data adress of the data to convert
         * @param dataLength number of samples to print
         * @param buf address of the character array where the string will be written (maximum required : 29464 bytes long)
         * @param maxlen size of the character array
@@ -1207,7 +1209,7 @@ class DecaDuino {
         * @date 20190527
         * @author Quentin Vey
         */
-        int getCIRAccumulatorAsJSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen);
+        int CIRAccumulatorToJSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen);
 
         /**
         * @brief Gets the content of register file: 0x25 (CIR memory accumulator) as a JSon array string, but with values encoded in base64.
@@ -1217,10 +1219,10 @@ class DecaDuino {
         * @date 20190611
         * @author Quentin Vey
         */
-        int getCIRAccumulatorAsBase64JSon(char* buf, uint16_t maxlen);
+        int getCIRAccumulatorAsBase64JSon(char* buf, uint16_t maxlen, unsigned int startIndex = 0, int readLength = -1);
 
         /**
-        * @brief Gets the content of register file: 0x25 (CIR memory accumulator) as a JSon array string but with values encoded in base64.
+        * @brief Converts the content of register file: 0x25 (CIR memory accumulator) as a JSon array string but with values encoded in base64.
         * The data is an array of int16_t values written in big-endian, grouped by pairs (real part, imaginary part) :
         * byte  bit
         *       0-------------------7---------------------15-----------------------23------------------------31
@@ -1228,7 +1230,7 @@ class DecaDuino {
         *    4  | sample_2_real_low |  sample_2_real_high | sample_2_imaginary_low | sample_2_imaginary_high |
         *                                                ...
         *    4n | sample_n_real_low |  sample_n_real_high | sample_n_imaginary_low | sample_n_imaginary_high |
-        * @param data adress of the data to write
+        * @param data adress of the data to convert
         * @param dataLength number of samples to print
         * @param buf address of the character array where the string will be written (maximum required : 29464 bytes long)
         * @param maxlen size of the character array
@@ -1236,7 +1238,7 @@ class DecaDuino {
         * @date 20190611
         * @author Quentin Vey
         */
-        int getCIRAccumulatorAsBase64JSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen);
+        int CIRAccumulatorToBase64JSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen);
 
 		/**
 		* @brief Builds an uint16 value from two uint8 values

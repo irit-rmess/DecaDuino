@@ -2361,7 +2361,7 @@ int DecaDuino::getCIRAccumulator(CIRSample_t *buffer, size_t arrayLength, unsign
     return i;
 }
 
-int DecaDuino::getCIRAccumulatorAsJSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen){
+int DecaDuino::CIRAccumulatorToJSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen){
     unsigned int c=0;
     buf[c++] = '[';
     unsigned int i = 0;
@@ -2378,19 +2378,19 @@ int DecaDuino::getCIRAccumulatorAsJSon(CIRSample_t *samples, uint16_t numSamples
     return c;
 }
 
-int DecaDuino::getCIRAccumulatorAsJSon(char* buf, uint16_t maxlen){
+int DecaDuino::getCIRAccumulatorAsJSon(char* buf, uint16_t maxlen, unsigned int startIndex, int readLength){
     CIRSample_t samples[1016];
-    int numSamples = getCIRAccumulator(samples,1016);
-    return getCIRAccumulatorAsJSon(samples, numSamples, buf, maxlen);
+    int numSamples = getCIRAccumulator(samples,1016,startIndex,readLength);
+    return CIRAccumulatorToJSon(samples, numSamples, buf, maxlen);
 }
 
-int DecaDuino::getCIRAccumulatorAsBase64JSon(char* buf, uint16_t maxlen){
+int DecaDuino::getCIRAccumulatorAsBase64JSon(char* buf, uint16_t maxlen, unsigned int startIndex, int readLength){
     CIRSample_t samples[1016];
-    int numSamples = getCIRAccumulator(samples,1016);
-    return getCIRAccumulatorAsBase64JSon(samples, numSamples, buf, maxlen);
+    int numSamples = getCIRAccumulator(samples,1016,startIndex,readLength);
+    return CIRAccumulatorToBase64JSon(samples, numSamples, buf, maxlen);
 }
 
-int DecaDuino::getCIRAccumulatorAsBase64JSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen){
+int DecaDuino::CIRAccumulatorToBase64JSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen){
     unsigned int c=0; // total character count
     buf[c++] = '"';
 
