@@ -117,7 +117,11 @@
 #define AIR_SPEED_OF_LIGHT 299702547.235 // @brief speed of light in the air, defined by c/1.0003
 #define RANGING_UNIT AIR_SPEED_OF_LIGHT*DW1000_TIMEBASE
 
+#ifdef ARDUINO_DWM1001_DEV
+#define DWM1000_DEFAULT_ANTENNA_DELAY_VALUE 32900 //@brief Calibration value for DWM1001-DEV, by Quentin Vey
+#else
 #define DWM1000_DEFAULT_ANTENNA_DELAY_VALUE 32847 //@brief Calibration value for DWM1000 on IRIT's DecaWiNo, by Adrien van den Bossche <vandenbo at univ-tlse2.fr>
+#endif
 
 #define DW1000_TRX_STATUS_IDLE 0
 #define DW1000_TRX_STATUS_TX 1
