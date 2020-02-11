@@ -1656,14 +1656,22 @@ bool DecaDuino::setChannel(uint8_t channel) {
         sprintf((char*)debugStr,"Expected CHAN_CTRL=0x%08x, Actual CHAN_CTRL=0x%08x", chan_ctrl, actual_chan_ctrl);
         Serial.println((char*)debugStr);
     #endif
-        if ( actual_chan_ctrl == chan_ctrl )
+        if ( actual_chan_ctrl == chan_ctrl ){
+            if (_useCalibratedAntennaDelay){
+                setCalibratedAntennaDelay();
+            }
             return true;
+        }
     }
     return false;
 }
 
 bool DecaDuino::setPrf(uint8_t prf) {
-    return setTxPrf(prf) && setRxPrf(prf);
+    bool ret = setTxPrf(prf) && setRxPrf(prf);
+    if (_useCalibratedAntennaDelay){
+        setCalibratedAntennaDelay();
+    }
+    return ret;
 }
 
 bool DecaDuino::setRxPrf(uint8_t prf) {
@@ -1948,7 +1956,7 @@ uint16_t DecaDuino::getAntennaDelay() {
 }
 
 
-void DecaDuino::setAntennaDelay(uint16_t newAntennaDelay) {
+void DecaDuino::setAntennaDelay(uint16_t newAntennaDelay, bool useCalibrated) {
 
     uint32_t tempVar;   // var to prevent overflow during computations
 
@@ -1961,6 +1969,18 @@ void DecaDuino::setAntennaDelay(uint16_t newAntennaDelay) {
 	setRXAntennaDelayReg(tempVar);
 
 	antennaDelay = newAntennaDelay;
+	_useCalibratedAntennaDelay = useCalibrated;
+}
+
+void DecaDuino::useCalibratedAntennaDelay(){
+    _useCalibratedAntennaDelay = true;
+    setCalibratedAntennaDelay();
+}
+
+void DecaDuino::setCalibratedAntennaDelay(){
+    int channelIndex = getChannel() -1 ;
+    uint8_t prfIndex = _rxPrf >> 6;
+    setAntennaDelay(calibratedAntennaDelay[channelIndex][prfIndex], true);
 }
 
 

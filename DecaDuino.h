@@ -118,9 +118,34 @@
 #define RANGING_UNIT AIR_SPEED_OF_LIGHT*DW1000_TIMEBASE
 
 #ifdef ARDUINO_DWM1001_DEV
-#define DWM1000_DEFAULT_ANTENNA_DELAY_VALUE 32900 //@brief Calibration value for DWM1001-DEV, by Quentin Vey
+#define DWM1000_DEFAULT_ANTENNA_DELAY_VALUE 32889   //@brief Calibration value for DWM1001-DEV, by Quentin Vey.
+                                                    // This is an average of all the calibrations done for the
+                                                    // frequencies and PRF that could be done in our testbed.
+                                                    // Expect a 40cm bias if you use this value.
+static uint16_t calibratedAntennaDelay[7][2] = //@brief Calibration value for DWM1001-DEV, by Quentin Vey.
+                            // These values have been measured in our testbed, at the distances recommended by DecaWave.
+                            // The index are the following : antennaDelay[channel-1][ (PRF in MHz)>>6 ]
+{
+    {32964, 32964}, // only the value for PRF 64MHz has been calibrated, the same value is used for 16MHz due to the lack of a better value
+    {32950, 32950}, // only the value for PRF 64MHz has been calibrated, the same value is used for 16MHz due to the lack of a better value
+    {32910, 32910}, // only the value for PRF 64MHz has been calibrated, the same value is used for 16MHz due to the lack of a better value
+    {32865, 32964}, // both values have been calibrated
+    {32893, 32921}, // both values have been calibrated
+    {    0,     0}, // channel 6 not implemented by DW1000
+    {32813, 32818}, // both values have been calibrated
+};
 #else
 #define DWM1000_DEFAULT_ANTENNA_DELAY_VALUE 32847 //@brief Calibration value for DWM1000 on IRIT's DecaWiNo, by Adrien van den Bossche <vandenbo at univ-tlse2.fr>
+static uint16_t calibratedAntennaDelay[7][2] =
+{
+    {DWM1000_DEFAULT_ANTENNA_DELAY_VALUE, DWM1000_DEFAULT_ANTENNA_DELAY_VALUE},
+    {DWM1000_DEFAULT_ANTENNA_DELAY_VALUE, DWM1000_DEFAULT_ANTENNA_DELAY_VALUE},
+    {DWM1000_DEFAULT_ANTENNA_DELAY_VALUE, DWM1000_DEFAULT_ANTENNA_DELAY_VALUE},
+    {DWM1000_DEFAULT_ANTENNA_DELAY_VALUE, DWM1000_DEFAULT_ANTENNA_DELAY_VALUE},
+    {DWM1000_DEFAULT_ANTENNA_DELAY_VALUE, DWM1000_DEFAULT_ANTENNA_DELAY_VALUE},
+    {DWM1000_DEFAULT_ANTENNA_DELAY_VALUE, DWM1000_DEFAULT_ANTENNA_DELAY_VALUE},
+    {DWM1000_DEFAULT_ANTENNA_DELAY_VALUE, DWM1000_DEFAULT_ANTENNA_DELAY_VALUE},
+};
 #endif
 
 #define DW1000_TRX_STATUS_IDLE 0
@@ -1378,11 +1403,29 @@ class DecaDuino {
 		/**
 		* @brief Sets the current antenna delay value
 		* @param antennaDelay The antenna delay value
+		* @param useCalibrated Enables antenna delay updates on frequence or PRF changes
 		* @return No return
 		* @author Adrien van den Bossche
 		* @date 20160915
 		*/
-		void setAntennaDelay(uint16_t newAntennaDelay);
+		void setAntennaDelay(uint16_t newAntennaDelay, bool useCalibrated=false);
+
+		/**
+        * @brief Sets the current antenna delay value to the one defined in calibratedAntennaDelay, and makes the antenna delay follow frequency and PRF changes
+        * @return No return
+        * @author Quentin Vey
+        * @date 20200211
+        */
+		void useCalibratedAntennaDelay();
+
+		/**
+        * @brief One-time setting the current antenna delay value to the one defined in calibratedAntennaDelay for
+        * current config. If you want this to be done automatically on channel and PRF change, call useCalibratedAntennaDelay().
+        * @return No return
+        * @author Quentin Vey
+        * @date 20200211
+        */
+		void setCalibratedAntennaDelay();
 
 		/**
 		* @brief Gets the NLOS indication value associated with the latest reception. 
@@ -1622,6 +1665,7 @@ class DecaDuino {
 		void spi_receive ( uint8_t* buf, uint16_t len );
 
 		uint16_t antennaDelay;
+		bool _useCalibratedAntennaDelay = true;
 		bool _DWSFD = false;    // use decawave-recommended SFD settings
 		bool _NLOSOptims = false;   // enables NLOS optimizations recommended by decawave
 	
