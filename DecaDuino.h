@@ -122,7 +122,7 @@
                                                     // This is an average of all the calibrations done for the
                                                     // frequencies and PRF that could be done in our testbed.
                                                     // Expect a 40cm bias if you use this value.
-static uint16_t calibratedAntennaDelay[7][2] = //@brief Calibration value for DWM1001-DEV, by Quentin Vey.
+static const uint16_t calibratedAntennaDelay[7][2] = //@brief Calibration value for DWM1001-DEV, by Quentin Vey.
                             // These values have been measured in our testbed, at the distances recommended by DecaWave.
                             // The index are the following : antennaDelay[channel-1][ (PRF in MHz)>>6 ]
 {
@@ -136,7 +136,7 @@ static uint16_t calibratedAntennaDelay[7][2] = //@brief Calibration value for DW
 };
 #else
 #define DWM1000_DEFAULT_ANTENNA_DELAY_VALUE 32847 //@brief Calibration value for DWM1000 on IRIT's DecaWiNo, by Adrien van den Bossche <vandenbo at univ-tlse2.fr>
-static uint16_t calibratedAntennaDelay[7][2] =
+static const uint16_t calibratedAntennaDelay[7][2] =
 {
     {DWM1000_DEFAULT_ANTENNA_DELAY_VALUE, DWM1000_DEFAULT_ANTENNA_DELAY_VALUE},
     {DWM1000_DEFAULT_ANTENNA_DELAY_VALUE, DWM1000_DEFAULT_ANTENNA_DELAY_VALUE},
