@@ -148,6 +148,37 @@ static const uint16_t calibratedAntennaDelay[7][2] =
 };
 #endif
 
+
+static const int TX_POWER_CHANNEL[] = {
+        -1,
+        0,
+        0,
+        1,
+        2,
+        3,
+        -1,
+        4
+};
+
+
+static const uint32_t smartTxPowerConf[5][2] {      //@brief recommended values for register 0x1E when smartTxPower is used with a 0dBi antenna.
+                                                    // First index is TX_POWER_CHANNEL[channel], second index is  (PRF in MHz)>>6
+    {0x15355575, 0x07274767},   // channels 1 & 2
+    {0x0F2F4F6F, 0x2B4B6B8B},   // channel 3
+    {0x1F1F3F5F, 0x3A5A7A9A},   // channel 4
+    {0x0E082848, 0x25456585},   // channel 5
+    {0x32527292, 0x5171B1D1}    // channel 7
+};
+
+static const uint32_t recommendedTxPowerConf[5][2] {    //@brief recommended values for register 0x1E when "manual" tx power is used with a 0dBi antenna.
+                                                        // First index is TX_POWER_CHANNEL[channel], second index is  (PRF in MHz)>>6
+    {0x75757575, 0x67676767},   // channels 1 & 2
+    {0x6F6F6F6F, 0x8B8B8B8B},   // channel 3
+    {0x5F5F5F5F, 0x9A9A9A9A},   // channel 4
+    {0x48484848, 0x85858585},   // channel 5
+    {0x92929292, 0xD1D1D1D1}    // channel 7
+};
+
 #define DW1000_TRX_STATUS_IDLE 0
 #define DW1000_TRX_STATUS_TX 1
 #define DW1000_TRX_STATUS_RX 2
