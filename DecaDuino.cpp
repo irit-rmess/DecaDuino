@@ -1657,7 +1657,7 @@ bool DecaDuino::setChannel(uint8_t channel) {
         Serial.println((char*)debugStr);
     #endif
         if ( actual_chan_ctrl == chan_ctrl ){
-            if (_useCalibratedAntennaDelay){
+            if (_antennaDelayTracksChanges){
                 setCalibratedAntennaDelay();
             }
             return true;
@@ -1668,7 +1668,7 @@ bool DecaDuino::setChannel(uint8_t channel) {
 
 bool DecaDuino::setPrf(uint8_t prf) {
     bool ret = setTxPrf(prf) && setRxPrf(prf);
-    if (_useCalibratedAntennaDelay){
+    if (_antennaDelayTracksChanges){
         setCalibratedAntennaDelay();
     }
     return ret;
@@ -1956,7 +1956,7 @@ uint16_t DecaDuino::getAntennaDelay() {
 }
 
 
-void DecaDuino::setAntennaDelay(uint16_t newAntennaDelay, bool useCalibrated) {
+void DecaDuino::setAntennaDelay(uint16_t newAntennaDelay, bool trackChanges) {
 
     uint32_t tempVar;   // var to prevent overflow during computations
 
@@ -1969,11 +1969,11 @@ void DecaDuino::setAntennaDelay(uint16_t newAntennaDelay, bool useCalibrated) {
 	setRXAntennaDelayReg(tempVar);
 
 	antennaDelay = newAntennaDelay;
-	_useCalibratedAntennaDelay = useCalibrated;
+	_antennaDelayTracksChanges = trackChanges;
 }
 
 void DecaDuino::useCalibratedAntennaDelay(){
-    _useCalibratedAntennaDelay = true;
+    _antennaDelayTracksChanges = true;
     setCalibratedAntennaDelay();
 }
 

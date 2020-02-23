@@ -1434,12 +1434,12 @@ class DecaDuino {
 		/**
 		* @brief Sets the current antenna delay value
 		* @param antennaDelay The antenna delay value
-		* @param useCalibrated Enables antenna delay updates on frequence or PRF changes
+		* @param trackChanges Enables antenna delay updates on frequence or PRF changes
 		* @return No return
 		* @author Adrien van den Bossche
 		* @date 20160915
 		*/
-		void setAntennaDelay(uint16_t newAntennaDelay, bool useCalibrated=false);
+		void setAntennaDelay(uint16_t newAntennaDelay, bool trackChanges=false);
 
 		/**
         * @brief Sets the current antenna delay value to the one defined in calibratedAntennaDelay, and makes the antenna delay follow frequency and PRF changes
@@ -1696,7 +1696,7 @@ class DecaDuino {
 		void spi_receive ( uint8_t* buf, uint16_t len );
 
 		uint16_t antennaDelay;
-		bool _useCalibratedAntennaDelay = true;
+		bool _antennaDelayTracksChanges = true; // if true, then the antenna delay is changed to the calibrated value when PRF or channel is changed.
 		bool _DWSFD = false;    // use decawave-recommended SFD settings
 		bool _NLOSOptims = false;   // enables NLOS optimizations recommended by decawave
 	
