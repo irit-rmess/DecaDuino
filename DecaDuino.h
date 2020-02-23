@@ -170,7 +170,7 @@ static const uint32_t smartTxPowerConf[5][2] {      //@brief recommended values 
     {0x32527292, 0x5171B1D1}    // channel 7
 };
 
-static const uint32_t recommendedTxPowerConf[5][2] {    //@brief recommended values for register 0x1E when "manual" tx power is used with a 0dBi antenna.
+static const uint32_t recommendedManualTxPowerConf[5][2] {    //@brief recommended values for register 0x1E when "manual" tx power is used with a 0dBi antenna.
                                                         // First index is TX_POWER_CHANNEL[channel], second index is  (PRF in MHz)>>6
     {0x75757575, 0x67676767},   // channels 1 & 2
     {0x6F6F6F6F, 0x8B8B8B8B},   // channel 3
@@ -479,12 +479,22 @@ class DecaDuino {
 
         /**
         * @brief Set power mode to smart (i.e. allows power boost for short frames).
-        * TX_POWER are set to their manufacturer default values
+        * @param trackChanges : whether the tx power conf should be updated when the channel or PRF are changed.
+        * TX_POWER registers are set to their manufacturer default values
         * @return No return
         * @author Quentin Vey
-        * @date 20190628
+        * @date 20200223
         */
-        void setSmartTxPower();
+        void setSmartTxPower(bool trackChanges = true);
+
+
+        /**
+        * @brief writes the appropriate value in 0x1E TX_POWER registers, according to the current tx channel and PRF
+        * @return No return
+        * @author Quentin Vey
+        * @date 20200223
+        */
+        void writeSmartTxPowerConf();
 
         /**
         * @brief Check if TX power mode is smart.
@@ -506,12 +516,30 @@ class DecaDuino {
 
         /**
         * @brief Set power Mode to a manual value (same value for PHY header, SFD portion and data portion)
-        * @param TX_POWER : value to write directly into registers TXPOWSD or TXPOWPHR
+        * @param TX_POWER : value to write directly into register 0x1E
         * @return No return
         * @author Quentin Vey
         * @date 20190701
         */
-        void setManualTxPowerRaw(uint8_t registerValue);
+        void setManualTxPowerRaw(uint32_t registerValue);
+
+        /**
+        * @brief Set power mode to "manual" (i.e. without power boost), and sets the gain values according to what is recommended in DW1000 user manual.
+        * @param trackChanges : whether the tx power conf should be updated when the channel or PRF are changed.
+        * TX_POWER registers are set to their manufacturer default values
+        * @return No return
+        * @author Quentin Vey
+        * @date 20200223
+        */
+        void setRecommendedFixedTxPower(bool trackChanges = true);
+
+        /**
+        * @brief writes the recommended value in 0x1E TX_POWER registers, according to the current tx channel and PRF
+        * @return No return
+        * @author Quentin Vey
+        * @date 20200223
+        */
+        void writeRecommendedFixedTxPowerConf();
 
         /**
         * @brief Check if TX power mode is manual.
@@ -1697,6 +1725,7 @@ class DecaDuino {
 
 		uint16_t antennaDelay;
 		bool _antennaDelayTracksChanges = true; // if true, then the antenna delay is changed to the calibrated value when PRF or channel is changed.
+		bool _txPowerTracksChanges = true;      // if true, then the TX power config registry is changed to the recommended value when PRF or channel is changed.
 		bool _DWSFD = false;    // use decawave-recommended SFD settings
 		bool _NLOSOptims = false;   // enables NLOS optimizations recommended by decawave
 	
