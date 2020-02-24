@@ -1069,11 +1069,11 @@ void DecaDuino::setManualTxPower(COARSE_POWER_SETTING coarse, unsigned int fine)
     // compute the power value according to the specs
     uint8_t power = powerSettingsToRegisterValue(coarse, fine);
 
-    setManualTxPowerRaw(power | power << 8 | power << 16 | power << 24);
+    setManualTxPowerRaw(power);
 }
 
 
-void DecaDuino::setManualTxPowerRaw(uint32_t registerValue){
+void DecaDuino::setManualTxPowerRawFullRegister(uint32_t registerValue){
     // get SYS_CFG register
     uint32_t u32;
     u32 = readSpiUint32(DW1000_REGISTER_SYS_CFG);
@@ -1088,13 +1088,17 @@ void DecaDuino::setManualTxPowerRaw(uint32_t registerValue){
     writeSpiUint32(DW1000_REGISTER_TX_POWER,registerValue);
 }
 
+void DecaDuino::setManualTxPowerRaw(uint8_t registerValue){
+    setManualTxPowerRawFullRegister(registerValue | registerValue << 8 | registerValue << 16 | registerValue << 24);
+}
+
 void DecaDuino::setRecommendedFixedTxPower(bool trackChanges){
     writeRecommendedFixedTxPowerConf();
     _txPowerTracksChanges = trackChanges;
 }
 
 void DecaDuino::writeRecommendedFixedTxPowerConf(){
-    setManualTxPowerRaw(recommendedManualTxPowerConf[ TX_POWER_CHANNEL[getChannel()] ][ getTxPrf() >> 6 ]);
+    setManualTxPowerRawFullRegister(recommendedManualTxPowerConf[ TX_POWER_CHANNEL[getChannel()] ][ getTxPrf() >> 6 ]);
 }
 
 bool DecaDuino::isTxPowerManual(){

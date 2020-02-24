@@ -519,9 +519,18 @@ class DecaDuino {
         * @param TX_POWER : value to write directly into register 0x1E
         * @return No return
         * @author Quentin Vey
+        * @date 20200224
+        */
+        void setManualTxPowerRawFullRegister(uint32_t registerValue);
+
+        /**
+        * @brief Set power Mode to a manual value (same value for PHY header, SFD portion and data portion)
+        * @param TX_POWER : value to write directly into register 0x1E (repeated 4 times)
+        * @return No return
+        * @author Quentin Vey
         * @date 20190701
         */
-        void setManualTxPowerRaw(uint32_t registerValue);
+        void setManualTxPowerRaw(uint8_t registerValue);
 
         /**
         * @brief Set power mode to "manual" (i.e. without power boost), and sets the gain values according to what is recommended in DW1000 user manual.
