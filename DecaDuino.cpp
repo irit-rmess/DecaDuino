@@ -1054,7 +1054,9 @@ void DecaDuino::setSmartTxPower(bool trackChanges){
 }
 
 void DecaDuino::writeSmartTxPowerConf(){
-    writeSpiUint32(DW1000_REGISTER_TX_POWER, smartTxPowerConf[ TX_POWER_CHANNEL[getChannel()] ][ getTxPrf() >> 6 ]);
+    uint32_t buf;
+    encodeUint32(smartTxPowerConf[ TX_POWER_CHANNEL[getChannel()] ][ getTxPrf() >> 6 ], (uint8_t *)&buf);
+    writeSpiUint32(DW1000_REGISTER_TX_POWER, buf);
 }
 
 bool DecaDuino::isTxPowerSmart(){
@@ -1098,7 +1100,9 @@ void DecaDuino::setRecommendedFixedTxPower(bool trackChanges){
 }
 
 void DecaDuino::writeRecommendedFixedTxPowerConf(){
-    setManualTxPowerRawFullRegister(recommendedManualTxPowerConf[ TX_POWER_CHANNEL[getChannel()] ][ getTxPrf() >> 6 ]);
+    uint32_t buf;
+    encodeUint32(recommendedManualTxPowerConf[ TX_POWER_CHANNEL[getChannel()] ][ getTxPrf() >> 6 ], (uint8_t *)&buf);
+    setManualTxPowerRawFullRegister(buf);
 }
 
 bool DecaDuino::isTxPowerManual(){
