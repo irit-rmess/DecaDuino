@@ -1365,7 +1365,7 @@ double DecaDuino::getFpPower(void) {
 	uint8_t prf = getRxPrf();
 	float A;
 	
-	if (prf == 1) {
+	if (prf == 16) {
 		// prf set to 16 MHz
 		A = 113.77;
 	}
@@ -1415,7 +1415,7 @@ double DecaDuino::getRSSI(void) {
 	uint8_t prf = getRxPrf();
 	float A;
 	
-	if (prf == 1) {
+	if (prf == 16) {
 		// prf set to 16 MHz
 		A = 113.77;
 	}
