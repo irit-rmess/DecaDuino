@@ -1369,10 +1369,11 @@ double DecaDuino::getFpPower(void) {
 		// prf set to 16 MHz
 		A = 113.77;
 	}
-	else {
+	else if (prf == 64) {
 		// prf set to 64 MHz
 		A = 121.74;
 	}
+	else return 0;
 		
 	fppow = 10 * ( log10( ( (F1 * F1) + (F2 * F2) + (F3 * F3) ) / (N * N) ) ) - A;
 	
@@ -1419,10 +1420,11 @@ double DecaDuino::getRSSI(void) {
 		// prf set to 16 MHz
 		A = 113.77;
 	}
-	else {
+	else if (prf == 64) {
 		// prf set to 64 MHz
 		A = 121.74;
 	}
+	else return 0;
 	
 	rss = 10 * ( log10( (C * pow(2,17)) / (N * N) ) )  - A;
 	
