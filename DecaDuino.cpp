@@ -127,7 +127,7 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 	}
 
 	// Set default antenna delay value
-	setAntennaDelay(DWM1000_DEFAULT_ANTENNA_DELAY_VALUE);
+	useCalibratedAntennaDelay();
 
 	// --- End of DW1000 configuration ------------------------------------------------------------------------------
 
