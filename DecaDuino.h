@@ -97,7 +97,7 @@
 
 //#define DECADUINO_DEBUG
 
-#ifdef ARDUINO_DWM1001_DEV
+#ifdef UWB_MODULE_DWM1001
 #include <SPI.h>
 #define DW1000_IRQ0_PIN 22
 #else
@@ -117,7 +117,7 @@
 #define AIR_SPEED_OF_LIGHT 299702547.235 // @brief speed of light in the air, defined by c/1.0003
 #define RANGING_UNIT AIR_SPEED_OF_LIGHT*DW1000_TIMEBASE
 
-#ifdef ARDUINO_DWM1001_DEV
+#ifdef UWB_MODULE_DWM1001
 #define DWM1000_DEFAULT_ANTENNA_DELAY_VALUE 32889   //@brief Calibration value for DWM1001-DEV, by Quentin Vey.
                                                     // This is an average of all the calibrations done for the
                                                     // frequencies and PRF that could be done in our testbed.
