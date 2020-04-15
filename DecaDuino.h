@@ -129,7 +129,7 @@ static const uint16_t calibratedAntennaDelay[7][2] = //@brief Calibration value 
     {32963, 32963}, // only the value for PRF 64MHz has been calibrated, the same value is used for 16MHz due to the lack of a better value
     {32962, 32962}, // only the value for PRF 64MHz has been calibrated, the same value is used for 16MHz due to the lack of a better value
     {32913, 32913}, // only the value for PRF 64MHz has been calibrated, the same value is used for 16MHz due to the lack of a better value
-    {32869, 32871}, // both values have been calibrated
+    {32842, 32843}, // both values have been calibrated
     {32900, 32929}, // both values have been calibrated
     {    0,     0}, // channel 6 not implemented by DW1000
     {32821, 32829}, // both values have been calibrated
