@@ -126,13 +126,13 @@ static const uint16_t calibratedAntennaDelay[7][2] = //@brief Calibration value 
                             // These values have been measured in our testbed, at the distances recommended by DecaWave.
                             // The index are the following : antennaDelay[channel-1][ (PRF in MHz)>>6 ]
 {
-    {32963, 32963}, // only the value for PRF 64MHz has been calibrated, the same value is used for 16MHz due to the lack of a better value
-    {32962, 32962}, // only the value for PRF 64MHz has been calibrated, the same value is used for 16MHz due to the lack of a better value
-    {32913, 32913}, // only the value for PRF 64MHz has been calibrated, the same value is used for 16MHz due to the lack of a better value
-    {32842, 32843}, // both values have been calibrated
-    {32900, 32929}, // both values have been calibrated
+    {32959, 32967}, // only the value for PRF 64MHz has been calibrated, the same value is used for 16MHz due to the lack of a better value
+    {32962, 32973}, // only the value for PRF 64MHz has been calibrated, the same value is used for 16MHz due to the lack of a better value
+    {32934, 32929}, // only the value for PRF 64MHz has been calibrated, the same value is used for 16MHz due to the lack of a better value
+    {32843, 32852}, // both values have been calibrated
+    {32905, 32938}, // both values have been calibrated
     {    0,     0}, // channel 6 not implemented by DW1000
-    {32821, 32829}, // both values have been calibrated
+    {32823, 32833}, // both values have been calibrated
 };
 #else
 #define DWM1000_DEFAULT_ANTENNA_DELAY_VALUE 32847 //@brief Calibration value for DWM1000 on IRIT's DecaWiNo, by Adrien van den Bossche <vandenbo at univ-tlse2.fr>
