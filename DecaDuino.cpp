@@ -441,6 +441,8 @@ void DecaDuino::handleInterrupt() {
 
 #ifdef DECADUINO_DEBUG 
 	Serial.println();
+	Serial.print("End if interrupt");
+	Serial.println();
 #endif
 }
 
@@ -2484,11 +2486,36 @@ void DecaDuino::sleepRequest(void) {
 
 void DecaDuino::deepsleepRequest(void) {
 
+	uint8_t ui8t;
+
+#ifdef DECADUINO_DEBUG 
+	sprintf((char*)debugStr,"deepsleep request");
+	Serial.println((char*)debugStr);
+#endif
+
+	readSpiSubAddress(DW1000_REGISTER_AON_CFG0, DW1000_REGISTER_OFFSET_AON_CFG0, &ui8t, 1);
+	ui8t |= DW1000_REGISTER_AON_CFG0_SLEEP_EN_MASK;
+	ui8t |= DW1000_REGISTER_AON_CFG0_WAKE_SPI_MASK;
+	writeSpiSubAddress(DW1000_REGISTER_AON_CFG0, DW1000_REGISTER_OFFSET_AON_CFG0, &ui8t, 1);
+
+	readSpiSubAddress(DW1000_REGISTER_AON_CTRL, DW1000_REGISTER_OFFSET_AON_CTRL, &ui8t, 1);
+	ui8t |= DW1000_REGISTER_AON_CTRL_UPL_CFG_MASK;
+	writeSpiSubAddress(DW1000_REGISTER_AON_CTRL, DW1000_REGISTER_OFFSET_AON_CTRL, &ui8t, 1);
+	delay(1);
+
+	// The DWM1000 is now deepsleepping
+
+	trxStatus = DW1000_TRX_STATUS_DEEPSLEEP;
 }
 
 
 void DecaDuino::wakeRequest(void) {
 
+	digitalWrite(_slaveSelectPin, LOW);
+ 	delayMicroseconds(600);
+	digitalWrite(_slaveSelectPin, HIGH);
+ 	delay(7);
+	trxStatus = DW1000_TRX_STATUS_IDLE;
 }
 
 
