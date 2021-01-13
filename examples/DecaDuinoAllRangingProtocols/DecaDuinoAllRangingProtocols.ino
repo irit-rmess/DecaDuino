@@ -185,6 +185,8 @@ void setup() {
 
 void loop() {
 
+  decaduino.engine();
+
   if ( millis() > EXPERIMENTATION_DURATION*1000 ) {
     Serial.println("END");
     digitalWrite(RGB_RED_PIN, HIGH);

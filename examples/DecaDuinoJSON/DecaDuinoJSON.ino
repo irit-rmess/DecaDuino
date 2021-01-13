@@ -306,7 +306,7 @@ void sendData(char * data, int size)
 {
   decaduino.plmeRxDisableRequest(); // Always disable RX before request frame sending
   decaduino.pdDataRequest((uint8_t *)data, size);
-  while ( !decaduino.hasTxSucceeded() );
+  while ( !decaduino.hasTxSucceeded() ) decaduino.engine();
   decaduino.plmeRxEnableRequest();
 }
 
@@ -318,6 +318,9 @@ void reset_json_buffer()
 
 void loop()
 {
+
+  decaduino.engine();
+
   static uint32_t json_timeout = 0;
 
   wino.rgbDraw(0,255,0);

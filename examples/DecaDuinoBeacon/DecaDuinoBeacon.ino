@@ -103,6 +103,8 @@ void pushFloatInSerialBuffer(float f)
 
 void loop()
 {
+  decaduino.engine();
+
   char c;
 
   // Pull one char in Serial Buffer per Arduino loop
@@ -123,7 +125,7 @@ void loop()
     decaduino.encodeUint16(++myNseq, &txData[2]);
     decaduino.pdDataRequest(txData, MAX_FRAME_LEN);
 
-    while ( !decaduino.hasTxSucceeded() );
+    while ( !decaduino.hasTxSucceeded() ) decaduino.engine();
 
     decaduino.plmeRxEnableRequest(); // Always renable RX after a frame reception
     digitalWrite(LED_BUILTIN, LED_OFF);

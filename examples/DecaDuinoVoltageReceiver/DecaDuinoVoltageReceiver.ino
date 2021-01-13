@@ -49,6 +49,7 @@ void setup()
 
 void loop()
 {
+  decaduino.engine();
   // If a message has been received, print it and re-enable receiver
   if ( decaduino.rxFrameAvailable() )
   {

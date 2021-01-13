@@ -68,6 +68,7 @@ void setup()
 
 void loop()
 {
+  decaduino.engine();
   if ( millis() >= timeToSend ) 
   {
     digitalWrite(LED_RED, LED_ON);
@@ -85,7 +86,7 @@ void loop()
 #endif
 #endif
     decaduino.pdDataRequest(txData, 14);
-    while ( !decaduino.hasTxSucceeded() );
+    while ( !decaduino.hasTxSucceeded() ) { decaduino.engine(); };
 #ifdef RX_ENABLE
     decaduino.plmeRxEnableRequest();
 #endif

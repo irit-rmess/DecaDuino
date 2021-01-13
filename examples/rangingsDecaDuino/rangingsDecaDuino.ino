@@ -26,6 +26,8 @@ void setup() {
 }
 
 void loop() {
+
+  decaduino.engine();
   
   decaduino.rangingEngine();
   

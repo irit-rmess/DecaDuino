@@ -52,6 +52,8 @@ void setup()
 
 void loop()
 {
+  decaduino.engine();
+
   switch (state) {
    
     case TWR_ENGINE_STATE_INIT:

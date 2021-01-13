@@ -32,6 +32,8 @@ void setup() {
 }
 
 void loop() {
+
+  decaduino.engine();
   
   int i;
 

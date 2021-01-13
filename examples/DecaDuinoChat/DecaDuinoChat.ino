@@ -191,7 +191,7 @@ void sendData(char * data, int size)
   #ifdef ARDUINO_DWM1001_DEV
   digitalWrite(LED_BLUE, LED_ON);
   #endif
-  while ( !decaduino.hasTxSucceeded() );
+  while ( !decaduino.hasTxSucceeded() )decaduino.engine();
   #ifdef ARDUINO_DWM1001_DEV
   digitalWrite(LED_BLUE, LED_OFF);
   #endif
@@ -237,6 +237,8 @@ void setup()
 
 void loop()
 {
+  decaduino.engine();
+
   static char cmdline[MAX_FRAME_LEN];
   static int index = 0;
   // This is the sender part ****************************************************************

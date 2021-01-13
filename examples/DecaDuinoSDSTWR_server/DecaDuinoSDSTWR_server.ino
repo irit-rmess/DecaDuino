@@ -54,6 +54,8 @@ void setup()
 
 void loop()
 {
+  decaduino.engine();
+
   switch (state) {
   
     case SDSTWR_ENGINE_STATE_INIT :

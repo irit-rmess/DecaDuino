@@ -1160,6 +1160,7 @@ void setup() {
 
 void loop() { 
 
+
 /*
   if ( millis() > EXPERIMENTATION_DURATION*1000 ) {
     Serial.println("END");
@@ -1177,6 +1178,7 @@ void loop() {
   macEngine();
   checkSerialAvailable();
   neighbPosition();
+  decaduino.engine();
 
   if ( millis() > printNeighbTimeout ) {
     printNeighbTimeout = millis() + PRINT_NEIGHB_PERIOD*1000;

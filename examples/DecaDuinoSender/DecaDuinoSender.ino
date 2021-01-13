@@ -37,13 +37,15 @@ void setup()
 
 void loop()
 {
+  decaduino.engine();
+
   // make dummy data, send it and wait the end of the transmission.
   digitalWrite(LED_BUILTIN, LED_ON);
   for (int i=0; i<MAX_FRAME_LEN; i++) {
     txData[i] = i;
   }
   decaduino.pdDataRequest(txData, MAX_FRAME_LEN);
-  while ( !decaduino.hasTxSucceeded() );
+  while ( !decaduino.hasTxSucceeded() ) {decaduino.engine();};
   digitalWrite(LED_BUILTIN, LED_OFF);
   
   // wait 1 second 

@@ -109,6 +109,8 @@ void setup() {
 }
 
 void loop() {
+
+  decaduino.engine();
   
   switch (state) {
   

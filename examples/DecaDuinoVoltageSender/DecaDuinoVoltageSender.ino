@@ -48,6 +48,7 @@ void setup()
 
 void loop()
 {
+  decaduino.engine();
   digitalWrite(LED_RED, LED_ON);
   float voltage = decaduino.getVoltage();
   float temperature = decaduino.getTemperature();
@@ -57,7 +58,7 @@ void loop()
   decaduino.encodeFloat(voltage, &txData[6]);
   decaduino.encodeFloat(temperature, &txData[10]);
   decaduino.pdDataRequest(txData, 14);
-  while ( !decaduino.hasTxSucceeded() );
+  while ( !decaduino.hasTxSucceeded() ) { decaduino.engine(); } ;
   digitalWrite(LED_RED, LED_OFF);
   // wait 2 second 
   delay(2000);
