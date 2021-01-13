@@ -280,6 +280,15 @@ void DecaDuino::isr2() {
 
 
 void DecaDuino::handleInterrupt() {
+    _interrupReceived = true;
+
+}
+
+void DecaDuino::engine() {
+    // Do nothing if no interrupt were received
+    if (!_interrupReceived) {
+        return;
+    }
 
 	uint8_t buf[8];
 	uint32_t sysStatusReg, ack, ui32t;
@@ -290,10 +299,12 @@ void DecaDuino::handleInterrupt() {
 	sysStatusReg = readSpiUint32(DW1000_REGISTER_SYS_STATUS);
 
 	// If IRQS is cleared, no enabled interrupt (SYS_MASK) have assert the IRQ pin: exit
-	if ( ! ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_IRQS_MASK ) )
+	if ( ! ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_IRQS_MASK ) ){
 		return;
+	}
 
-#ifdef DECADUINO_DEBUG 
+
+#ifdef DECADUINO_DEBUG
 	// Serial.print("\n###isr### ");
 	//ui32t = readSpiUint32(DW1000_REGISTER_SYS_MASK);
 	//sprintf((char*)debugStr,"SYS_MASK	=%08x", ui32t);
@@ -307,20 +318,20 @@ void DecaDuino::handleInterrupt() {
 
 		trxStatus = DW1000_TRX_STATUS_IDLE;
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 	 	// Serial.print("RXDFR ");
 #endif
 
 		// Good frame
 		if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_RXFCG_MASK ) { // RXFCG
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 			//Serial.print("RXFCG ");
 #endif
 
 			if ( rxData == NULL ) {
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 			Serial.print("Error: no RX buffer set");
 #endif
 
@@ -329,7 +340,7 @@ void DecaDuino::handleInterrupt() {
 				// get frame length
 				ui32t = (readSpiUint32(DW1000_REGISTER_RX_FINFO) & DW1000_REGISTER_RX_FINFO_RXFLEN_MASK) - 2; // FCS is 2-bytes long. Avoid it in the len.
 				*rxDataLen = (uint16_t)ui32t;
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 				//sprintf((char*)debugStr,"length=%dbytes ", *rxDataLen);
 				// Serial.print((char*)debugStr);
 #endif
@@ -346,7 +357,7 @@ void DecaDuino::handleInterrupt() {
 				if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_LDEDONE_MASK ) {
 
 					// Get RX timestamp
-					encodeUint64(0, buf); // init buffer the 64-bit buffer 
+					encodeUint64(0, buf); // init buffer the 64-bit buffer
 					readSpi(DW1000_REGISTER_RX_TIME, buf, 5);
 					lastRxTimestamp = decodeUint64(buf);
 
@@ -381,15 +392,15 @@ void DecaDuino::handleInterrupt() {
 					rxDataAvailable = true;
 
 					// Serial.print("clock offset=");
-					// Serial.println(ui32t, HEX);			
+					// Serial.println(ui32t, HEX);
 					// Serial.println(offseti);
 
 					// Serial.print("RXTOFS=0x");
 					// Serial.println(ui32t, HEX);
 					// ui32t = 0x01F00000/ui32t;
 					// Serial.print("clock offset=0x");
-					// Serial.println(ui32t, HEX);	
-#ifdef DECADUINO_DEBUG 
+					// Serial.println(ui32t, HEX);
+#ifdef DECADUINO_DEBUG
 					Serial.print("RX Frame timestamp=");
 					printUint64(lastRxTimestamp);
 					Serial.print(", skew=");
@@ -406,7 +417,7 @@ void DecaDuino::handleInterrupt() {
 		// Bad frame (FCS error)
 		if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_RXFCE_MASK ) { // RXFCE
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 			Serial.println("RXFCG (FCS error)");
 #endif
 			// Clearing the RXFCG bit (it clears the interrupt if enabled)
@@ -419,7 +430,7 @@ void DecaDuino::handleInterrupt() {
 
 	// Manage TX completion interrupt
 	if ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_TXFRS_MASK ) { // TXFRS
-
+	    //Serial.println("TX frame interrupt");
 		trxStatus = DW1000_TRX_STATUS_IDLE;
 
 		// Read TX timestamp
@@ -428,7 +439,7 @@ void DecaDuino::handleInterrupt() {
 		lastTxTimestamp = decodeUint64(buf);
 
 		lastTxOK = true;
- 
+
 #ifdef DECADUINO_DEBUG
 		Serial.print("TX Frame OK. Tx timestamp=");
 		printUint64(lastTxTimestamp);
@@ -439,7 +450,9 @@ void DecaDuino::handleInterrupt() {
 	// Acknoledge by writing '1' in all set bits in the System Event Status Register
 	writeSpiUint32(DW1000_REGISTER_SYS_STATUS, ack);
 
-#ifdef DECADUINO_DEBUG 
+	_interrupReceived = false;
+
+#ifdef DECADUINO_DEBUG
 	Serial.println();
 #endif
 }

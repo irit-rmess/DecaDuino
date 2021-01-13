@@ -442,6 +442,16 @@ class DecaDuino {
 		*/
 		boolean init(uint32_t shortAddrAndPanId);
 
+
+        /**
+        * @brief Method that processes the interrupts on the DW1000. MUST be called regularly in order to receive
+        * data frames and TX success notification.
+        * @return No return
+        * @author Quentin Vey
+        * @date 20210113
+        */
+        void engine();
+
 		/**
 		* @brief Reset the DW1000 chip
 		* @return No return
@@ -1765,10 +1775,10 @@ class DecaDuino {
 		static void isr2();
 
 		/**
-		* @brief The global interrupt function
+		* @brief The global interrupt function. Is triggered by DW1000.
 		* @return No return
-		* @author Adrien van den Bossche
-		* @date 20141115
+		* @author Quentin Vey
+        * @date 20210113
 		*/
 		void handleInterrupt();
 
@@ -1829,6 +1839,7 @@ class DecaDuino {
 		uint8_t _interruptPin;
 		uint8_t _rxPrf = 16;
 		static DecaDuino* _DecaDuinoInterrupt[];
+		bool _interrupReceived = false;
 };
 
 #endif
