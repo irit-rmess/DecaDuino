@@ -183,6 +183,7 @@ static const uint32_t recommendedManualTxPowerConf[5][2] {    //@brief recommend
 #define DW1000_TRX_STATUS_TX 1
 #define DW1000_TRX_STATUS_RX 2
 #define DW1000_TRX_STATUS_SLEEP 3
+#define DW1000_TRX_STATUS_DEEPSLEEP 4
 
 
 // DW1000 register map
@@ -993,7 +994,6 @@ class DecaDuino {
 		* @return No return
 		* @author Adrien van den Bossche
 		* @date 20141115
-		* @todo To be implemented
 		*/
 		void deepsleepRequest(void);
 
@@ -1002,7 +1002,6 @@ class DecaDuino {
 		* @return No return
 		* @author Adrien van den Bossche
 		* @date 20141115
-		* @todo To be implemented
 		*/
 		void wakeRequest(void);
 
