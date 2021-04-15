@@ -65,7 +65,7 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 	// Wait for DW1000 POR (up to 5msec)
 	delay(5);
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 	delay(3000); // delay to see next messages on console for debug
 	Serial.println("DecaDuino Debug is active!");
 #endif
@@ -102,7 +102,7 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 	ui32t |= DW1000_REGISTER_SYS_CFG_RXAUTR_MASK; // RXAUTR: Receiver Auto-Re-enable after a RX failure
 	writeSpiUint32(DW1000_REGISTER_SYS_CFG,ui32t);
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 	sprintf((char*)debugStr,"SYS_CFG=%08lx", ui32t);
 	Serial.println((char*)debugStr);
 #endif
@@ -113,7 +113,7 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 	ui32t |= DW1000_REGISTER_SYS_MASK_MTXFRS_MASK;
 	writeSpiUint32(DW1000_REGISTER_SYS_MASK, ui32t);
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 	sprintf((char*)debugStr,"SYS_MASK=%08lx", ui32t);
 	Serial.println((char*)debugStr);
 #endif
@@ -160,7 +160,7 @@ void DecaDuino::resetDW1000() {
 	// Getting PMSC_CTRL0 register
 	ui32t = readSpiUint32(DW1000_REGISTER_PMSC_CTRL0);
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 	sprintf((char*)debugStr,"PMSC_CTRL0=%08lx", ui32t);
 	Serial.println((char*)debugStr);
 #endif
@@ -175,7 +175,7 @@ void DecaDuino::resetDW1000() {
 	writeSpiUint32(DW1000_REGISTER_PMSC_CTRL0, ui32t);
 	delay(1);
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 	sprintf((char*)debugStr,"PMSC_CTRL0=%08lx", ui32t);
 	Serial.println((char*)debugStr);
 #endif
@@ -227,7 +227,7 @@ void DecaDuino::resetDW1000() {
 		buf[3] = 0x02;
 		spi_send(buf,4);
 		digitalWrite(_slaveSelectPin, HIGH);
-		SPI.endTransaction(); 
+		SPI.endTransaction();
 	}
 
     #ifdef UWB_MODULE_DWM1001
@@ -238,7 +238,7 @@ void DecaDuino::resetDW1000() {
 	currentSPISettings = SPISettings(6000000, MSBFIRST, SPI_MODE0);
 	delay(1);
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 	ui32t = readSpiUint32(DW1000_REGISTER_PMSC_CTRL0);
 	sprintf((char*)debugStr,"PMSC_CTRL0=%08lx", ui32t);
 	Serial.println((char*)debugStr);
@@ -250,7 +250,7 @@ void DecaDuino::resetDW1000() {
 
 void DecaDuino::isr0() {
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 	//Serial.println("\n###isr0###");
 #endif
     #ifdef UWB_MODULE_DWM1001
@@ -263,7 +263,7 @@ void DecaDuino::isr0() {
 
 void DecaDuino::isr1() {
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 	//Serial.println("\n###isr1###");
 #endif
 	if (_DecaDuinoInterrupt[DW1000_IRQ1_PIN]) _DecaDuinoInterrupt[DW1000_IRQ1_PIN]->handleInterrupt();
@@ -272,7 +272,7 @@ void DecaDuino::isr1() {
 
 void DecaDuino::isr2() {
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 	//Serial.println("\n###isr2###");
 #endif
 	if (_DecaDuinoInterrupt[DW1000_IRQ2_PIN]) _DecaDuinoInterrupt[DW1000_IRQ2_PIN]->handleInterrupt();
@@ -354,7 +354,7 @@ void DecaDuino::engine() {
                     case 0xC: pLength = 4096; break;
                     default: pLength = -1;    break;
                 }
-				_lastRxDuration = computeRxDuration(pLength, *rxDataLen + 2); // adds the 2-bytes from the FCS
+				_lastRxDuration = computeRxDuration(pLength, (*rxDataLen) + 2); // adds the 2-bytes from the FCS
 #ifdef DECADUINO_DEBUG
 				//sprintf((char*)debugStr,"length=%dbytes ", *rxDataLen);
 				// Serial.print((char*)debugStr);
@@ -497,7 +497,7 @@ uint8_t DecaDuino::pdDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, ui
 	uint32_t ui32t;
 	uint8_t tempbuf[8];
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 	sprintf((char*)debugStr,"Request to send %dbyte(s): |", len);
 	Serial.print((char*)debugStr);
 	for (int i=0;i<len;i++) {
@@ -530,7 +530,7 @@ uint8_t DecaDuino::pdDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, ui
 			// send time
 			encodeUint64 ( (time - getAntennaDelay() ) & 0x000000FFFFFFFE00, tempbuf); // time is 5-bytes long, 9 lsb=0
 			writeSpi(DW1000_REGISTER_DX_TIME, tempbuf, 5);
-			
+
 			// set tx start bit and Transmitter Delayed Sendind bit
 			writeSpiUint32(DW1000_REGISTER_SYS_CTRL, DW1000_REGISTER_SYS_CTRL_TXSTRT_MASK | DW1000_REGISTER_SYS_CTRL_TXDLYS_MASK);
 
@@ -546,7 +546,7 @@ uint8_t DecaDuino::pdDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, ui
     end_atomic(prim);
     #endif
 /*
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 	ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
 	sprintf((char*)debugStr,"TX_FCTRL=%08x\n", ui32t);
 	Serial.print((char*)debugStr);
@@ -571,7 +571,7 @@ uint8_t DecaDuino::send(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t ti
 
 void DecaDuino::setRxBuffer(uint8_t* buf, uint16_t *len) {
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 	sprintf((char*)debugStr,"Setting RX buffer address to 0x%08lx", (uint32_t)buf);
 	Serial.println((char*)debugStr);
 #endif
@@ -591,7 +591,7 @@ void DecaDuino::setRxBuffer(uint8_t* buf, uint16_t *len, uint16_t max) {
 
 void DecaDuino::plmeRxEnableRequest(void) {
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 	sprintf((char*)debugStr,"RX enable request");
 	Serial.println((char*)debugStr);
 #endif
@@ -614,13 +614,13 @@ void DecaDuino::plmeRxEnableRequest(uint16_t max) {
 
 void DecaDuino::plmeRxEnableRequest(uint8_t* buf, uint16_t *len) {
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 	sprintf((char*)debugStr,"RX enable request with address buffer");
 	Serial.println((char*)debugStr);
 #endif
 
 	setRxBuffer(buf, len);
-	plmeRxEnableRequest(); 
+	plmeRxEnableRequest();
 }
 
 
@@ -633,7 +633,7 @@ void DecaDuino::plmeRxEnableRequest(uint8_t* buf, uint16_t *len, uint16_t max) {
 
 void DecaDuino::plmeRxDisableRequest(void) {
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 	sprintf((char*)debugStr,"RX disable request");
 	Serial.println((char*)debugStr);
 #endif
@@ -778,7 +778,7 @@ void DecaDuino::readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t*
 			spi_send(addr);
 			spi_send(sub_addr);
 			spi_receive(buf,len);
-			digitalWrite(_slaveSelectPin, HIGH); 
+			digitalWrite(_slaveSelectPin, HIGH);
 			SPI.endTransaction();
 		}
         #ifdef UWB_MODULE_DWM1001
@@ -788,7 +788,7 @@ void DecaDuino::readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t*
 	} else {
 
 		// This is a 3-bytes header SPI transaction
-		
+
 		uint8_t sub_addrL, sub_addrH;
 
 		sub_addrL = 0x80 | (subAddress & 0x7F); // Extension Address Indicator (0x80) + low-order 7 bits of sub address
@@ -806,7 +806,7 @@ void DecaDuino::readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t*
 			spi_send(sub_addrL);
 			spi_send(sub_addrH);
 			spi_receive(buf,len);
-			digitalWrite(_slaveSelectPin, HIGH); 
+			digitalWrite(_slaveSelectPin, HIGH);
 			SPI.endTransaction();
 		}
         #ifdef UWB_MODULE_DWM1001
@@ -951,7 +951,7 @@ uint64_t DecaDuino::decodeUint40 ( uint8_t *data )
 	tmp = data[4];
 	tmp = tmp << 32;
 	tmp = tmp | decodeUint32(data);
-	
+
 	return tmp;
 }
 
@@ -972,7 +972,7 @@ uint64_t DecaDuino::decodeUint64 ( uint8_t *data ) {
 	tmp = decodeUint32(&data[4]); // | decodeUint32(data);
 	tmp = tmp << 32;
 	tmp = tmp | decodeUint32(data);
-	
+
 	return tmp;
 }
 
@@ -1178,7 +1178,7 @@ double DecaDuino::getLastRxDuration(){
 }
 
 
-double DecaDuino::computeRxDuration(int preambleLength, int payloadSize){
+double DecaDuino::computeRxDuration(int preambleLength, unsigned int payloadSize){
     double duration = 0;
 
     double symbolDuration = 0;
@@ -1271,7 +1271,7 @@ void DecaDuino::setShortAddressAndPanId(uint16_t shortAddress, uint16_t panId) {
 
 int DecaDuino::setShortAddressAndPanId(uint32_t shortAddressPanId) {
 
-	uint32_t ret;	
+	uint32_t ret;
 
 	writeSpiUint32(0x03, shortAddressPanId);
 	ret = readSpiUint32(0x03);
@@ -1292,12 +1292,12 @@ int DecaDuino::setShortAddressAndPanId(uint32_t shortAddressPanId) {
 uint8_t DecaDuino::getChannelRaw(void) {
 
 	uint8_t buf;
- 
+
  	readSpiSubAddress(DW1000_REGISTER_CHAN_CTRL, 0, &buf, 1);
  	return buf;
 }
 
- 
+
 uint8_t DecaDuino::getChannel(void) {
 
 	return getChannelRaw() & 0x0F;
@@ -1336,15 +1336,15 @@ uint8_t DecaDuino::getTxPrf(void){
 }
 
 uint8_t DecaDuino::getFpAmpl1(void) {
-	
-	
+
+
 	uint8_t u8t;
-	
+
 	readSpiSubAddress(DW1000_REGISTER_RX_TIME, 0x07, &u8t, 1);
-	
-	
-	
-	
+
+
+
+
 	return u8t;
 }
 
@@ -1352,21 +1352,21 @@ uint8_t DecaDuino::getFpAmpl1(void) {
 
 
 uint16_t DecaDuino::getFpAmpl2(void) {
-	
+
 	uint32_t ui32t;
 	ui32t = readSpiUint32(DW1000_REGISTER_RX_RFQUAL);
 	ui32t = ( ui32t & DW1000_REGISTER_RX_RFQUAL_FPAMPL2_MASK ) >> 16;
-	
+
 	return (uint16_t) ui32t;
 }
-	
 
-	
+
+
 
 uint16_t DecaDuino::getFpAmpl3(void) {
 	uint16_t ui16t;
 	readSpiSubAddress(DW1000_REGISTER_RX_RFQUAL, 0x04,
-            (uint8_t *) &ui16t, sizeof(ui16t));	
+            (uint8_t *) &ui16t, sizeof(ui16t));
 	return ui16t;
 }
 
@@ -1430,7 +1430,7 @@ uint16_t DecaDuino::getRxPacc(void) {
 
 
 double DecaDuino::getFpPower(void) {
-	
+
 	double fppow;
 	float F1 = (float) getFpAmpl1();
 	float F2 = (float) getFpAmpl2();
@@ -1438,7 +1438,7 @@ double DecaDuino::getFpPower(void) {
 	float N = (float) getRxPacc();
 	uint8_t prf = getRxPrf();
 	float A;
-	
+
 	if (prf == 16) {
 		// prf set to 16 MHz
 		A = 113.77;
@@ -1448,13 +1448,13 @@ double DecaDuino::getFpPower(void) {
 		A = 121.74;
 	}
 	else return 0;
-		
+
 	fppow = 10 * ( log10( ( (F1 * F1) + (F2 * F2) + (F3 * F3) ) / (N * N) ) ) - A;
-	
+
 	return(fppow);
 }
-	
-	
+
+
 uint16_t DecaDuino::getCirp(void) {
 	uint16_t ui16t;
 	readSpiSubAddress(DW1000_REGISTER_RX_RFQUAL, 0x06,
@@ -1466,9 +1466,9 @@ float DecaDuino::getSNR(void) {
 	float ratio,cire,ampl2;
 	cire = (float) getCire();
 	ampl2 = (float) getFpAmpl2();
-	
+
 	ratio = ampl2 / cire;
-	
+
 	return(ratio);
 }
 
@@ -1476,20 +1476,20 @@ uint16_t DecaDuino::getCire(void) {
 	uint32_t ui32t;
 	ui32t = readSpiUint32(DW1000_REGISTER_RX_RFQUAL);
 	ui32t = ( ui32t & DW1000_REGISTER_RX_RFQUAL_CIRE_MASK );
-	
+
 	return (uint16_t) ui32t;
-	
+
 }
-	
-	
+
+
 double DecaDuino::getRSSI(void) {
-	
+
 	double rss;
 	float C = (float) getCirp();
 	float N = (float) getRxPacc();
 	uint8_t prf = getRxPrf();
 	float A;
-	
+
 	if (prf == 16) {
 		// prf set to 16 MHz
 		A = 113.77;
@@ -1499,14 +1499,14 @@ double DecaDuino::getRSSI(void) {
 		A = 121.74;
 	}
 	else return 0;
-	
+
 	rss = 10 * ( log10( (C * pow(2,17)) / (N * N) ) )  - A;
-	
+
 	return(rss);
 }
-	
-	
-	
+
+
+
 
 
 uint8_t DecaDuino::getTxPcode(void) {
@@ -1999,7 +1999,7 @@ bool DecaDuino::setPreambleLength (int plength) {
             recommended_pac_size_index = 3;
 			break;
 		default:
-			return false;			
+			return false;
 	}
 
 	ui32t = readSpiUint32(DW1000_REGISTER_TX_FCTRL);
@@ -2038,7 +2038,7 @@ bool DecaDuino::setPreambleLength (int plength) {
     }
     writeSpiSubAddress(DRX_CONF_ID, DRX_TUNE4H_OFFSET,
             (uint8_t*)&tune4h, DRX_TUNE4H_LEN);
-	return true;		
+	return true;
 }
 
 
@@ -2145,7 +2145,7 @@ uint8_t DecaDuino::getVoltageRaw() {
     #else
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     #endif
-		
+
 		u8t = 0x80; writeSpiSubAddress(0x28, 0x11, &u8t, 1); // 1. Write Sub-Register 28:11 1byte 0x80
 		u8t = 0x0A; writeSpiSubAddress(0x28, 0x12, &u8t, 1); // 2. Write Sub-Register 28:12 1byte 0x0A
 		u8t = 0x0F; writeSpiSubAddress(0x28, 0x12, &u8t, 1); // 3. Write Sub-Register 28:12 1byte 0x0F
@@ -2167,14 +2167,14 @@ float DecaDuino::getTemperature(void) {
 	uint8_t buf_32[4];
 	float temp,diff;
 	uint8_t t23,raw_temp;
-	
+
 	#ifdef UWB_MODULE_DWM1001
 	uint32_t prim = begin_atomic();
 	{
 	#else
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
 	#endif
-		
+
 		buf_16[0] = 0x09;buf_16[1] = 0x00; writeSpiSubAddress(0x2D, 0x04, buf_16, 2);
 		u8t= 0x03; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
 		u8t= 0x00; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
@@ -2188,7 +2188,7 @@ float DecaDuino::getTemperature(void) {
 	raw_temp = getTemperatureRaw();
 	t23 =   buf_32[0];
 	diff = (float) (raw_temp - t23);
-	temp =   diff * 1.14 + 23.0; 
+	temp =   diff * 1.14 + 23.0;
 	return temp;
 }
 
@@ -2197,7 +2197,7 @@ float DecaDuino::getVoltage(void) {
 
 	// Voltage (volts) = (SAR_LVBAT- (OTP_READ(Vmeas @ 3.3 V )) /173) + 3.3
 	// Todo: what is OTP_READ(Vmeas @ 3.3 V ) ?
-	
+
 	uint8_t u8t;
 	uint8_t buf_16[2];
 	uint8_t buf_32[4];
@@ -2214,18 +2214,18 @@ float DecaDuino::getVoltage(void) {
 		u8t= 0x03; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
 		u8t= 0x00; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
 		readSpiSubAddress(0x2D,0x0A,buf_32,4);
-		
+
 	}
 	#ifdef UWB_MODULE_DWM1001
 	end_atomic(prim);
 	#endif
 	raw_v = (float)getVoltageRaw();
 	v33 =  (float) buf_32[0];
-	v =  ( ( raw_v - v33 ) / 173) + 3.3; 
+	v =  ( ( raw_v - v33 ) / 173) + 3.3;
 
 	return v;
 
-	
+
 }
 
 
@@ -2536,7 +2536,7 @@ void DecaDuino::sleepRequest(void) {
 
 	uint8_t ui8t;
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 	sprintf((char*)debugStr,"sleep request");
 	Serial.println((char*)debugStr);
 #endif
@@ -2560,7 +2560,7 @@ void DecaDuino::deepsleepRequest(void) {
 
 	uint8_t ui8t;
 
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 	sprintf((char*)debugStr,"deepsleep request");
 	Serial.println((char*)debugStr);
 #endif
@@ -2600,7 +2600,7 @@ float DecaDuino::getNLOSIndication(void) {
 	uint16_t F1;	//bytes 8 and 7 of reg15
 	uint16_t F2;	//bytes 3 and 2 of reg12
 	uint16_t F3;	//bytes 5 and 4 of reg12
- 
+
 	//read register 0x12:DW1000_REGISTER_RX_RFQUAL
 	readSpi(DW1000_REGISTER_RX_RFQUAL, reg12, 8);
 	C = reg12[7]*256 + reg12[6];
@@ -2613,7 +2613,7 @@ float DecaDuino::getNLOSIndication(void) {
 
 	//compute LOS/NLOS indicator
 	indicator = 131072.0*C/(F1*F1 + F2*F2 + F3*F3);
-#ifdef DECADUINO_DEBUG 
+#ifdef DECADUINO_DEBUG
 	printf("%d\n",C);
 	printf("%d\n",F1);
 	printf("%d\n",F2);
