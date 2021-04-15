@@ -338,8 +338,23 @@ void DecaDuino::engine() {
 			} else {
 
 				// get frame length
-				ui32t = (readSpiUint32(DW1000_REGISTER_RX_FINFO) & DW1000_REGISTER_RX_FINFO_RXFLEN_MASK) - 2; // FCS is 2-bytes long. Avoid it in the len.
-				*rxDataLen = (uint16_t)ui32t;
+			    uint32_t RX_FINFO = readSpiUint32(DW1000_REGISTER_RX_FINFO);
+				*rxDataLen = (uint16_t)((RX_FINFO & DW1000_REGISTER_RX_FINFO_RXFLEN_MASK) - 2); // FCS is 2-bytes long. Avoid it in the len.
+				uint8_t RXPSR = (RX_FINFO & DW1000_REGISTER_RX_FINFO_RXPSR_MASK) >> DW1000_REGISTER_RX_FINFO_RXPSR_SHIFT;
+				uint8_t RXNSPL = (RX_FINFO & DW1000_REGISTER_RX_FINFO_RXFNSPL_MASK) >> DW1000_REGISTER_RX_FINFO_RXFNSPL_SHIFT;
+				uint16_t pLength = RXPSR | (RXNSPL << 2);
+				switch (pLength) {  // according to DWM1000 user manual
+                    case 0x4: pLength = 64; break;
+                    case 0x5: pLength = 128; break;
+                    case 0x6: pLength = 256; break;
+                    case 0x7: pLength = 512; break;
+                    case 0x8: pLength = 1024; break;
+                    case 0x9: pLength = 1536; break;
+                    case 0xA: pLength = 2048; break;
+                    case 0xC: pLength = 4096; break;
+                    default: pLength = -1;    break;
+                }
+				_lastRxDuration = computeRxDuration(pLength, *rxDataLen + 2); // adds the 2-bytes from the FCS
 #ifdef DECADUINO_DEBUG
 				//sprintf((char*)debugStr,"length=%dbytes ", *rxDataLen);
 				// Serial.print((char*)debugStr);
@@ -1155,6 +1170,50 @@ uint64_t DecaDuino::getLastRxTimestamp() {
 double DecaDuino::getLastRxSkew() {
 
 	return clkOffset;
+}
+
+
+double DecaDuino::getLastRxDuration(){
+    return _lastRxDuration;
+}
+
+
+double DecaDuino::computeRxDuration(int preambleLength, int payloadSize){
+    double duration = 0;
+
+    double symbolDuration = 0;
+    if (_rxPrf == 16) symbolDuration  = 0.00000099359;
+    else symbolDuration = 0.00000101763;
+
+    // preamble
+    duration += ((double)preambleLength) * symbolDuration;
+
+    // SFD
+    if (_DWSFD){
+        switch (_datarate) {
+            case DW1000_DATARATE_110KBPS: duration += 64.0 * symbolDuration; break;
+            case DW1000_DATARATE_850KBPS: duration += 16.0 * symbolDuration; break;
+            case DW1000_DATARATE_6_8MBPS: duration += 8.0 * symbolDuration; break;
+            default: duration += 1; break;
+        }
+    }
+    else {
+        duration += 8.0*symbolDuration;
+    }
+
+    // PHR
+    if (_datarate == DW1000_DATARATE_110KBPS) duration += 19. / 110000.;
+    else  duration += 19. / 850000.;
+
+    // payload
+    switch (_datarate) {
+        case DW1000_DATARATE_110KBPS: duration += ((double)payloadSize) * 8.0 / 110000.; break;
+        case DW1000_DATARATE_850KBPS: duration += ((double)payloadSize) * 8.0 / 850000.; break;
+        case DW1000_DATARATE_6_8MBPS: duration += ((double)payloadSize) * 8.0 / 6800000.; break;
+        default: duration += 1.;  break;
+    }
+
+    return duration;
 }
 
 
@@ -2605,6 +2664,7 @@ dw1000_datarate_t DecaDuino::getDataRate() {
 
 void DecaDuino::setDataRate(dw1000_datarate_t rate) {
     // DTUNE0
+    _datarate = rate;
     int SFDIndex = _DWSFD ? 1 : 0;
     writeSpiSubAddress(DRX_CONF_ID, DRX_TUNE0b_OFFSET,
             (uint8_t*)&DRX_TUNE0b[rate][SFDIndex], DRX_TUNE0b_LEN);

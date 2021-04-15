@@ -1470,6 +1470,26 @@ class DecaDuino {
 		double getLastRxSkew();
 
 		/**
+        * @brief Returns last received frame's approximate duration.
+        * Warning : does not take into account user-defined SFD length (work for decawave-defined SFD though)
+        * @return Last received frame's approximate duration
+        * @author Quentin Vey
+        * @date 20210415
+        */
+        double getLastRxDuration();
+
+        /**
+        * @brief Computes the duration of a frame with a payload of a given size, depending on current RX configuration.
+        * Warning : does not take into account user-defined SFD length (work for decawave-defined SFD though)
+        * @param SFD size in bytes
+        * @param Payload size in bytes (including the last 2 bytes of FCS)
+        * @return Last received frame's approximate duration
+        * @author Quentin Vey
+        * @date 20210415
+        */
+        double computeRxDuration(int preambleLength, int payloadSize);
+
+		/**
 		* @brief Returns current antenna delay value
 		* @return The current antenna delay value
 		* @author Adrien van den Bossche
@@ -1745,6 +1765,7 @@ class DecaDuino {
 		bool _antennaDelayTracksChanges = true; // if true, then the antenna delay is changed to the calibrated value when PRF or channel is changed.
 		bool _txPowerTracksChanges = true;      // if true, then the TX power config registry is changed to the recommended value when PRF or channel is changed.
 		bool _DWSFD = false;    // use decawave-recommended SFD settings
+		dw1000_datarate_t _datarate = DW1000_DATARATE_6_8MBPS;
 		bool _NLOSOptims = false;   // enables NLOS optimizations recommended by decawave
 	
 	protected:
@@ -1829,6 +1850,11 @@ class DecaDuino {
 		* @brief Timestamp of last received frame
 		*/
 		uint64_t lastRxTimestamp;
+
+		/**
+        * @brief Appro. duration of last received frame (in seconds)
+        */
+        float _lastRxDuration;
 
 		/**
 		* @brief Last clock offset (aka clock skew)
