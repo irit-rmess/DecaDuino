@@ -746,6 +746,14 @@ class DecaDuino {
 		* @date 20180614
 		*/
 
+		double getPeakPower(void);
+        /**
+        * @brief Returns peak sample "power". This is a custom metric and has no official definition.
+        * @return "power" of the maximum amplitude sample as a double (dBm)
+        * @author Quentin Vey
+        * @date 20220221
+        */
+
 		uint16_t getCirp(void);
 		/**
 		* @brief Returns Channel Impulse Response Power

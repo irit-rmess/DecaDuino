@@ -1454,6 +1454,31 @@ double DecaDuino::getFpPower(void) {
 	return(fppow);
 }
 
+double DecaDuino::getPeakPower(void){
+    double fppow;
+
+    uint8_t buf[2];
+    readSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE,DW1000_REGISTER_LDE_INTERFACE_LDE_PPAMPL_OFFSET,buf,2);
+    float PPA = (float) decodeUint16(buf);
+    float N = (float) getRxPacc();
+    uint8_t prf = getRxPrf();
+    float A;
+
+    if (prf == 16) {
+        // prf set to 16 MHz
+        A = 113.77;
+    }
+    else if (prf == 64) {
+        // prf set to 64 MHz
+        A = 121.74;
+    }
+    else return 0;
+
+    fppow = 10 * ( log10( ( PPA * PPA) / (N * N) ) ) - A;
+
+    return(fppow);
+}
+
 
 uint16_t DecaDuino::getCirp(void) {
 	uint16_t ui16t;
