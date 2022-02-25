@@ -1294,7 +1294,7 @@ class DecaDuino {
         * @param buffer address of a CIRSample_t array
         * @param maximum number of samples that *buffer can hold (should be at least 992 for a 16 MHz PRF, or 1016 for 64MHz PRF, ideally these values + 1 )
         * @param startIndex index where to start reading CIR samples
-        * @param readLength Nomber of samples to read (-1 means read all samples)
+        * @param readLength Number of samples to read (-1 means read all samples)
         * @return number of samples written
         * @date 20190527
         * @author Quentin Vey
@@ -1353,6 +1353,33 @@ class DecaDuino {
         * @author Quentin Vey
         */
         int CIRAccumulatorToBase64JSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen);
+
+        /**
+        * @brief Dumps the content of all the registries related to reception.
+        * @param to string where to write the result (recommended size : 8192)
+        * @param maxSize size of that string
+        * @param cir enable CIR dump
+        * @param cir_first_index index where to start reading the CIR
+        * @return numbers of characters written (or that would have been written, as for snprintf)
+        * @date 20220225
+        * @author Quentin Vey
+        */
+        int printAllRXInfos(char* to, int maxSize, bool cir=false, int cir_first_index=700);
+
+        typedef struct {
+            uint8_t RXM110K:1;
+            uint16_t RXPACC_NOSAT;
+            uint32_t SFD_LENGTH;
+            LDEInterface_t LDE_IF;
+            channelCTRL_t CHAN_CTRL;
+            RXFInfo_t RX_FINFO;
+            RXFQual_t RX_FQUAL;
+            RXTime_t RX_TIME;
+            CIRSample_t CIR[1017];
+            uint32_t CIR_length;
+        }registerDump_t;
+
+        void readAllRXInfos(registerDump_t *registers, bool cir=false, int cir_first_index=700);
 
 		/**
 		* @brief Builds an uint16 value from two uint8 values
