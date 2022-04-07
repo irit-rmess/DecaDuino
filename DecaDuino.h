@@ -1366,6 +1366,18 @@ class DecaDuino {
         */
         int printAllRXInfos(char* to, int maxSize, bool cir=false, int cir_first_index=700, int cir_num_samples = -1);
 
+        /**
+        * @brief Dumps only the content related to CIR.
+        * @param to string where to write the result (recommended size : 8192)
+        * @param maxSize size of that string
+        * @param cir enable CIR dump
+        * @param cir_first_index index where to start reading the CIR
+        * @return numbers of characters written (or that would have been written, as for snprintf)
+        * @date 20220407
+        * @author Quentin Vey
+        */
+        int printMinimalCIRInfos(char* to, int maxSize, int cir_first_index=700, int cir_num_samples = -1);
+
         typedef struct {
             uint8_t RXM110K:1;
             uint16_t RXPACC_NOSAT;
