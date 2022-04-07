@@ -2556,7 +2556,7 @@ int DecaDuino::CIRAccumulatorToBase64JSon(CIRSample_t *samples, uint16_t numSamp
     return c;
 }
 
-void DecaDuino::readAllRXInfos(registerDump_t *registers, bool cir, int cir_first_index){
+void DecaDuino::readAllRXInfos(registerDump_t *registers, bool cir, int cir_first_index, int cir_num_samples){
     registers->RXM110K = this->getRXM110K();
     registers->RXPACC_NOSAT = this->getRXPACC_NOSAT();
     registers->SFD_LENGTH = this->getSFD_LENGTH();
@@ -2567,18 +2567,18 @@ void DecaDuino::readAllRXInfos(registerDump_t *registers, bool cir, int cir_firs
     registers->RX_TIME = this->getRxTimeRegister();
 
     if (cir) {
-        registers->CIR_length = this->getCIRAccumulator(registers->CIR,1017, cir_first_index);
+        registers->CIR_length = this->getCIRAccumulator(registers->CIR,1017, cir_first_index, cir_num_samples);
     }
 }
 
-int DecaDuino::printAllRXInfos(char* to, int maxSize, bool cir, int cir_first_index){
+int DecaDuino::printAllRXInfos(char* to, int maxSize, bool cir, int cir_first_index, int cir_num_samples){
 
 
     registerDump_t registers;
 
     uint32_t read_duration = 0;
     read_duration = millis();
-    readAllRXInfos(&registers, cir, cir_first_index);
+    readAllRXInfos(&registers, cir, cir_first_index, cir_num_samples);
     read_duration = millis() - read_duration;
 
 

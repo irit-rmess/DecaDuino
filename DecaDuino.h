@@ -1364,7 +1364,7 @@ class DecaDuino {
         * @date 20220225
         * @author Quentin Vey
         */
-        int printAllRXInfos(char* to, int maxSize, bool cir=false, int cir_first_index=700);
+        int printAllRXInfos(char* to, int maxSize, bool cir=false, int cir_first_index=700, int cir_num_samples = -1);
 
         typedef struct {
             uint8_t RXM110K:1;
@@ -1379,7 +1379,7 @@ class DecaDuino {
             uint32_t CIR_length;
         }registerDump_t;
 
-        void readAllRXInfos(registerDump_t *registers, bool cir=false, int cir_first_index=700);
+        void readAllRXInfos(registerDump_t *registers, bool cir=false, int cir_first_index=700, int cir_num_samples = -1);
 
 		/**
 		* @brief Builds an uint16 value from two uint8 values
