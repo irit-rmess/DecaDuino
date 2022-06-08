@@ -2175,6 +2175,8 @@ uint8_t DecaDuino::getTemperatureRaw() {
         uint32_t newVal = ui32t | 0x00000200;
         writeSpiUint32(DW1000_REGISTER_PMSC_CTRL0, newVal);
 
+        delayMicroseconds(32);
+
 		u8t = 0x80; writeSpiSubAddress(0x28, 0x11, &u8t, 1); // 1. Write Sub-Register 28:11 1byte 0x80
 		u8t = 0x0A; writeSpiSubAddress(0x28, 0x12, &u8t, 1); // 2. Write Sub-Register 28:12 1byte 0x0A
 		u8t = 0x0F; writeSpiSubAddress(0x28, 0x12, &u8t, 1); // 3. Write Sub-Register 28:12 1byte 0x0F
@@ -2208,6 +2210,8 @@ uint8_t DecaDuino::getVoltageRaw() {
         uint32_t ui32t = readSpiUint32(DW1000_REGISTER_PMSC_CTRL0);
         uint32_t newVal = ui32t | 0x00000200;
         writeSpiUint32(DW1000_REGISTER_PMSC_CTRL0, newVal);
+
+        delayMicroseconds(32);
 
         u8t = 0x80; writeSpiSubAddress(0x28, 0x11, &u8t, 1); // 1. Write Sub-Register 28:11 1byte 0x80
 		u8t = 0x0A; writeSpiSubAddress(0x28, 0x12, &u8t, 1); // 2. Write Sub-Register 28:12 1byte 0x0A
