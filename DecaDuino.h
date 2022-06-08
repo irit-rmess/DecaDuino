@@ -1912,6 +1912,8 @@ class DecaDuino {
 		uint8_t _rxPrf = 16;
 		static DecaDuino* _DecaDuinoInterrupt[];
 		bool _interrupReceived = false;
+		uint8_t _OTPTempCalibration = 0;
+		uint8_t _OTPVoltageCalibration = 0;
 };
 
 #endif

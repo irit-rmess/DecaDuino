@@ -129,6 +129,33 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 	// Set default antenna delay value
 	useCalibratedAntennaDelay();
 
+
+	// Read OTP factory-set calibration parameters
+    uint8_t u8t;
+    uint8_t buf_16[2];
+    uint8_t buf_32[4];
+    #ifdef UWB_MODULE_DWM1001
+    uint32_t prim = begin_atomic();
+    {
+    #else
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    #endif
+        buf_16[0] = 0x08;buf_16[1] = 0x00; writeSpiSubAddress(0x2D, 0x04, buf_16, 2);
+        u8t= 0x03; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
+        u8t= 0x00; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
+        readSpiSubAddress(0x2D,0x0A,buf_32,4);
+        _OTPVoltageCalibration = buf_32[0];
+
+        buf_16[0] = 0x09;buf_16[1] = 0x00; writeSpiSubAddress(0x2D, 0x04, buf_16, 2);
+        u8t= 0x03; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
+        u8t= 0x00; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
+        readSpiSubAddress(0x2D,0x0A,buf_32,4);
+        _OTPTempCalibration = buf_32[0];
+    }
+    #ifdef UWB_MODULE_DWM1001
+    end_atomic(prim);
+    #endif
+
 	// --- End of DW1000 configuration ------------------------------------------------------------------------------
 
 	lastTxOK = false;
@@ -2137,13 +2164,16 @@ void DecaDuino::setRXAntennaDelayReg(uint16_t newAntennaDelay) {
 uint8_t DecaDuino::getTemperatureRaw() {
 
 	uint8_t u8t;
-
     #ifdef UWB_MODULE_DWM1001
     uint32_t prim = begin_atomic();
     {
     #else
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     #endif
+	    // Set ADCCE bit to enable on-demand voltage and temperature reading
+        uint32_t ui32t = readSpiUint32(DW1000_REGISTER_PMSC_CTRL0);
+        uint32_t newVal = ui32t | 0x00000200;
+        writeSpiUint32(DW1000_REGISTER_PMSC_CTRL0, newVal);
 
 		u8t = 0x80; writeSpiSubAddress(0x28, 0x11, &u8t, 1); // 1. Write Sub-Register 28:11 1byte 0x80
 		u8t = 0x0A; writeSpiSubAddress(0x28, 0x12, &u8t, 1); // 2. Write Sub-Register 28:12 1byte 0x0A
@@ -2151,7 +2181,11 @@ uint8_t DecaDuino::getTemperatureRaw() {
 		u8t = 0x01; writeSpiSubAddress(0x2A, 0x00, &u8t, 1); // 4. Write Register 2A:00 1byte 0x01
 		u8t = 0x00; writeSpiSubAddress(0x2A, 0x00, &u8t, 1); // 5. Write Register 2A:00 1byte 0x00
 		readSpiSubAddress(0x2A, 0x04, &u8t, 1); // 6. Read Register 2A:04 1byte 8 bit Temperature reading
+
+		// Restore ADCCE
+        writeSpiUint32(DW1000_REGISTER_PMSC_CTRL0, ui32t);
 	}
+
     #ifdef UWB_MODULE_DWM1001
     end_atomic(prim);
     #endif
@@ -2170,13 +2204,20 @@ uint8_t DecaDuino::getVoltageRaw() {
     #else
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     #endif
+	    // Set ADCCE bit to enable on-demand voltage and temperature reading
+        uint32_t ui32t = readSpiUint32(DW1000_REGISTER_PMSC_CTRL0);
+        uint32_t newVal = ui32t | 0x00000200;
+        writeSpiUint32(DW1000_REGISTER_PMSC_CTRL0, newVal);
 
-		u8t = 0x80; writeSpiSubAddress(0x28, 0x11, &u8t, 1); // 1. Write Sub-Register 28:11 1byte 0x80
+        u8t = 0x80; writeSpiSubAddress(0x28, 0x11, &u8t, 1); // 1. Write Sub-Register 28:11 1byte 0x80
 		u8t = 0x0A; writeSpiSubAddress(0x28, 0x12, &u8t, 1); // 2. Write Sub-Register 28:12 1byte 0x0A
 		u8t = 0x0F; writeSpiSubAddress(0x28, 0x12, &u8t, 1); // 3. Write Sub-Register 28:12 1byte 0x0F
 		u8t = 0x01; writeSpiSubAddress(0x2A, 0x00, &u8t, 1); // 4. Write Register 2A:00 1byte 0x01
 		u8t = 0x00; writeSpiSubAddress(0x2A, 0x00, &u8t, 1); // 5. Write Register 2A:00 1byte 0x00
 		readSpiSubAddress(0x2A, 0x03, &u8t, 1); // 6. Read Register 2A:03 1byte 8 bit Voltage reading
+
+		// Restore ADCCE
+        writeSpiUint32(DW1000_REGISTER_PMSC_CTRL0, ui32t);
 	}
     #ifdef UWB_MODULE_DWM1001
     end_atomic(prim);
@@ -2188,30 +2229,13 @@ uint8_t DecaDuino::getVoltageRaw() {
 
 float DecaDuino::getTemperature(void) {
 	uint8_t u8t;
-	uint8_t buf_16[2];
-	uint8_t buf_32[4];
 	float temp,diff;
 	uint8_t t23,raw_temp;
 
-	#ifdef UWB_MODULE_DWM1001
-	uint32_t prim = begin_atomic();
-	{
-	#else
-	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-	#endif
 
-		buf_16[0] = 0x09;buf_16[1] = 0x00; writeSpiSubAddress(0x2D, 0x04, buf_16, 2);
-		u8t= 0x03; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
-		u8t= 0x00; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
-		readSpiSubAddress(0x2D,0x0A,buf_32,4);
-	}
-
-    #ifdef UWB_MODULE_DWM1001
-    end_atomic(prim);
-    #endif
 
 	raw_temp = getTemperatureRaw();
-	t23 =   buf_32[0];
+	t23 =   (float) _OTPTempCalibration;
 	diff = (float) (raw_temp - t23);
 	temp =   diff * 1.14 + 23.0;
 	return temp;
@@ -2223,29 +2247,11 @@ float DecaDuino::getVoltage(void) {
 	// Voltage (volts) = (SAR_LVBAT- (OTP_READ(Vmeas @ 3.3 V )) /173) + 3.3
 	// Todo: what is OTP_READ(Vmeas @ 3.3 V ) ?
 
-	uint8_t u8t;
-	uint8_t buf_16[2];
-	uint8_t buf_32[4];
 	float raw_v;
 	float v33,v;
 
-	#ifdef UWB_MODULE_DWM1001
-    uint32_t prim = begin_atomic();
-    {
-    #else
-	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-    #endif
-		buf_16[0] = 0x08;buf_16[1] = 0x00; writeSpiSubAddress(0x2D, 0x04, buf_16, 2);
-		u8t= 0x03; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
-		u8t= 0x00; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
-		readSpiSubAddress(0x2D,0x0A,buf_32,4);
-
-	}
-	#ifdef UWB_MODULE_DWM1001
-	end_atomic(prim);
-	#endif
 	raw_v = (float)getVoltageRaw();
-	v33 =  (float) buf_32[0];
+	v33 =  (float) _OTPVoltageCalibration;
 	v =  ( ( raw_v - v33 ) / 173) + 3.3;
 
 	return v;
