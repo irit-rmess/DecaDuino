@@ -1545,6 +1545,30 @@ class DecaDuino {
 		uint16_t getAntennaDelay();
 
 		/**
+        * @brief Returns first OTP antenna delay value
+        * @return The first OTP antenna delay value
+        * @author Quentin Vey
+        * @date 20230420
+        */
+        uint16_t getOTPAntennaDelay1();
+
+        /**
+        * @brief Returns second OTP antenna delay value
+        * @return The second OTP antenna delay value
+        * @author Quentin Vey
+        * @date 20230420
+        */
+        uint16_t getOTPAntennaDelay2();
+
+        /**
+        * @brief Returns OTP XTAL_trim
+        * @return The OTP XTAL_trimvalue
+        * @author Quentin Vey
+        * @date 20230420
+        */
+        uint8_t getOTPXTalTrim();
+
+		/**
 		* @brief Sets the current antenna delay value
 		* @param antennaDelay The antenna delay value
 		* @param trackChanges Enables antenna delay updates on frequence or PRF changes
@@ -1673,6 +1697,14 @@ class DecaDuino {
         */
         bool getNLOSTunings();
 
+        /**
+        * @brief Reads a 4-byte word on OTP at given address
+        * @param address The OTP address
+        * @param dest Destination buffer (must be at least 4 bytes)
+        * @author Quentin Vey
+        * @date 20230420
+        */
+        void readOTP(uint16_t address, uint8_t dest[4]);
 
 	private:
 
@@ -1735,15 +1767,6 @@ class DecaDuino {
 		* @date 20141115
 		*/
 		uint32_t readSpiUint32(uint8_t address);
-
-		/**
-        * @brief Reads a 4-byte word on OTP at given address
-        * @param address The OTP address
-        * @param dest Destination buffer (must be at least 4 bytes)
-        * @author Quentin Vey
-        * @date 20230420
-        */
-        void readOTP(uint16_t address, uint8_t dest[4]);
 
 		/**
 		* @brief Writes len bytes on SPI at given address from buf

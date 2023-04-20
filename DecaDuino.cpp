@@ -2104,6 +2104,23 @@ uint16_t DecaDuino::getAntennaDelay() {
 	return antennaDelay;
 }
 
+uint16_t DecaDuino::getOTPAntennaDelay1() {
+    uint8_t buf[4] = {0};
+    readOTP(0x1C,buf);
+    return buf[0] | buf[1] << 8;
+}
+
+uint16_t DecaDuino::getOTPAntennaDelay2() {
+    uint8_t buf[4] = {0};
+    readOTP(0x1C,buf);
+    return buf[2] | buf[3] << 8;
+}
+
+uint8_t DecaDuino::getOTPXTalTrim() {
+    uint8_t buf[4] = {0};
+    readOTP(0x1E,buf);
+    return buf[0] & 0x1F;
+}
 
 void DecaDuino::setAntennaDelay(uint16_t newAntennaDelay, bool trackChanges) {
 
