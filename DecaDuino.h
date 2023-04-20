@@ -1737,6 +1737,15 @@ class DecaDuino {
 		uint32_t readSpiUint32(uint8_t address);
 
 		/**
+        * @brief Reads a 4-byte word on OTP at given address
+        * @param address The OTP address
+        * @param dest Destination buffer (must be at least 4 bytes)
+        * @author Quentin Vey
+        * @date 20230420
+        */
+        void readOTP(uint16_t address, uint8_t dest[4]);
+
+		/**
 		* @brief Writes len bytes on SPI at given address from buf
 		* @param address The destination address
 		* @param buf The address of the buffer

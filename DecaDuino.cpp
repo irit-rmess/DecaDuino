@@ -134,27 +134,11 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
     uint8_t u8t;
     uint8_t buf_16[2];
     uint8_t buf_32[4];
-    #ifdef UWB_MODULE_DWM1001
-    uint32_t prim = begin_atomic();
-    {
-    #else
-    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-    #endif
-        buf_16[0] = 0x08;buf_16[1] = 0x00; writeSpiSubAddress(0x2D, 0x04, buf_16, 2);
-        u8t= 0x03; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
-        u8t= 0x00; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
-        readSpiSubAddress(0x2D,0x0A,buf_32,4);
-        _OTPVoltageCalibration = buf_32[0];
 
-        buf_16[0] = 0x09;buf_16[1] = 0x00; writeSpiSubAddress(0x2D, 0x04, buf_16, 2);
-        u8t= 0x03; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
-        u8t= 0x00; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
-        readSpiSubAddress(0x2D,0x0A,buf_32,4);
-        _OTPTempCalibration = buf_32[0];
-    }
-    #ifdef UWB_MODULE_DWM1001
-    end_atomic(prim);
-    #endif
+    readOTP(0x0008,buf_32);
+    _OTPVoltageCalibration = buf_32[0];
+    readOTP(0x0009,buf_32);
+    _OTPTempCalibration = buf_32[0];
 
 	// --- End of DW1000 configuration ------------------------------------------------------------------------------
 
@@ -851,6 +835,27 @@ uint32_t DecaDuino::readSpiUint32(uint8_t address) {
 	return decodeUint32(buf);
 }
 
+void DecaDuino::readOTP(uint16_t address, uint8_t dest[4]) {
+
+    uint8_t buf[4] = {0};
+    uint8_t u8t;
+
+#ifdef UWB_MODULE_DWM1001
+    uint32_t prim = begin_atomic();
+    {
+#else
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+#endif
+        writeSpiSubAddress(0x2D, 0x04, (uint8_t*)&address, 2);
+        u8t= 0x03; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
+        u8t= 0x00; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
+        readSpiSubAddress(0x2D,0x0A,dest,4);
+    }
+#ifdef UWB_MODULE_DWM1001
+    end_atomic(prim);
+#endif
+
+}
 
 void DecaDuino::writeSpi(uint8_t address, uint8_t* buf, uint16_t len) {
 
