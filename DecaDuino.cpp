@@ -296,6 +296,9 @@ void DecaDuino::handleInterrupt() {
 }
 
 void DecaDuino::engine() {
+    // XXX : Note for future me : It may be intereting to read DW1000_REGISTER_SYS_STATUS anyay and check the
+    // IRQS bit to detect if an interrupt event from the DW1000 was missed.
+
     // Do nothing if no interrupt were received
     if (!_interrupReceived) {
         return;
@@ -306,8 +309,19 @@ void DecaDuino::engine() {
 	double rxtofs, rxttcki;
 	ack = 0;
 
-	// Read System Event Status Register
-	sysStatusReg = readSpiUint32(DW1000_REGISTER_SYS_STATUS);
+#ifdef UWB_MODULE_DWM1001
+uint32_t prim = begin_atomic();
+{
+#else
+ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+#endif
+        // Read System Event Status Register
+        sysStatusReg = readSpiUint32(DW1000_REGISTER_SYS_STATUS);
+        _interrupReceived = false;
+}
+#ifdef UWB_MODULE_DWM1001
+end_atomic(prim);
+#endif
 
 	// If IRQS is cleared, no enabled interrupt (SYS_MASK) have assert the IRQ pin: exit
 	if ( ! ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_IRQS_MASK ) ){
@@ -473,10 +487,16 @@ void DecaDuino::engine() {
 		ack |= DW1000_REGISTER_SYS_STATUS_TXFRS_MASK;
 	}
 
-	// Acknoledge by writing '1' in all set bits in the System Event Status Register
+	// Acknowledge by writing '1' in all set bits in the System Event Status Register
 	writeSpiUint32(DW1000_REGISTER_SYS_STATUS, ack);
+	// read back status bit to check whether we have missed something while processing the previous interrupt
+    sysStatusReg = readSpiUint32(DW1000_REGISTER_SYS_STATUS);
+    // If IRQS is 1 after having already read the buffer, then an interrupt has happend while we were processing the previous one.
+    // So we set _interrupReceived to true tu let decaduino know that something is to be handled.
+    if (  sysStatusReg & DW1000_REGISTER_SYS_STATUS_IRQS_MASK  ){
+        _interrupReceived = true;
+    }
 
-	_interrupReceived = false;
 
 #ifdef DECADUINO_DEBUG
 	Serial.println();
