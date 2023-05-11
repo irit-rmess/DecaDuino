@@ -304,6 +304,8 @@ static const uint32_t recommendedManualTxPowerConf[5][2] {    //@brief recommend
 #define DW1000_REGISTER_TX_CAL                  0x2A
 #define DW1000_REGISTER_OFFSET_TC_PGDELAY       0x0B
 
+#define DW1000_REGISTER_FS_CTRL                 0x2B
+#define DW1000_REGISTER_OFFSET_FS_XTALT         0x0E
 
 #define DW1000_REGISTER_AON_CTRL			0x2C
 #define DW1000_REGISTER_OFFSET_AON_CTRL			0x02
@@ -1567,6 +1569,32 @@ class DecaDuino {
         * @date 20230420
         */
         uint8_t getOTPXTalTrim();
+
+        /**
+        * @brief Returns current XTAL_trim in register FS_XTALT
+        * @return The current XTAL_trim value
+        * @author Quentin Vey
+        * @date 20230511
+        */
+        uint8_t getXTalTrim();
+
+        /**
+        * @brief set XTAL_trim in register FS_XTALT
+        * @param value to write
+        * @return No return
+        * @author Quentin Vey
+        * @date 20230511
+        */
+        void setXTalTrim(uint8_t val);
+
+        /**
+        * @brief set XTAL_trim in register FS_XTALT from value in OTP
+        * @param value to write
+        * @return No return
+        * @author Quentin Vey
+        * @date 20230511
+        */
+        void setXTalTrimFromOTP();
 
 		/**
 		* @brief Sets the current antenna delay value

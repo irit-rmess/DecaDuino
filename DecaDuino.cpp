@@ -2142,6 +2142,22 @@ uint8_t DecaDuino::getOTPXTalTrim() {
     return buf[0] & 0x1F;
 }
 
+uint8_t DecaDuino::getXTalTrim() {
+    uint8_t buf;
+    readSpiSubAddress(DW1000_REGISTER_FS_CTRL, DW1000_REGISTER_OFFSET_FS_XTALT, &buf, 1);
+    return buf & 0x1F;
+}
+
+
+void DecaDuino::setXTalTrim(uint8_t val){
+    uint8_t buf = (val & 0x1F) | 0x60;
+    writeSpiSubAddress(DW1000_REGISTER_FS_CTRL, DW1000_REGISTER_OFFSET_FS_XTALT, &buf, 1);
+}
+
+void DecaDuino::setXTalTrimFromOTP(){
+    setXTalTrim(getOTPXTalTrim());
+}
+
 void DecaDuino::setAntennaDelay(uint16_t newAntennaDelay, bool trackChanges) {
 
     uint32_t tempVar;   // var to prevent overflow during computations
