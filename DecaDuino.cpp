@@ -152,6 +152,10 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 	setNTM(0x0D);
 	encodeUint32(0X2502A907,buf);
 	writeSpiSubAddress(DW1000_REGISTER_AGC_CTRL, DW1000_REGISTER_OFFSET_AGC_TUNE2, buf, 4);
+
+	// set the XTALT with the value from OTP
+	setXTalTrimFromOTP();
+
 	// Return true if everything OK
 	return true;
 
