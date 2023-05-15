@@ -370,6 +370,7 @@ end_atomic(prim);
 			    uint32_t RX_FINFO = readSpiUint32(DW1000_REGISTER_RX_FINFO);
 				*rxDataLen = (uint16_t)((RX_FINFO & DW1000_REGISTER_RX_FINFO_RXFLEN_MASK) - 2); // FCS is 2-bytes long. Avoid it in the len.
 				uint8_t RXPSR = (RX_FINFO & DW1000_REGISTER_RX_FINFO_RXPSR_MASK) >> DW1000_REGISTER_RX_FINFO_RXPSR_SHIFT;
+				uint8_t RXBR = (RX_FINFO & DW1000_REGISTER_RX_FINFO_RXBR_MASK) >> DW1000_REGISTER_RX_FINFO_RXBR_SHIFT;
 				uint8_t RXNSPL = (RX_FINFO & DW1000_REGISTER_RX_FINFO_RXFNSPL_MASK) >> DW1000_REGISTER_RX_FINFO_RXFNSPL_SHIFT;
 				uint16_t pLength = RXPSR | (RXNSPL << 2);
 				switch (pLength) {  // according to DWM1000 user manual
@@ -450,6 +451,21 @@ end_atomic(prim);
 					Serial.print(", skew=");
 					Serial.println(clkOffset);
 #endif
+
+					// compute transmitter-receiver frequency offset (not clock offset !)
+					// QV 20230511
+					uint8_t buf[4] = {0};
+					readSpiSubAddress(DW1000_REGISTER_DRX_CONF, DW1000_REGISTER_OFFSET_DRX_CAR_INT,buf,3);
+                    uint32_t Cint = decodeUint32(buf); //DRX_CAR_INT
+                    int sgn = 1;
+                    if (Cint&0x100000) {
+                        Cint = (~Cint)+1;
+                        sgn = -1;
+                    }
+                    double Cintd = (double)(Cint&0xfffff) / (2<<17)  ;
+                    Cintd *= sgn;
+                    double Nsamples = RXBR == 0x00  ? 8192 : 1012;
+                    freqOffset = Cintd*998400000. / (2 * Nsamples);
 
 				}
 			}
@@ -1228,7 +1244,14 @@ double DecaDuino::getLastRxSkew() {
 	return clkOffset;
 }
 
+double DecaDuino::getLastFreqOffset() {
 
+    return freqOffset;
+}
+double DecaDuino::getLastFreqOffsetPPM() {
+
+    return -getLastFreqOffset()/(channelToFreq[CHANNEL_INDEX_FREQ[getChannel()]]);   // units work out right if channelToFreq is in MHz
+}
 double DecaDuino::getLastRxDuration(){
     return _lastRxDuration;
 }

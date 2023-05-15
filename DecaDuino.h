@@ -179,6 +179,26 @@ static const uint32_t recommendedManualTxPowerConf[5][2] {    //@brief recommend
     {0x92929292, 0xD1D1D1D1}    // channel 7
 };
 
+
+static const int CHANNEL_INDEX_FREQ[] = {
+        -1,
+        0, // 1
+        1, // 2
+        2, // 3
+        1, // 4
+        3, // 5
+        -1,// 6
+        3  // 7
+};
+static const float channelToFreq[4] {                   //@brief Channel central frequencies in MHz.
+                                                        // index is CHANNEL_INDEX_FREQ[channel]
+    3494.4,   // channel 1
+    3993.6,   // channel 2 & 4
+    4492.8,   // channel 3
+    6489.6,   // channel 5 & 7
+
+};
+
 #define DW1000_TRX_STATUS_IDLE 0
 #define DW1000_TRX_STATUS_TX 1
 #define DW1000_TRX_STATUS_RX 2
@@ -296,6 +316,7 @@ static const uint32_t recommendedManualTxPowerConf[5][2] {    //@brief recommend
 #define DW1000_REGISTER_OFFSET_DRX_TUNE2            0x08
 #define DW1000_REGISTER_OFFSET_DRX_SFDTOC           0x20
 #define DW1000_REGISTER_OFFSET_RXPACC_NOSAT         0x2C
+#define DW1000_REGISTER_OFFSET_DRX_CAR_INT          0x28
 
 #define DW1000_REGISTER_AGC_CTRL                            0x23
 #define DW1000_REGISTER_OFFSET_AGC_TUNE1                    0x04
@@ -1519,6 +1540,22 @@ class DecaDuino {
 		double getLastRxSkew();
 
 		/**
+        * @brief Returns last received frame's frequency offset
+        * @return Last received frame's frequency offset (in Hz)
+        * @author Quentin Vey
+        * @date 20230515
+        */
+        double getLastFreqOffset();
+
+        /**
+        * @brief Returns last received frame's frequency offset in PPM
+        * @return Last received frame's frequency offset (in PPM)
+        * @author Quentin Vey
+        * @date 20230515
+        */
+        double getLastFreqOffsetPPM();
+
+		/**
         * @brief Returns last received frame's approximate duration.
         * Warning : does not take into account user-defined SFD length (work for decawave-defined SFD though)
         * @return Last received frame's approximate duration
@@ -1967,6 +2004,10 @@ class DecaDuino {
 		* @brief Last clock offset (aka clock skew)
 		*/
 		double clkOffset;
+		/**
+        * @brief Last frequency offset
+        */
+		double freqOffset;
 		uint8_t _slaveSelectPin;
 		uint8_t _interruptPin;
 		uint8_t _rxPrf = 16;
