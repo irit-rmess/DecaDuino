@@ -2320,13 +2320,16 @@ float DecaDuino::getTemperature(void) {
 	uint8_t u8t;
 	float temp,diff;
 	uint8_t t23,raw_temp;
+	int attempts = 0;
 
+	do {
+        raw_temp = getTemperatureRaw();
+        t23 =   (float) _OTPTempCalibration;
+        diff = (float) (raw_temp - t23);
+        temp =   diff * 1.14 + 23.0;
+        attempts++;
+	} while ((temp < -40. || temp > 85) && attempts < 20); // repeat reading while the temperature is absurdly extreme (outside absolute maximum ratings)
 
-
-	raw_temp = getTemperatureRaw();
-	t23 =   (float) _OTPTempCalibration;
-	diff = (float) (raw_temp - t23);
-	temp =   diff * 1.14 + 23.0;
 	return temp;
 }
 
