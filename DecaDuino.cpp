@@ -2341,10 +2341,14 @@ float DecaDuino::getVoltage(void) {
 
 	float raw_v;
 	float v33,v;
+    int attempts = 0;
 
-	raw_v = (float)getVoltageRaw();
-	v33 =  (float) _OTPVoltageCalibration;
-	v =  ( ( raw_v - v33 ) / 173) + 3.3;
+    do {
+        raw_v = (float)getVoltageRaw();
+        v33 =  (float) _OTPVoltageCalibration;
+        v =  ( ( raw_v - v33 ) / 173) + 3.3;
+        attempts ++;
+    } while ((v < 2.8 || v > 3.9) && attempts < 20); // repeat reading while voltage is absurdly extreme (outside nominal operating conditions)
 
 	return v;
 
