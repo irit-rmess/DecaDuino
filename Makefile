@@ -30,24 +30,22 @@ $(info LIBRAIRIES is [${LIBRARIES}])
 $(info SRC        is [${SRC}])
 $(info HDRS       is [${HDRS}])
 
-all: $(ELF) upload
+all: 
 .PHONY: all
 
 clean:
 	@echo "---> Cleaning the examples directory"
-	@for f in $(shell ls ${MYDIR}); do echo $${f}; done
-	
+	@for f in $(shell ls examples/); do echo examples/$${f}/ ; rm -rf examples/$${f}/build examples/$${f}/*.elf ; done
+
 .SECONDEXPANSION:	# required for secondary expansions of $$*
 % : examples/$$*/$$*.elf
-	@echo Making $@
 	
 	
-.PRECIOUS:
+.SECONDARY:
 %.elf : $$*.ino $(SRC) $(HDRS)
 	$(eval OUT_PATH := $(shell dirname $@))
 	$(eval BASENAME := $(shell basename $@))
-	@echo $(OUT_PATH)
-	arduino-cli compile -b $(FQBN) $(CLI_ARGS) $(LIBARGS) -e -v $*.ino
+	arduino-cli compile -b $(FQBN) $(CLI_ARGS) $(LIBARGS) -e $*.ino
 	mv $(OUT_PATH)/build/$(subst :,.,$(FQBN))/*.elf $@
 	
 
