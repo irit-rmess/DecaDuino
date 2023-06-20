@@ -364,7 +364,8 @@ static const float channelToFreq[4] {                   //@brief Channel central
 typedef enum {
     DW1000_DATARATE_110KBPS = 0,    // MUST be 0
     DW1000_DATARATE_850KBPS,
-    DW1000_DATARATE_6_8MBPS
+    DW1000_DATARATE_6_8MBPS,
+    DW1000_DATARATE_UNKNOWN
 } dw1000_datarate_t;
 
 typedef struct {
@@ -1094,7 +1095,6 @@ class DecaDuino {
 		* @return The temperature value in celsius degrees
 		* @author Adrien van den Bossche
 		* @date 20141115
-		* @todo To be implemented
 		*/
 		float getTemperature(void);
 
@@ -1111,7 +1111,6 @@ class DecaDuino {
 		* @return The voltage value in volts
 		* @author Adrien van den Bossche
 		* @date 20141115
-		* @todo To be implemented
 		*/
 		float getVoltage(void);
 
@@ -1905,7 +1904,7 @@ class DecaDuino {
 		void spi_send ( uint8_t* buf, uint16_t len );
 		void spi_receive ( uint8_t* buf, uint16_t len );
 
-		uint16_t antennaDelay;
+		uint16_t antennaDelay=DWM1000_DEFAULT_ANTENNA_DELAY_VALUE;
 		bool _antennaDelayTracksChanges = true; // if true, then the antenna delay is changed to the calibrated value when PRF or channel is changed.
 		bool _txPowerTracksChanges = true;      // if true, then the TX power config registry is changed to the recommended value when PRF or channel is changed.
 		bool _DWSFD = false;    // use decawave-recommended SFD settings
@@ -1954,60 +1953,60 @@ class DecaDuino {
 		/**
 		* @brief Current EUID (Extended Unique IDentifier)
 		*/
-		uint64_t euid;
+		uint64_t euid = 0;
 
 		/**
 		* @brief The current (or last) PPDU
 		*/
-		uint8_t *rxData;
+		uint8_t *rxData = nullptr;
 
 		/**
 		* @brief The current PPDU length
 		*/
-		uint16_t *rxDataLen;
+		uint16_t *rxDataLen = nullptr;
 		/**
 		* @brief The max PPDU length
 		*/
-		uint16_t rxDataLenMax;
+		uint16_t rxDataLenMax = 0;
 
 		/**
 		* @brief Flag indicating if last reception has data
 		*/
-		uint8_t rxDataAvailable;
+		bool rxDataAvailable = false;
 
 		/**
 		* @brief Transceiver status
 		*/
-		uint8_t trxStatus;
+		uint8_t trxStatus = DW1000_TRX_STATUS_IDLE;
 
 		/**
 		* @brief Flag indicating if last transmission is done
 		*/
-		bool lastTxOK;
+		bool lastTxOK = false;
 
 		/**
 		* @brief Timestamp of last transmitted frame
 		*/
-		uint64_t lastTxTimestamp;
+		uint64_t lastTxTimestamp = 0;
 
 		/**
 		* @brief Timestamp of last received frame
 		*/
-		uint64_t lastRxTimestamp;
+		uint64_t lastRxTimestamp = 0;
 
 		/**
         * @brief Appro. duration of last received frame (in seconds)
         */
-        float _lastRxDuration;
+        float _lastRxDuration = 0;
 
 		/**
 		* @brief Last clock offset (aka clock skew)
 		*/
-		double clkOffset;
+		double clkOffset = 0;
 		/**
         * @brief Last frequency offset
         */
-		double freqOffset;
+		double freqOffset = 0;
 		uint8_t _slaveSelectPin;
 		uint8_t _interruptPin;
 		uint8_t _rxPrf = 16;

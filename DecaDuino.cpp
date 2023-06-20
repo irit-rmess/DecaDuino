@@ -34,7 +34,6 @@ static inline void end_atomic(uint32_t prim)
 DecaDuino* DecaDuino::_DecaDuinoInterrupt[MAX_NB_DW1000_FOR_INTERRUPTS] = {0, 0, 0};
 
 DecaDuino::DecaDuino(uint8_t slaveSelectPin, uint8_t interruptPin) {
-
 	_slaveSelectPin = slaveSelectPin;
 	_interruptPin = interruptPin;
 }
@@ -2336,9 +2335,6 @@ float DecaDuino::getTemperature(void) {
 
 float DecaDuino::getVoltage(void) {
 
-	// Voltage (volts) = (SAR_LVBAT- (OTP_READ(Vmeas @ 3.3 V )) /173) + 3.3
-	// Todo: what is OTP_READ(Vmeas @ 3.3 V ) ?
-
 	float raw_v;
 	float v33,v;
     int attempts = 0;
@@ -2882,6 +2878,7 @@ dw1000_datarate_t DecaDuino::getDataRate() {
     {
         if (tx_fctrl_txbr == TX_FCTRL_TXBR[i]) return (dw1000_datarate_t)i;
     }
+    return DW1000_DATARATE_UNKNOWN;
 }
 
 void DecaDuino::setDataRate(dw1000_datarate_t rate) {
