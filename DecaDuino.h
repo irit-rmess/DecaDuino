@@ -922,7 +922,7 @@ class DecaDuino {
 		* @author Adrien van den Bossche
 		* @date 20141115
 		*/
-		uint8_t pdDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time);
+		uint8_t pdDataRequest(uint8_t* buf, uint16_t len, bool delayed, uint64_t time);
 
 		/**
 		* @brief Sends a len-byte frame from buf

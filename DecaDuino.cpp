@@ -510,8 +510,8 @@ end_atomic(prim);
 	writeSpiUint32(DW1000_REGISTER_SYS_STATUS, ack);
 	// read back status bit to check whether we have missed something while processing the previous interrupt
     sysStatusReg = readSpiUint32(DW1000_REGISTER_SYS_STATUS);
-    // If IRQS is 1 after having already read the buffer, then an interrupt has happend while we were processing the previous one.
-    // So we set _interrupReceived to true tu let decaduino know that something is to be handled.
+    // If IRQS is 1 after having already read the buffer, then an interrupt has happened while we were processing the previous one.
+    // So we set _interrupReceived to true to let decaduino know that something is to be handled.
     if (  sysStatusReg & DW1000_REGISTER_SYS_STATUS_IRQS_MASK  ){
         _interrupReceived = true;
     }
@@ -542,7 +542,7 @@ uint8_t DecaDuino::pdDataRequest(uint8_t* buf, uint16_t len) {
 	return pdDataRequest(buf, len, false, 0);
 }
 
-uint8_t DecaDuino::pdDataRequest(uint8_t* buf, uint16_t len, uint8_t delayed, uint64_t time) {
+uint8_t DecaDuino::pdDataRequest(uint8_t* buf, uint16_t len, bool delayed, uint64_t time) {
 
 	uint32_t ui32t;
 	uint8_t tempbuf[8];
