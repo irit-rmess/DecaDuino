@@ -1642,6 +1642,22 @@ class DecaDuino {
 		*/
 		void setAntennaDelay(uint16_t newAntennaDelay, bool trackChanges=false);
 
+        /**
+        * @brief Returns the antenna delay value in the DW1000 register
+        * @return The antenna delay value in the register
+        * @author Adrien van den Bossche
+        * @date 20160915
+        */
+        uint16_t getTXAntennaDelayReg();
+
+        /**
+        * @brief Returns the RX antenna delay value in the DW1000 register
+        * @return The antenna delay value in the register
+        * @author Quentin Vey
+        * @date 20190917
+        */
+        uint16_t getRXAntennaDelayReg();
+
 		/**
         * @brief Sets the current antenna delay value to the one defined in calibratedAntennaDelay, and makes the antenna delay follow frequency and PRF changes
         * @return No return
@@ -1866,14 +1882,6 @@ class DecaDuino {
 		void writeSpiUint32(uint8_t address, uint32_t ui32t);
 
 		/**
-		* @brief Returns the antenna delay value in the DW1000 register
-		* @return The antenna delay value in the register
-		* @author Adrien van den Bossche
-		* @date 20160915
-		*/
-		uint16_t getTXAntennaDelayReg();
-
-		/**
 		* @brief Sets the TX antenna delay value in the DW1000 register
 		* @param antennaDelay The antenna delay value
 		* @return No return
@@ -1881,14 +1889,6 @@ class DecaDuino {
 		* @date 20160915
 		*/
 		void setTXAntennaDelayReg(uint16_t newAntennaDelay);
-
-        /**
-        * @brief Returns the RX antenna delay value in the DW1000 register
-        * @return The antenna delay value in the register
-        * @author Quentin Vey
-        * @date 20190917
-        */
-        uint16_t getRXAntennaDelayReg();
 		/**
         * @brief Sets the RX antenna delay value in the DW1000 register
         * @param antennaDelay The antenna delay value

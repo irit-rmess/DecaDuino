@@ -533,7 +533,7 @@ bool DecaDuino::hasTxSucceeded() {
 
 uint64_t DecaDuino::alignDelayedTransmission ( uint64_t wantedDelay ) {
 
-	return ((getSystemTimeCounter() + wantedDelay) & 0xFFFFFFFE00) + getAntennaDelay();
+	return ((getSystemTimeCounter() + wantedDelay) & 0xFFFFFFFE00) + getTXAntennaDelayReg();
 }
 
 
@@ -578,7 +578,7 @@ uint8_t DecaDuino::pdDataRequest(uint8_t* buf, uint16_t len, bool delayed, uint6
 
 		if ( delayed ) { // if delayed transmission
 			// send time
-			encodeUint64 ( (time - getAntennaDelay() ) & 0x000000FFFFFFFE00, tempbuf); // time is 5-bytes long, 9 lsb=0
+			encodeUint64 ( (time - getTXAntennaDelayReg() ) & 0x000000FFFFFFFE00, tempbuf); // time is 5-bytes long, 9 lsb=0
 			writeSpi(DW1000_REGISTER_DX_TIME, tempbuf, 5);
 
 			// set tx start bit and Transmitter Delayed Sendind bit
