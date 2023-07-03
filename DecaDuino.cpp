@@ -1883,44 +1883,53 @@ bool DecaDuino::setRxPrf(uint8_t prf) {
 
         // other tuning related to PRF
 		uint8_t drx_tun1a[2];
-		uint8_t drx_tun2[4];
         uint8_t lde_cfg2[2];
         uint8_t pac = recommendedPACSize(getPreambleLength());
+        setRxPAC(pac);
         if (prf == 1){  //16MHz
             // DRX_TUNE1A
             encodeUint16(0x0087, drx_tun1a);
-            // DRX_TUNE2
-            switch (pac) {
-            case 8: encodeUint32(0x311A002D, drx_tun2); break;
-            case 16: encodeUint32(0x331A0052, drx_tun2); break;
-            case 32: encodeUint32(0x351A009A, drx_tun2); break;
-            case 64:
-            default: encodeUint32(0x371A011D, drx_tun2); break;
-            }
             // LDE_CFG2
             encodeUint16(_NLOSOptims ? 0x0003 : 0x1607,lde_cfg2);
         }
         else { //64MHz
             // DRX_TUNE1A
             encodeUint16(0x008D, drx_tun1a);
-            // DRX_TUNE2
-            switch (pac) {
-            case 8: encodeUint32(0x313B006B, drx_tun2); break;
-            case 16: encodeUint32(0x333B00BE, drx_tun2); break;
-            case 32: encodeUint32(0x353B015E, drx_tun2); break;
-            case 64:
-            default: encodeUint32(0x373B0296, drx_tun2); break;
-            }
             // LDE_CFG2
             encodeUint16(0x0607,lde_cfg2);
         }
+
         writeSpiSubAddress(DW1000_REGISTER_DRX_CONF, DW1000_REGISTER_OFFSET_DRX_TUNE1A, drx_tun1a, 2);
-        writeSpiSubAddress(DW1000_REGISTER_DRX_CONF, DW1000_REGISTER_OFFSET_DRX_TUNE2, drx_tun2, 4);
         writeSpiSubAddress(DW1000_REGISTER_LDE_INTERFACE, DW1000_REGISTER_LDE_INTERFACE_LDE_CFG2_OFFSET, lde_cfg2, 2);
 
         return true;
 
 	} else return false;
+}
+
+void DecaDuino::setRxPAC(uint8_t pac){
+    uint8_t drx_tun2[4];
+    if (_rxPrf == 1){  //16MHz
+        // DRX_TUNE2
+        switch (pac) {
+        case 8: encodeUint32(0x311A002D, drx_tun2); break;
+        case 16: encodeUint32(0x331A0052, drx_tun2); break;
+        case 32: encodeUint32(0x351A009A, drx_tun2); break;
+        case 64:
+        default: encodeUint32(0x371A011D, drx_tun2); break;
+        }
+    }
+    else { //64MHz
+        // DRX_TUNE2
+        switch (pac) {
+        case 8: encodeUint32(0x313B006B, drx_tun2); break;
+        case 16: encodeUint32(0x333B00BE, drx_tun2); break;
+        case 32: encodeUint32(0x353B015E, drx_tun2); break;
+        case 64:
+        default: encodeUint32(0x373B0296, drx_tun2); break;
+        }
+    }
+    writeSpiSubAddress(DW1000_REGISTER_DRX_CONF, DW1000_REGISTER_OFFSET_DRX_TUNE2, drx_tun2, 4);
 }
 
 bool DecaDuino::setTxPrf(uint8_t prf){

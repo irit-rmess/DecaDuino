@@ -1786,6 +1786,15 @@ class DecaDuino {
         */
         void readOTP(uint16_t address, uint8_t dest[4]);
 
+        /**
+        * @brief Sets Preamble Acquisition Chunk size. See dw1000 user
+        * manual, section 4.1.1
+        * @param PAC size (8, 16 or 64)
+        * @author Quentin Vey
+        * @date 20230703
+        */
+        void setRxPAC(uint8_t pac);
+
 	private:
 
 
