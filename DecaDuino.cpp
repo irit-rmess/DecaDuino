@@ -533,7 +533,12 @@ bool DecaDuino::hasTxSucceeded() {
 
 uint64_t DecaDuino::alignDelayedTransmission ( uint64_t wantedDelay ) {
 
-	return ((getSystemTimeCounter() + wantedDelay) & 0xFFFFFFFE00) + getTXAntennaDelayReg();
+	return alignDelayedTransmissionTS(getSystemTimeCounter() + wantedDelay);
+}
+
+uint64_t DecaDuino::alignDelayedTransmissionTS ( uint64_t wantedTS ) {
+
+    return (wantedTS & 0xFFFFFFFE00)+ getTXAntennaDelayReg();
 }
 
 
@@ -1819,22 +1824,13 @@ bool DecaDuino::setChannel(uint8_t channel) {
 				break;
 		}
 
-        uint16_t lde_repc = LDE_REPC[pcode];
-        if (getDataRate() == DW1000_DATARATE_110KBPS)
-        {
-            lde_repc >>= 3;
-        }
-        writeSpiSubAddress(LDE_IF_ID, LDE_REPC_OFFSET,
-                (uint8_t*)&lde_repc, LDE_REPC_LEN);
+		setPcode(pcode);
 
         uint32_t chan_ctrl = readSpiUint32(DW1000_REGISTER_CHAN_CTRL);
-        chan_ctrl &= ~(CHAN_CTRL_TX_CHAN_MASK | CHAN_CTRL_RX_CHAN_MASK
-            | CHAN_CTRL_TX_PCOD_MASK | CHAN_CTRL_RX_PCOD_MASK);
+        chan_ctrl &= ~(CHAN_CTRL_TX_CHAN_MASK | CHAN_CTRL_RX_CHAN_MASK);
 
         chan_ctrl |= (CHAN_CTRL_TX_CHAN_MASK & (channel << CHAN_CTRL_TX_CHAN_SHIFT)) | // Transmit Channel
-              (CHAN_CTRL_RX_CHAN_MASK & (channel << CHAN_CTRL_RX_CHAN_SHIFT)) | // Receive Channel
-              (CHAN_CTRL_TX_PCOD_MASK & (pcode << CHAN_CTRL_TX_PCOD_SHIFT)) | // TX Preamble Code
-              (CHAN_CTRL_RX_PCOD_MASK & (pcode << CHAN_CTRL_RX_PCOD_SHIFT)) ; // RX Preamble Code
+              (CHAN_CTRL_RX_CHAN_MASK & (channel << CHAN_CTRL_RX_CHAN_SHIFT));  // Receive Channel
 
         writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, chan_ctrl);
 
@@ -1998,6 +1994,16 @@ bool DecaDuino::setRxPcode(uint8_t pcode) {
 		ui32t = ui32t & (~DW1000_REGISTER_CHAN_CTRL_RX_PCODE_MASK);
 		ui32t |= pcode << DW1000_REGISTER_CHAN_CTRL_RX_PCODE_SHIFT;
 		writeSpiUint32(DW1000_REGISTER_CHAN_CTRL, ui32t);
+
+		uint16_t lde_repc = LDE_REPC[pcode];
+        if (getDataRate() == DW1000_DATARATE_110KBPS)
+        {
+            lde_repc >>= 3;
+        }
+        writeSpiSubAddress(LDE_IF_ID, LDE_REPC_OFFSET,
+                (uint8_t*)&lde_repc, LDE_REPC_LEN);
+
+
 		return true;
 
 	} else return false;
@@ -2736,7 +2742,7 @@ int DecaDuino::printMinimalCIRInfos(char* to, int maxSize,  int cir_first_index,
     char bigbuf[8192];
     this->CIRAccumulatorToBase64JSon(registers.CIR,registers.CIR_length,bigbuf,sizeof(bigbuf));
 
-    return snprintf(to, maxSize,"{\"registerDump_CIR\":{"
+    return snprintf(to, maxSize,"\"registerDump_CIR\":{"
                                         "\"ACC_MEM\": %s, "
                                         "\"ACC_MEM_first_index\":%d, "
                                         "\"RXPACC\": %lu, "
@@ -2746,8 +2752,7 @@ int DecaDuino::printMinimalCIRInfos(char* to, int maxSize,  int cir_first_index,
                                         "\"DWSFD\": %d, "
                                         "\"RNSSFD\": %d, "
                                         "\"FP_INDEX\": %"PRIu16""
-                                    "}"
-                                "}",
+                                    "}",
             bigbuf,
             cir_first_index,
             registers.RX_FINFO.RXPACC,

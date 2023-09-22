@@ -903,6 +903,15 @@ class DecaDuino {
 		uint64_t alignDelayedTransmission ( uint64_t wantedDelay );
 
 		/**
+        * @brief Returns an aligned timestamp to use with pdDataRequest() in case of delayed transmissions
+        * @param wantedDelay The required timestamp to align
+        * @return the aligned timestamp
+        * @author Quentin Vey
+        * @date 20230922
+        */
+        uint64_t alignDelayedTransmissionTS ( uint64_t wantedTS);
+
+		/**
 		* @brief Sends a len-byte frame from buf
 		* @param buf The address of the buffer
 		* @param len The message length
