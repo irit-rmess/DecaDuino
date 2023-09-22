@@ -2569,10 +2569,11 @@ void DecaDuino::enableCIRAccumulatorRead(bool enable){
 }
 
 int DecaDuino::getCIRAccumulator(CIRSample_t *buffer, size_t arrayLength, unsigned int startIndex, int readLength){
+    unsigned int bulkBonus;
+    int i=0;
     unsigned int numSamples = getRxPrf() == 16 ? 992 : 1016;                    // CIR contains 992 samples if PRF == 16 MHz, 1016 if PRF == 64, so we start with this number of samples to read
     numSamples -= startIndex;                                                   // If we do not start at sample 0, there are less samples to read
     if (readLength >= 0 && readLength < numSamples) numSamples = readLength;    // The user has requested less samples to be read, so be it.
-    unsigned int bulkBonus;
     if ( numSamples >= arrayLength ){                            // make sure that we will not write too much to the buffer
         numSamples = arrayLength;
         bulkBonus = 0;
@@ -2586,9 +2587,8 @@ int DecaDuino::getCIRAccumulator(CIRSample_t *buffer, size_t arrayLength, unsign
     enableCIRAccumulatorRead(true);
 
     // extreme bulk reading : read everything in (almost) one call, use destination buffer as temporary buffer.
-    int i;
     uint8_t *buff = (uint8_t*)buffer;   // in place reading
-    readSpiSubAddress(0x25, startIndex*4, buff, (startIndex + numSamples)*4  + bulkBonus);  // read everything directly into  buf
+    readSpiSubAddress(0x25, startIndex*4, buff, (numSamples)*4  + bulkBonus);  // read everything directly into  buf
     uint8_t lastOne[2];
     if (!bulkBonus) {
         readSpiSubAddress(0x25, (startIndex + numSamples)*4 - 1 , lastOne, 2);  // read last byte (due to first byte to be dropped
