@@ -24,7 +24,12 @@ TWR_ENGINE_STATE_SEND_DATA_REPLY, TWR_ENGINE_STATE_WAIT_DATA_REPLY_SENT };
 
 uint64_t t2, t3;
 
+#ifdef ARDUINO_DWM1001_DEV
+DecaDuino decaduino(SS1, DW_IRQ);
+#else
 DecaDuino decaduino;
+#endif
+
 uint8_t txData[128];
 uint8_t rxData[128];
 uint16_t rxLen;
@@ -36,8 +41,9 @@ void setup()
 {
   pinMode(13, OUTPUT); // Internal LED (pin 13 on DecaWiNo board)
   Serial.begin(115200); // Init Serial port
+#ifndef ARDUINO_DWM1001_DEV
   SPI.setSCK(14); // Set SPI clock pin (pin 14 on DecaWiNo board)
-
+#endif
   // Init DecaDuino and blink if initialisation fails
   if ( !decaduino.init() ) {
     Serial.println("decaduino init failed");
