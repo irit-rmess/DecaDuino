@@ -1,4 +1,4 @@
-#define ENABLE_CALIBRATION_FROM_EEPROM
+//#define ENABLE_CALIBRATION_FROM_EEPROM
 
 #include <SPI.h>
 #include <DecaDuino.h>
@@ -44,7 +44,11 @@ uint64_t t1, t2, t3, t4, t5, t6;
 uint64_t mask = 0xFFFFFFFFFF;
 int32_t tof;
 
+#ifdef ARDUINO_DWM1001_DEV
+DecaDuino decaduino(SS1, DW_IRQ);
+#elif defined(TEENSYDUINO)
 DecaDuino decaduino;
+#endif
 uint8_t txData[128];
 uint8_t rxData[128];
 uint16_t rxLen;
@@ -80,7 +84,9 @@ void setup() {
   FastLED.addLeds<WS2812B, LED_DATA_PIN, GRB>(leds, NUM_LEDS);
 
   pinMode(13, OUTPUT);
+#ifdef TEENSYDUINO    
   SPI.setSCK(14);
+#endif  
   if (!decaduino.init()){
     Serial.print("decaduino init failled");
     while(1){
@@ -134,7 +140,7 @@ void loop() {
       break;
        
     case TWR_ENGINE_STATE_MEMORISE_T1 :
-      t1 = decaduino.lastTxTimestamp;
+      t1 = decaduino.getLastTxTimestamp();
       timeout = millis() + TIMEOUT;
       decaduino.plmeRxEnableRequest();
       state = TWR_ENGINE_STATE_WAIT_ACK_REQ;
@@ -157,7 +163,7 @@ void loop() {
       break;
        
     case TWR_ENGINE_STATE_MEMORISE_T4 :
-      t4 = decaduino.lastRxTimestamp;
+      t4 = decaduino.getLastRxTimestamp();
       state = TWR_ENGINE_STATE_SEND_ACK;
       break;
        
@@ -174,7 +180,7 @@ void loop() {
       break;
       
     case TWR_ENGINE_STATE_MEMORISE_T5 :
-      t5 = decaduino.lastTxTimestamp;
+      t5 = decaduino.getLastTxTimestamp();
       timeout = millis() + TIMEOUT;
       decaduino.plmeRxEnableRequest();
       state = TWR_ENGINE_STATE_WAIT_DATA_REPLY;

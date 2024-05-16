@@ -31,7 +31,11 @@ int seqnum;
 
 uint64_t t2, t3, t6;
 
+#ifdef ARDUINO_DWM1001_DEV
+DecaDuino decaduino(SS1, DW_IRQ);
+#elif defined(TEENSYDUINO)
 DecaDuino decaduino;
+#endif
 uint8_t txData[128];
 uint8_t rxData[128];
 uint16_t rxLen;
@@ -46,7 +50,9 @@ int dtim;
 void setup() {
 
   pinMode(13, OUTPUT);
+#ifdef TEENSYDUINO    
   SPI.setSCK(14);
+#endif
   if (!decaduino.init(addrPANID)){
    Serial.print("decaduino init failled");
    while(1){
@@ -97,7 +103,7 @@ void loop() {
        break;
        
     case TWR_ENGINE_STATE_MEMORISE_T2 :
-       t2 = decaduino.lastRxTimestamp;
+       t2 = decaduino.getLastTxTimestamp();
        state = TWR_ENGINE_STATE_SEND_ACK_REQ;
        break;
          
@@ -125,7 +131,7 @@ void loop() {
        break;
        
     case TWR_ENGINE_STATE_MEMORISE_T3 :
-       t3 = decaduino.lastTxTimestamp;
+       t3 = decaduino.getLastTxTimestamp();
        //state = TWR_ENGINE_STATE_WATCHDOG_FOR_ACK;
        state = TWR_ENGINE_STATE_ON_FOR_DATA_REQUEST;
        break;
@@ -136,7 +142,7 @@ void loop() {
     case TWR_ENGINE_WAIT_DATAREQ :
           if (decaduino.rxFrameAvailable()){
            if (rxData[9] == TWR_MSG_TYPE_DATAREQ) {
-             t6 = decaduino.lastRxTimestamp;
+             t6 = decaduino.getLastTxTimestamp();
              Serial.println("Received DATAREQ____sent datareply");
              //time to reply!
              switch((uint16_t)addrPANID){
@@ -191,7 +197,7 @@ void loop() {
 //       break;
 //       
 //    case TWR_ENGINE_STATE_MEMORISE_T6 :
-//       t6 = decaduino.lastRxTimestamp;
+//       t6 = decaduino.getLastTxTimestamp();
 //       state = TWR_ENGINE_STATE_SEND_DATA_REPLY; 
 //       break;
 //       

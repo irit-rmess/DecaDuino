@@ -21,6 +21,7 @@ int rxFrames;
 #ifdef UWB_MODULE_DWM1001
 DecaDuino decaduino(SS1, DW_IRQ);
 #ifdef ARDUINO_DWM1001_DEV
+#define LED_RED LED_RED_TOP
 #define LED_ON LOW
 #define LED_OFF HIGH
 #else

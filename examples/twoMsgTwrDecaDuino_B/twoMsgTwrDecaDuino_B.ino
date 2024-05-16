@@ -25,7 +25,11 @@ int rxFrames;
 
 uint64_t t2, t3, t3_predicted;
 
+#ifdef ARDUINO_DWM1001_DEV
+DecaDuino decaduino(SS1, DW_IRQ);
+#elif defined(TEENSYDUINO)
 DecaDuino decaduino;
+#endif
 uint8_t txData[128];
 uint8_t rxData[128];
 uint16_t rxLen;
@@ -35,7 +39,9 @@ int state;
 void setup() {
 
   pinMode(13, OUTPUT);
+#ifdef TEENSYDUINO    
   SPI.setSCK(14);
+#endif  
   if ( !decaduino.init() ) {
     Serial.println("decaduino init failed");
     while(1) {
@@ -75,7 +81,7 @@ void loop() {
       break;
 
     case TWR_ENGINE_STATE_MEMORISE_T2:
-      t2 = decaduino.lastRxTimestamp;
+      t2 = decaduino.getLastRxTimestamp();
       state = TWR_ENGINE_STATE_SEND_ACK;
       break;
 
@@ -90,7 +96,7 @@ void loop() {
 
     case TWR_ENGINE_STATE_WAIT_SENT:
       if ( decaduino.hasTxSucceeded() ) {
-        t3 = decaduino.lastTxTimestamp;
+        t3 = decaduino.getLastTxTimestamp();
         Serial.print("t3-t3_predicted=");
         Serial.print((int)(t3-t3_predicted));
         Serial.println();

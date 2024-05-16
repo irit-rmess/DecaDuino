@@ -9,6 +9,10 @@
 #include "base64.hpp"
 #include <machine/endian.h>
 
+#ifdef ARDUINO_DWM1001_DEV
+#define     UWB_MODULE_DWM1001
+#endif
+
 #ifdef UWB_MODULE_DWM1001
 
 #define SPI SPI1

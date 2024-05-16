@@ -1,15 +1,21 @@
 #include <ArduinoJson.h>
-#include "base64.hpp"
 #include <SPI.h>
-#include <EEPROM.h>
-#include <WiNoIO.h>
 #include <DecaDuino.h>
+#include <printfToSerial.h>
+#include <base64.hpp>
 
-#define DEBUG_MESSAGE(...) if (debug) Serial.printf(__VA_ARGS__)
+#define DEBUG_MESSAGE(...) if (debug) printf(__VA_ARGS__)
 
 #define MAX_MESSAGE_LEN 120
+#ifdef ARDUINO_DWM1001_DEV
+DecaDuino decaduino(SS1, DW_IRQ);
+#elif defined(TEENSYDUINO)
+#include <EEPROM.h>
+#include <WiNoIO.h>
 DecaDuino decaduino;
 WiNoIO wino;
+#endif
+
 char txBuffer[MAX_MESSAGE_LEN];
 int txBufferLen = 0;
 char rxBuffer[MAX_MESSAGE_LEN];
@@ -38,11 +44,12 @@ int json_buffer_len = 0;
 int parseCommand ( char json[] )
 {
   char json_buffer_temp[2048];
-  StaticJsonBuffer<2048> jsonBuffer;
+  StaticJsonDocument<2048> jsonDoc;
   memcpy(json_buffer_temp, json, strlen(json));
-  JsonObject& root = jsonBuffer.parseObject(json_buffer_temp);
+  DeserializationError error = deserializeJson(jsonDoc, json_buffer_temp);
+  JsonObject root = jsonDoc.as<JsonObject>();
 
-  if (!root.success()) {
+  if (error) {
     DEBUG_MESSAGE("parseObject() failed\r\n");
     return false;
   }
@@ -90,8 +97,8 @@ int parseCommand ( char json[] )
     Serial.print("  phyPayload: ");
     Serial.println(phyPayload);
     Serial.print("  phyPayloadBytes: |");
-    for (unsigned int i=0; i<payload_length; i++ ) Serial.printf("%02X|", phyPayloadBytes[i]);
-    Serial.printf(" (len=%dbytes)\r\n\r\n", payload_length);
+    for (unsigned int i=0; i<payload_length; i++ ) printf("%02X|", phyPayloadBytes[i]);
+    printf(" (len=%dbytes)\r\n\r\n", payload_length);
   }
 
   if ( strcmp(nodeID, stored_nodeID) != 0 )
@@ -206,9 +213,9 @@ int parseCommand ( char json[] )
   {
     if ( debug )
     {
-      Serial.printf("New frame to send frame: |");
-      for (unsigned int i=0; i<payload_length; i++ ) Serial.printf("%02X|", phyPayloadBytes[i]);
-      Serial.printf(" (len=%dbytes)\r\n\r\n", payload_length);
+      printf("New frame to send frame: |");
+      for (unsigned int i=0; i<payload_length; i++ ) printf("%02X|", phyPayloadBytes[i]);
+      printf(" (len=%dbytes)\r\n\r\n", payload_length);
     }
     memcpy(txBuffer, phyPayloadBytes, payload_length);
     tx_token = token;
@@ -221,7 +228,7 @@ int parseCommand ( char json[] )
 
 void send_stats()
 {
-  Serial.printf("{\"message_type\":\"DecaDuino_stats\",\"message\":{\"nodeID\":\"%s\",\"time\":\"%ld\",\"rxPacketsReceived\":%d,\"rxPacketsReceivedOK\":%d,\"txPacketsReceived\":%d,\"txPacketsEmitted\":%d}}\r\n", stored_nodeID, millis(), stats_rxPacketsReceived, stats_rxPacketsReceivedOK, stats_txPacketsReceived, stats_txPacketsEmitted );
+  printf("{\"message_type\":\"DecaDuino_stats\",\"message\":{\"nodeID\":\"%s\",\"time\":\"%ld\",\"rxPacketsReceived\":%d,\"rxPacketsReceivedOK\":%d,\"txPacketsReceived\":%d,\"txPacketsEmitted\":%d}}\r\n", stored_nodeID, millis(), stats_rxPacketsReceived, stats_rxPacketsReceivedOK, stats_txPacketsReceived, stats_txPacketsEmitted );
   stats_rxPacketsReceived = 0;
   stats_rxPacketsReceivedOK = 0;
   stats_txPacketsReceived = 0;
@@ -231,12 +238,26 @@ void send_stats()
 
 void setup()
 {
+#ifdef TEENSYDUINO
   randomSeed(analogRead(A13));
+#else
+  randomSeed(analogRead(A0));
+#endif
   Serial.begin(115200);
+#ifdef TEENSYDUINO
   if (!wino.loadConfig() ) while (1) { Serial.println("WiNoIO Error"); delay(5000); }
   SPI.setSCK(wino.getTrxSckPin());
-  if (!decaduino.init()) while (1) { wino.rgbDraw(255,0,0); delay(50); wino.rgbDraw(255,0,0);  delay(50); Serial.println("DecaDuino Init Error"); }
+#endif
+  if (!decaduino.init()) while (1) { 
+#ifdef TEENSYDUINO
+    wino.rgbDraw(255,0,0); delay(50); wino.rgbDraw(255,0,0);  delay(50); Serial.println("DecaDuino Init Error"); 
+#endif
+    Serial.println("decaduino init failed");
+    delay(100);
+    }
+#ifdef TEENSYDUINO
   sprintf(stored_nodeID,"%x",wino.getLabel());
+#endif
   //current_power = 0;
   switch ( decaduino.getChannel() )
   {
@@ -322,9 +343,9 @@ void loop()
   decaduino.engine();
 
   static uint32_t json_timeout = 0;
-
+#ifdef TEENSYDUINO
   wino.rgbDraw(0,255,0);
-
+#endif
   if ( millis() > statsTimeout ) send_stats();
   if ( millis() > json_timeout ) reset_json_buffer();
 
@@ -367,38 +388,41 @@ void loop()
   {
     if ( debug )
     {
-      Serial.printf("Sending frame: |");
-      for ( int i=0; i<txBufferLen; i++ ) Serial.printf("%02X|", txBuffer[i]);
-      Serial.printf(" (len=%dbytes)\r\n\r\n", txBufferLen);
+      printf("Sending frame: |");
+      for ( int i=0; i<txBufferLen; i++ ) printf("%02X|", txBuffer[i]);
+      printf(" (len=%dbytes)\r\n\r\n", txBufferLen);
     }
+#ifdef TEENSYDUINO    
     wino.rgbDraw(255,0,0);
-
+#endif
     sendData(txBuffer, txBufferLen);
 
     stats_txPacketsEmitted++;
     txBufferLen = 0;
-    Serial.printf("{\"message_type\":\"DecaDuino_ack\",\"message\":{\"nodeID\":\"%s\",\"token\":%d, \"timestamp\":%ld, \"tx_dw_timestamp_hex\":\"0x", stored_nodeID, tx_token, micros());
+    printf("{\"message_type\":\"DecaDuino_ack\",\"message\":{\"nodeID\":\"%s\",\"token\":%d, \"timestamp\":%ld, \"tx_dw_timestamp_hex\":\"0x", stored_nodeID, tx_token, micros());
     decaduino.printUint64(decaduino.getLastTxTimestamp());
-    Serial.printf("\"p}}\r\n");
+    printf("\"p}}\r\n");
   }
 
   // Check incoming messages from radio
   if ( decaduino.rxFrameAvailable() )
   {
+#ifdef TEENSYDUINO    
     wino.rgbDraw(0,0,0);
+#endif    
     unsigned char phyPayloadBase64[MAX_MESSAGE_LEN*2];
     unsigned int base64_length = encode_base64((uint8_t *)rxBuffer, rxBufferLen, phyPayloadBase64);
 
     if ( base64_length != 0 )
     {
-      Serial.printf("{\"message_type\":\"DecaDuino_rx\",\"message\":{");
-      Serial.printf("\"txInfo\":{\"frequency\":%lu,\"modulation\":\"UWB\",\"UWBModulationInfo\":{", current_frequency);
-      Serial.printf("\"bandwidth\":%d,\"dataRate\":%d}},", current_bandwidth, current_dataRate);
-      Serial.printf("\"rxInfo\":{\"nodeID\":\"%s\",\"timestamp\":%ld,\"rx_dw_timestamp_hex\":\"0x", stored_nodeID, micros());
+      printf("{\"message_type\":\"DecaDuino_rx\",\"message\":{");
+      printf("\"txInfo\":{\"frequency\":%lu,\"modulation\":\"UWB\",\"UWBModulationInfo\":{", current_frequency);
+      printf("\"bandwidth\":%d,\"dataRate\":%d}},", current_bandwidth, current_dataRate);
+      printf("\"rxInfo\":{\"nodeID\":\"%s\",\"timestamp\":%ld,\"rx_dw_timestamp_hex\":\"0x", stored_nodeID, micros());
       decaduino.printUint64(decaduino.getLastRxTimestamp());
-      Serial.printf("\",");
-      Serial.printf("\"rssi\":%d,\"UWBSNR\":%d,\"size\":%d},",-1,-1,rxBufferLen);
-      Serial.printf("\"phyPayload\":\"%s\"}}\r\n", phyPayloadBase64);
+      printf("\",");
+      printf("\"rssi\":%d,\"UWBSNR\":%d,\"size\":%d},",-1,-1,rxBufferLen);
+      printf("\"phyPayload\":\"%s\"}}\r\n", phyPayloadBase64);
     }
 
     decaduino.plmeRxEnableRequest(); // Always renable RX after a frame reception

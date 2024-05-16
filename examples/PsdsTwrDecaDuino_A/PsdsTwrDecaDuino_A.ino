@@ -1,7 +1,7 @@
 #include <SPI.h>
 #include <DecaDuino.h>
 
-#define AIR_SPEED_OF_LIGHT 299792458//229702547.0
+#define AIR_SPEED_OF_LIGHT 299792458
 #define DW1000_TIMEBASE 15.65E-12
 #define COEFF AIR_SPEED_OF_LIGHT*DW1000_TIMEBASE
 
@@ -48,7 +48,11 @@ uint64_t tof;
 
 uint64_t _Delai;
 
+#ifdef ARDUINO_DWM1001_DEV
+DecaDuino decaduino(SS1, DW_IRQ);
+#elif defined(TEENSYDUINO)
 DecaDuino decaduino;
+#endif
 uint8_t txData[128];
 uint8_t rxData[128];
 uint16_t rxLen;
@@ -84,7 +88,10 @@ int mindex;
 void setup() {
 
   pinMode(13, OUTPUT);
+  
+#ifdef TEENSYDUINO    
   SPI.setSCK(14);
+#endif
   if (!decaduino.init(addrPANID)){
     Serial.print("decaduino init failled");
     while(1){
@@ -151,7 +158,7 @@ void loop() {
       break;
        
     case TWR_ENGINE_STATE_MEMORISE_T1 :
-      t1 = decaduino.lastTxTimestamp;
+      t1 = decaduino.getLastTxTimestamp();
       state = TWR_ENGINE_STATE_WATCHDOG_FOR_ACK_REQ;
       break;
        
@@ -185,18 +192,18 @@ void loop() {
       break;
        
     case TWR_ENGINE_STATE_MEMORISE_T4 :
-      t4 = decaduino.lastRxTimestamp;
+      t4 = decaduino.getLastRxTimestamp();
       switch(rxData[7]){
             case 0x23: results[1].t4=t4;
-            results[1].offsetPPM_t4=decaduino.clkOffset;
+            results[1].offsetPPM_t4=decaduino.getLastRxSkew();
            // Serial.println("rx ACK+REQ: 0x23 ");
             break;
             case 0x22: results[0].t4=t4;
-            results[0].offsetPPM_t4=decaduino.clkOffset;
+            results[0].offsetPPM_t4=decaduino.getLastRxSkew();
            //Serial.println("rx ACK+REQ: 0x22 ");
             break;
             case 0x24: results[2].t4=t4;
-            results[2].offsetPPM_t4=decaduino.clkOffset;
+            results[2].offsetPPM_t4=decaduino.getLastRxSkew();
             //Serial.println("rx ACK+REQ: 0x24 ");
             break;
             
@@ -235,7 +242,7 @@ void loop() {
       break;
       
     case TWR_ENGINE_STATE_MEMORISE_T5 :
-      t5 = decaduino.lastTxTimestamp;
+      t5 = decaduino.getLastTxTimestamp();
       state = TWR_ENGINE_STATE_WATCHDOG_FOR_DATA_REPLY;
       break;
        
@@ -276,20 +283,20 @@ void loop() {
                    results[1].t3=t3;
                    results[1].t6=t6;
                    results[1].valid=1;
-                   results[1].offsetPPM_drep=decaduino.clkOffset;
+                   results[1].offsetPPM_drep=decaduino.getLastRxSkew();
                    
         break;
         case 0x22: results[0].t2=t2;
                    results[0].t3=t3;
                    results[0].t6=t6;
                    results[0].valid=1;
-                   results[0].offsetPPM_drep=decaduino.clkOffset;
+                   results[0].offsetPPM_drep=decaduino.getLastRxSkew();
                    break;
         case 0x24: results[2].t2=t2;
                    results[2].t3=t3;
                    results[2].t6=t6;
                    results[2].valid=1;
-                   results[2].offsetPPM_drep=decaduino.clkOffset;
+                   results[2].offsetPPM_drep=decaduino.getLastRxSkew();
                    break;
         
         }
@@ -330,7 +337,7 @@ void loop() {
 #endif
         tof = (2*results[0].t4 - t1 - 2*results[0].t3 + results[0].t2 + results[0].t6 - t5)/4;
         Serial.print("ToF=");
-        decaduino.print(tof);
+        printf("%"PRIu64"",tof);
          hi16=(uint16_t)(tof >> 32);
         if(hi16 & 0x80!=0){
          // Serial.println("TOF is negative");
@@ -356,7 +363,7 @@ void loop() {
         Serial.print("|");
         _Delai=results[1].t4-results[0].t4;
       Serial.print("D=");
-        decaduino.print(_Delai);
+        printf("%"PRIu64"",_Delai);
         Serial.println();
       }
       
@@ -384,7 +391,7 @@ void loop() {
    #endif     
         tof = (2*results[1].t4 - t1 - 2*results[1].t3 + results[1].t2 + results[1].t6 - t5)/4;
         Serial.print("ToF=");        
-        decaduino.print(tof);
+        printf("%"PRIu64"",tof);
         
         hi16=(uint16_t)(tof >> 32);
         if(hi16 & 0x80!=0){
@@ -412,7 +419,7 @@ void loop() {
         Serial.print("|");
         _Delai=results[1].t4-results[0].t4;
       Serial.print("D=");
-        decaduino.print(_Delai);
+        printf("%"PRIu64"",_Delai);
         Serial.println();
       }
       
@@ -440,7 +447,7 @@ void loop() {
       #endif  
         tof = (2*results[2].t4 - t1 - 2*results[2].t3 + results[2].t2 + results[2].t6 - t5)/4;
         Serial.print("ToF=");
-        decaduino.print(tof);
+        printf("%"PRIu64"",tof);
         
         hi16=(uint16_t)(tof >> 32);
         if(hi16 & 0x80!=0){
@@ -468,7 +475,7 @@ void loop() {
         Serial.print("|");
         _Delai=results[1].t4-results[0].t4;
       Serial.print("D=");
-        decaduino.print(_Delai);
+        printf("%"PRIu64"",_Delai);
         Serial.println();
       }
       

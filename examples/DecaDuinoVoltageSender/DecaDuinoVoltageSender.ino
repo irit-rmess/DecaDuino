@@ -12,6 +12,7 @@ uint8_t txData[MAX_FRAME_LEN];
 uint16_t txLen;
 #ifdef UWB_MODULE_DWM1001
 DecaDuino decaduino(SS1, DW_IRQ);
+#define LED_RED LED_RED_TOP
 #ifdef ARDUINO_DWM1001_DEV
 #define LED_ON LOW
 #define LED_OFF HIGH

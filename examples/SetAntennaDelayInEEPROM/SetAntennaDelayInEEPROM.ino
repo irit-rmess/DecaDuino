@@ -1,3 +1,7 @@
+#ifndef TEENSYDUINO  
+#error this sketch will only work on teensyduino. However, there is an eeprom WITHIN THE DW1000 that can be used for the same purpose (and which is maybe already populated from the factory)
+#ifndef
+
 #include <SPI.h>
 #include <DecaDuino.h>
 #include <EEPROM.h>
