@@ -436,7 +436,7 @@ end_atomic(prim);
 						rxtofs = buf[2] * 256*256 + buf[1] * 256 + buf[0];
 					}
 
-					clkOffset = rxtofs * 1000000 / rxttcki;
+					clkOffset = rxtofs * 1000000. / rxttcki;
 					rxDataAvailable = true;
 
 					// Serial.print("clock offset=");
