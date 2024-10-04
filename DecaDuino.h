@@ -101,8 +101,10 @@
 #ifdef UWB_MODULE_DWM1001
 #include <SPI.h>
 #define DW1000_IRQ0_PIN 22
-#else
+#elif defined(TEENSYDUINO)
 #define DW1000_IRQ0_PIN 9
+#else
+#error compile toolchain not setup for compatible hardware
 #endif
 #define DW1000_IRQ1_PIN 0
 #define DW1000_IRQ2_PIN 1
@@ -135,7 +137,7 @@ static const uint16_t calibratedAntennaDelay[7][2] = //@brief Calibration value 
     {    0,     0}, // channel 6 not implemented by DW1000
     {32823, 32833}, // both values have been calibrated
 };
-#else
+#elif defined(TEENSYDUINO)
 #define DWM1000_DEFAULT_ANTENNA_DELAY_VALUE 32847 //@brief Calibration value for DWM1000 on IRIT's DecaWiNo, by Adrien van den Bossche <vandenbo at univ-tlse2.fr>
 static const uint16_t calibratedAntennaDelay[7][2] =
 {
@@ -147,6 +149,8 @@ static const uint16_t calibratedAntennaDelay[7][2] =
     {DWM1000_DEFAULT_ANTENNA_DELAY_VALUE, DWM1000_DEFAULT_ANTENNA_DELAY_VALUE},
     {DWM1000_DEFAULT_ANTENNA_DELAY_VALUE, DWM1000_DEFAULT_ANTENNA_DELAY_VALUE},
 };
+#else
+#error compile toolchain not setup for compatible hardware
 #endif
 
 

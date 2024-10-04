@@ -30,8 +30,10 @@ static inline void end_atomic(uint32_t prim)
     }
 }
 
-#else
+#elif defined(TEENSYDUINO)
 #include <util/atomic.h>
+#else
+#error compile toolchain not setup for compatible hardware
 #endif
 
 
@@ -97,6 +99,8 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
 		_DecaDuinoInterrupt[DW1000_IRQ2_PIN] = this;
 		attachInterrupt(_interruptPin, DecaDuino::isr2, RISING);
 	} else return false;
+    #else
+    #error compile toolchain not setup for compatible hardware
     #endif
 	// --- Configure DW1000 -----------------------------------------------------------------------------------------
 
@@ -211,8 +215,10 @@ void DecaDuino::resetDW1000() {
     #ifdef UWB_MODULE_DWM1001
     uint32_t prim = begin_atomic();
     {
-    #else
+    #elif defined(TEENSYDUINO)
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    #else
+    #error compile toolchain not setup for compatible hardware
     #endif
 
 		SPI.beginTransaction(currentSPISettings);
@@ -273,8 +279,10 @@ void DecaDuino::isr0() {
 #endif
     #ifdef UWB_MODULE_DWM1001
     _DecaDuinoInterrupt[0]->handleInterrupt();
-    #else
+    #elif defined(TEENSYDUINO)
 	if (_DecaDuinoInterrupt[DW1000_IRQ0_PIN]) _DecaDuinoInterrupt[DW1000_IRQ0_PIN]->handleInterrupt();
+    #else
+    #error compile toolchain not setup for compatible hardware
     #endif
 }
 
@@ -316,19 +324,21 @@ void DecaDuino::engine() {
 	double rxtofs, rxttcki;
 	ack = 0;
 
-#ifdef UWB_MODULE_DWM1001
-uint32_t prim = begin_atomic();
-{
-#else
-ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-#endif
+    #ifdef UWB_MODULE_DWM1001
+    uint32_t prim = begin_atomic();
+    {
+    #elif defined(TEENSYDUINO)
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    #else
+    #error compile toolchain not setup for compatible hardware
+    #endif
         // Read System Event Status Register
         sysStatusReg = readSpiUint32(DW1000_REGISTER_SYS_STATUS);
         _interrupReceived = false;
-}
-#ifdef UWB_MODULE_DWM1001
-end_atomic(prim);
-#endif
+    }
+    #ifdef UWB_MODULE_DWM1001
+    end_atomic(prim);
+    #endif
 
 	// If IRQS is cleared, no enabled interrupt (SYS_MASK) have assert the IRQ pin: exit
 	if ( ! ( sysStatusReg & DW1000_REGISTER_SYS_STATUS_IRQS_MASK ) ){
@@ -569,9 +579,11 @@ uint8_t DecaDuino::pdDataRequest(uint8_t* buf, uint16_t len, bool delayed, uint6
     #ifdef UWB_MODULE_DWM1001
     uint32_t prim = begin_atomic();
     {
-    #else
+    #elif defined(TEENSYDUINO)
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
-	        {
+    {
+    #else
+    #error compile toolchain not setup for compatible hardware
     #endif
 
 		trxStatus = DW1000_TRX_STATUS_TX;
@@ -730,8 +742,11 @@ uint8_t DecaDuino::rxFrameAvailable(uint8_t* buf, uint16_t *len, uint16_t max) {
     #ifdef UWB_MODULE_DWM1001
     uint32_t prim = begin_atomic();
     {
+    #elif defined(TEENSYDUINO)
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
     #else
-	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    #error compile toolchain not setup for compatible hardware
     #endif
 
 		if ( rxDataAvailable ) {
@@ -799,8 +814,10 @@ void DecaDuino::readSpi(uint8_t address, uint8_t* buf, uint16_t len) {
     #ifdef UWB_MODULE_DWM1001
     uint32_t prim = begin_atomic();
     {
-    #else
+    #elif defined(TEENSYDUINO)
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    #else
+    #error compile toolchain not setup for compatible hardware
     #endif
 		SPI.beginTransaction(currentSPISettings);
 		digitalWrite(_slaveSelectPin, LOW);
@@ -830,8 +847,10 @@ void DecaDuino::readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t*
         #ifdef UWB_MODULE_DWM1001
         uint32_t prim = begin_atomic();
         {
-        #else
+        #elif defined(TEENSYDUINO)
 		ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        #else
+        #error compile toolchain not setup for compatible hardware
         #endif
 			SPI.beginTransaction(currentSPISettings);
 			digitalWrite(_slaveSelectPin, LOW);
@@ -857,8 +876,10 @@ void DecaDuino::readSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t*
         #ifdef UWB_MODULE_DWM1001
         uint32_t prim = begin_atomic();
         {
-        #else
+        #elif defined(TEENSYDUINO)
 		ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        #else
+        #error compile toolchain not setup for compatible hardware
         #endif
 			SPI.beginTransaction(currentSPISettings);
 			digitalWrite(_slaveSelectPin, LOW);
@@ -892,8 +913,10 @@ void DecaDuino::readOTP(uint16_t address, uint8_t dest[4]) {
 #ifdef UWB_MODULE_DWM1001
     uint32_t prim = begin_atomic();
     {
-#else
+#elif defined(TEENSYDUINO)
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+#else
+#error compile toolchain not setup for compatible hardware
 #endif
         writeSpiSubAddress(0x2D, 0x04, (uint8_t*)&address, 2);
         u8t= 0x03; writeSpiSubAddress(0x2D, 0x06, &u8t, 1);
@@ -944,8 +967,10 @@ void DecaDuino::writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t
         #ifdef UWB_MODULE_DWM1001
         uint32_t prim = begin_atomic();
         {
-        #else
+        #elif defined(TEENSYDUINO)
 		ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        #else
+        #error compile toolchain not setup for compatible hardware
         #endif
 			SPI.beginTransaction(currentSPISettings);
 			digitalWrite(_slaveSelectPin, LOW);
@@ -970,8 +995,10 @@ void DecaDuino::writeSpiSubAddress(uint8_t address, uint16_t subAddress, uint8_t
         #ifdef UWB_MODULE_DWM1001
         uint32_t prim = begin_atomic();
         {
-        #else
+        #elif defined(TEENSYDUINO)
         ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        #else
+        #error compile toolchain not setup for compatible hardware
         #endif
             SPI.beginTransaction(currentSPISettings);
             digitalWrite(_slaveSelectPin, LOW);
@@ -2271,8 +2298,10 @@ uint8_t DecaDuino::getTemperatureRaw() {
     #ifdef UWB_MODULE_DWM1001
     uint32_t prim = begin_atomic();
     {
-    #else
+    #elif defined(TEENSYDUINO)
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    #else
+    #error compile toolchain not setup for compatible hardware
     #endif
 	    // Set ADCCE bit to enable on-demand voltage and temperature reading
         uint32_t ui32t = readSpiUint32(DW1000_REGISTER_PMSC_CTRL0);
@@ -2307,8 +2336,10 @@ uint8_t DecaDuino::getVoltageRaw() {
     #ifdef UWB_MODULE_DWM1001
     uint32_t prim = begin_atomic();
     {
-    #else
+    #elif defined(TEENSYDUINO)
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    #else
+    #error compile toolchain not setup for compatible hardware
     #endif
 	    // Set ADCCE bit to enable on-demand voltage and temperature reading
         uint32_t ui32t = readSpiUint32(DW1000_REGISTER_PMSC_CTRL0);
