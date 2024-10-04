@@ -85,17 +85,17 @@ boolean DecaDuino::init ( uint32_t shortAddressAndPanId ) {
     #ifdef UWB_MODULE_DWM1001
 	_DecaDuinoInterrupt[0] = this;
     attachInterrupt(_interruptPin, DecaDuino::isr0, RISING);
-    #else
+    #elif defined(TEENSYDUINO)
 	// Attach interrupt handler
 	if (_interruptPin == DW1000_IRQ0_PIN) {
 		_DecaDuinoInterrupt[DW1000_IRQ0_PIN] = this;
-		attachInterrupt(_interruptPin, DecaDuino::isr0, HIGH);
+		attachInterrupt(_interruptPin, DecaDuino::isr0, RISING);
 	} else if (_interruptPin == DW1000_IRQ1_PIN) {
 		_DecaDuinoInterrupt[DW1000_IRQ1_PIN] = this;
-		attachInterrupt(_interruptPin, DecaDuino::isr1, HIGH);
+		attachInterrupt(_interruptPin, DecaDuino::isr1, RISING);
 	} else if (_interruptPin == DW1000_IRQ2_PIN) {
 		_DecaDuinoInterrupt[DW1000_IRQ2_PIN] = this;
-		attachInterrupt(_interruptPin, DecaDuino::isr2, HIGH);
+		attachInterrupt(_interruptPin, DecaDuino::isr2, RISING);
 	} else return false;
     #endif
 	// --- Configure DW1000 -----------------------------------------------------------------------------------------
@@ -570,7 +570,8 @@ uint8_t DecaDuino::pdDataRequest(uint8_t* buf, uint16_t len, bool delayed, uint6
     uint32_t prim = begin_atomic();
     {
     #else
-	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+	        {
     #endif
 
 		trxStatus = DW1000_TRX_STATUS_TX;
