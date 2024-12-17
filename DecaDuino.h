@@ -94,6 +94,7 @@
 #define DecaDuino_h
 
 #include "Arduino.h"
+#include <stdint.h>
 
 
 //#define DECADUINO_DEBUG
@@ -461,7 +462,7 @@ class DecaDuino {
 		* @author Adrien van den Bossche
 		* @date 20140701
 		*/
-		boolean init();
+		bool init();
 
 		/**
 		* @brief Initializes DecaDuino and DWM1000 with given Short Address and Pan Id
@@ -470,7 +471,7 @@ class DecaDuino {
 		* @author Adrien van den Bossche
 		* @date 20150905
 		*/
-		boolean init(uint32_t shortAddrAndPanId);
+		bool init(uint32_t shortAddrAndPanId);
 
 
         /**
@@ -1127,6 +1128,26 @@ class DecaDuino {
 		* @date 20141115
 		*/
 		float getVoltage(void);
+
+		/**
+        * @brief Gets the raw value from the DW1000's embedded voltage and temperature sensors.
+        * Faster than requesting them separately (performs both readings in a single request)
+        * @param temp : pointer for return value for raw temperature reading
+        * @param volt : pointer for return value for raw voltage reading
+        * @author Cassandre Vey
+        * @date 20241217
+        */
+		void getTemperatureAndVoltageRaw(uint8_t *temp, uint8_t *volt);
+
+		/**
+        * @brief Gets the voltage value in volts and temperature in Celsius from the DW1000's embedded voltage sensor
+        * Faster than requesting them separately (performs both readings in a single request)
+        * @param temp : pointer for return value for temperature (in Celsius)
+        * @param volt : pointer for return value for voltage (in Volts)
+        * @author Cassandre Vey
+        * @date 20241217
+        */
+        void  getTemperatureAndVoltage(float *temp, float *volt);
 
 
 		/**

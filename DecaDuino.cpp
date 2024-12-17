@@ -2328,6 +2328,69 @@ uint8_t DecaDuino::getTemperatureRaw() {
 	return u8t;
 }
 
+void DecaDuino::getTemperatureAndVoltageRaw(uint8_t *temp, uint8_t *volt) {
+
+        uint8_t u8t;
+        #ifdef UWB_MODULE_DWM1001
+        uint32_t prim = begin_atomic();
+        {
+        #elif defined(TEENSYDUINO)
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        #else
+        #error compile toolchain not setup for compatible hardware
+        #endif
+            // Set ADCCE bit to enable on-demand voltage and temperature reading
+            uint32_t ui32t = readSpiUint32(DW1000_REGISTER_PMSC_CTRL0);
+            uint32_t newVal = ui32t | 0x00000200;
+            writeSpiUint32(DW1000_REGISTER_PMSC_CTRL0, newVal);
+
+            delayMicroseconds(32);
+
+            u8t = 0x80; writeSpiSubAddress(0x28, 0x11, &u8t, 1); // 1. Write Sub-Register 28:11 1byte 0x80
+            u8t = 0x0A; writeSpiSubAddress(0x28, 0x12, &u8t, 1); // 2. Write Sub-Register 28:12 1byte 0x0A
+            u8t = 0x0F; writeSpiSubAddress(0x28, 0x12, &u8t, 1); // 3. Write Sub-Register 28:12 1byte 0x0F
+            u8t = 0x01; writeSpiSubAddress(0x2A, 0x00, &u8t, 1); // 4. Write Register 2A:00 1byte 0x01
+            u8t = 0x00; writeSpiSubAddress(0x2A, 0x00, &u8t, 1); // 5. Write Register 2A:00 1byte 0x00
+            readSpiSubAddress(0x2A, 0x03, volt, 1); // 6. Read Register 2A:03 1byte 8 bit Voltage reading
+            readSpiSubAddress(0x2A, 0x04, temp, 1); // 6. Read Register 2A:04 1byte 8 bit Temperature reading
+
+            // Restore ADCCE
+            writeSpiUint32(DW1000_REGISTER_PMSC_CTRL0, ui32t);
+        }
+
+        #ifdef UWB_MODULE_DWM1001
+        end_atomic(prim);
+        #endif
+    }
+
+void  DecaDuino::getTemperatureAndVoltage(float *temp, float *volt){
+    uint8_t t,v;
+    int attempts=0;
+    float t23, diff, v33, tf, vf;
+    do {
+        getTemperatureAndVoltageRaw(&t, &v);
+
+        t23 =   (float) _OTPTempCalibration;
+        diff = (float) (t - t23);
+        tf =   diff * 1.14 + 23.0;
+
+        v33 =  (float) _OTPVoltageCalibration;
+        vf =  ( ( v - v33 ) / 173) + 3.3;
+        attempts ++;
+
+
+        attempts++;
+    } while ((tf < -40. || tf > 85) && (vf < 2.8 || vf > 3.9) && attempts < 20); // repeat reading while the temperature is absurdly extreme (outside absolute maximum ratings)
+    if (attempts < 20){
+        *temp = tf;
+        *volt = vf;
+    }
+    else {
+        *temp = NAN;
+        *volt = NAN;
+    }
+}
+
 
 uint8_t DecaDuino::getVoltageRaw() {
 

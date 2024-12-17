@@ -9,7 +9,7 @@
 #	LIBRARIES	arduino libraries path
 #
 #
-FQBN        ?= sandeepmistry:nRF5:DWM1001-DEV
+FQBN        ?= RMESS:nRF5:DWM1001-DEV
 LIBRARIES   ?= 
 CLI_ARGS    ?= 
 
