@@ -1147,7 +1147,7 @@ class DecaDuino {
         * @author Cassandre Vey
         * @date 20241217
         */
-        void  getTemperatureAndVoltage(float *temp, float *volt);
+        void  getTemperatureAndVoltage(float *temp, float *volt, int maxTries=20);
 
 
 		/**

@@ -2363,32 +2363,26 @@ void DecaDuino::getTemperatureAndVoltageRaw(uint8_t *temp, uint8_t *volt) {
         #endif
     }
 
-void  DecaDuino::getTemperatureAndVoltage(float *temp, float *volt){
+void  DecaDuino::getTemperatureAndVoltage(float *temp, float *volt, int maxTries){
     uint8_t t,v;
     int attempts=0;
     float t23, diff, v33, tf, vf;
+    *temp = NAN;
+    *volt = NAN;
     do {
         getTemperatureAndVoltageRaw(&t, &v);
 
         t23 =   (float) _OTPTempCalibration;
         diff = (float) (t - t23);
         tf =   diff * 1.14 + 23.0;
+        if (tf > -40. &&  tf < 85) *temp = tf;
 
         v33 =  (float) _OTPVoltageCalibration;
         vf =  ( ( v - v33 ) / 173) + 3.3;
-        attempts ++;
-
+        if (vf > 2.8 && vf < 3.9) *volt = vf;
 
         attempts++;
-    } while ((tf < -40. || tf > 85) && (vf < 2.8 || vf > 3.9) && attempts < 20); // repeat reading while the temperature is absurdly extreme (outside absolute maximum ratings)
-    if (attempts < 20){
-        *temp = tf;
-        *volt = vf;
-    }
-    else {
-        *temp = NAN;
-        *volt = NAN;
-    }
+    } while ( (isnan(*temp) || isnan(*volt)) && attempts < maxTries); // repeat reading while the temperature is absurdly extreme (outside absolute maximum ratings)
 }
 
 
