@@ -122,11 +122,11 @@
 #define RANGING_UNIT AIR_SPEED_OF_LIGHT*DW1000_TIMEBASE
 
 #ifdef UWB_MODULE_DWM1001
-#define DWM1000_DEFAULT_ANTENNA_DELAY_VALUE 32889   //@brief Calibration value for DWM1001-DEV, by Quentin Vey.
+#define DWM1000_DEFAULT_ANTENNA_DELAY_VALUE 32889   //@brief Calibration value for DWM1001-DEV, by Cassandre Vey.
                                                     // This is an average of all the calibrations done for the
                                                     // frequencies and PRF that could be done in our testbed.
                                                     // Expect a 40cm bias if you use this value.
-static const uint16_t calibratedAntennaDelay[7][2] = //@brief Calibration value for DWM1001-DEV, by Quentin Vey.
+static const uint16_t calibratedAntennaDelay[7][2] = //@brief Calibration value for DWM1001-DEV, by Cassandre Vey.
                             // These values have been measured in our testbed, at the distances recommended by DecaWave.
                             // The index are the following : antennaDelay[channel-1][ (PRF in MHz)>>6 ]
 {
@@ -478,7 +478,7 @@ class DecaDuino {
         * @brief Method that processes the interrupts on the DW1000. MUST be called regularly in order to receive
         * data frames and TX success notification.
         * @return No return
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20210113
         */
         void engine();
@@ -513,7 +513,7 @@ class DecaDuino {
         * @param coarse : sets the coarse (DA) power setting. See DW1000 user manual, 7.2.31.1.
         * @param fine : expressed in half-db. Sets the fine (mixer) power setting. See DW1000 user manual, 7.2.31.1. Allowed values : 0 (0 dB) to 31 (15.5 dB). Any value above 31 will be capped to 31.
         * @return Value to write into the register TXPOWSD or TXPOWPHR
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190701
         */
         static uint8_t powerSettingsToRegisterValue(COARSE_POWER_SETTING coarse, uint8_t fine);
@@ -523,7 +523,7 @@ class DecaDuino {
         * @param trackChanges : whether the tx power conf should be updated when the channel or PRF are changed.
         * TX_POWER registers are set to their manufacturer default values
         * @return No return
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20200223
         */
         void setSmartTxPower(bool trackChanges = true);
@@ -532,7 +532,7 @@ class DecaDuino {
         /**
         * @brief writes the appropriate value in 0x1E TX_POWER registers, according to the current tx channel and PRF
         * @return No return
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20200223
         */
         void writeSmartTxPowerConf();
@@ -540,7 +540,7 @@ class DecaDuino {
         /**
         * @brief Check if TX power mode is smart.
         * @return true if DIS_STXP if set to 1, false otherwise
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190628
         */
         bool isTxPowerSmart();
@@ -550,7 +550,7 @@ class DecaDuino {
         * @param coarse : sets the coarse (DA) power setting. See DW1000 user manual, 7.2.31.1.
         * @param fine : expressed in half-db. Allowed values : 0 (0 dB) to 31 (15.5 dB). Sets the fine (mixer) power setting. See DW1000 user manual, 7.2.31.1.
         * @return No return
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190628
         */
         void setManualTxPower(COARSE_POWER_SETTING coarse, unsigned int fine);
@@ -559,7 +559,7 @@ class DecaDuino {
         * @brief Set power Mode to a manual value (same value for PHY header, SFD portion and data portion)
         * @param TX_POWER : value to write directly into register 0x1E
         * @return No return
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20200224
         */
         void setManualTxPowerRawFullRegister(uint32_t registerValue);
@@ -568,7 +568,7 @@ class DecaDuino {
         * @brief Set power Mode to a manual value (same value for PHY header, SFD portion and data portion)
         * @param TX_POWER : value to write directly into register 0x1E (repeated 4 times)
         * @return No return
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190701
         */
         void setManualTxPowerRaw(uint8_t registerValue);
@@ -578,7 +578,7 @@ class DecaDuino {
         * @param trackChanges : whether the tx power conf should be updated when the channel or PRF are changed.
         * TX_POWER registers are set to their manufacturer default values
         * @return No return
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20200223
         */
         void setRecommendedFixedTxPower(bool trackChanges = true);
@@ -586,7 +586,7 @@ class DecaDuino {
         /**
         * @brief writes the recommended value in 0x1E TX_POWER registers, according to the current tx channel and PRF
         * @return No return
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20200223
         */
         void writeRecommendedFixedTxPowerConf();
@@ -594,14 +594,14 @@ class DecaDuino {
         /**
         * @brief Check if TX power mode is manual.
         * @return true if DIS_STXP if set to 0, false otherwise
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190628
         */
         bool isTxPowerManual();
 
         /**
         * @brief Returns the content of TX_POWER register
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190628
         */
         uint32_t getTX_POWER();
@@ -720,7 +720,7 @@ class DecaDuino {
         /**
         * @brief Returns the currently configured Pulse Repetition Frequency
         * @return The PRF value as an unsigned byte
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190717
         */
         uint8_t getTxPrf(void);
@@ -780,7 +780,7 @@ class DecaDuino {
         /**
         * @brief Returns peak sample "power". This is a custom metric and has no official definition.
         * @return "power" of the maximum amplitude sample as a double (dBm)
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20220221
         */
 
@@ -850,7 +850,7 @@ class DecaDuino {
         * @brief Sets the Pulse Repetition Frequency for both TX and RX
         * @param prf The PRF value to set. Valid values are: 16, 64
         * @return Indicates whether configuration went well or not
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190717
         */
 		bool setPrf(uint8_t prf);
@@ -859,7 +859,7 @@ class DecaDuino {
         * @brief Sets the Tx and Rx Preamble Codes
         * @param pcode The Preamble Code to set. Valid values are: 1-20.
         * @return Indicates whether configuration went well or not
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190724
         */
         bool setPcode(uint8_t pcode);
@@ -912,7 +912,7 @@ class DecaDuino {
         * @brief Returns an aligned timestamp to use with pdDataRequest() in case of delayed transmissions
         * @param wantedDelay The required timestamp to align
         * @return the aligned timestamp
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20230922
         */
         uint64_t alignDelayedTransmissionTS ( uint64_t wantedTS);
@@ -1154,7 +1154,7 @@ class DecaDuino {
 		* @brief Gets the content of register file: 0x15 (Receive Time Stamp).
 		* @return content of the register
 		* @date 20190527
-		* @author Quentin Vey
+		* @author Cassandre Vey
 		*/
 		RXTime_t getRxTimeRegister();
 
@@ -1164,7 +1164,7 @@ class DecaDuino {
         * @param maxlen size of the character array
         * @return numbers of characters written (excluding the trailing null byte)
         * @date 20190527
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         int getRxTimeRegisterAsJSon(char *buf, int maxlen);
 
@@ -1175,7 +1175,7 @@ class DecaDuino {
         * @param maxlen size of the character array
         * @return numbers of characters written (excluding the trailing null byte)
         * @date 20190527
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         int getRxTimeRegisterAsJSon(const RXTime_t &data, char *buf, int maxlen);
 
@@ -1183,7 +1183,7 @@ class DecaDuino {
         * @brief Gets the content of register file: 0x12 (Rx Frame Quality Information).
         * @return content of the register
         * @date 20190527
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         RXFQual_t getRxQualityRegister();
 
@@ -1193,7 +1193,7 @@ class DecaDuino {
         * @param maxlen size of the character array
         * @return numbers of characters written (excluding the trailing null byte)
         * @date 20190527
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         int getRxQualityRegisterAsJSon(char *buf, int maxlen);
 
@@ -1204,7 +1204,7 @@ class DecaDuino {
         * @param maxlen size of the character array
         * @return numbers of characters written (excluding the trailing null byte)
         * @date 20190527
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         int getRxQualityRegisterAsJSon(const RXFQual_t &data, char *buf, int maxlen);
 
@@ -1212,7 +1212,7 @@ class DecaDuino {
         * @brief Gets the content of register file: 0x10 (Rx Frame Information).
         * @return content of the register
         * @date 20190527
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         RXFInfo_t getRxFrameInfoRegister();
 
@@ -1222,7 +1222,7 @@ class DecaDuino {
         * @param maxlen size of the character array
         * @return numbers of characters written (excluding the trailing null byte)
         * @date 20190527
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         int getRxFrameInfoRegisterAsJSon(char *buf, int maxlen);
 
@@ -1234,7 +1234,7 @@ class DecaDuino {
         * @param maxlen size of the character array
         * @return numbers of characters written (excluding the trailing null byte)
         * @date 20190527
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         int getRxFrameInfoRegisterAsJSon(const RXFInfo_t &data, char *buf, int maxlen);
 
@@ -1242,7 +1242,7 @@ class DecaDuino {
         * @brief Gets full content of register file: 0x1F (channel control).
         * @return content of the register
         * @date 20190603
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         channelCTRL_t getChannelControlRegister();
 
@@ -1252,7 +1252,7 @@ class DecaDuino {
         * @param maxlen size of the character array
         * @return numbers of characters written (excluding the trailing null byte)
         * @date 20190603
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         int getChannelControlRegisterAsJSon(char *buf, int maxlen);
 
@@ -1263,14 +1263,14 @@ class DecaDuino {
         * @param maxlen size of the character array
         * @return numbers of characters written (excluding the trailing null byte)
         * @date 20190603
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         int getChannelControlRegisterAsJSon(const channelCTRL_t &data, char *buf, int maxlen);
         /**
         * @brief Gets full content of register file: 0x2E (LDE interface).
         * @return  content of the register
         * @date 20190603
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         LDEInterface_t getLDEInterfaceRegister();
 
@@ -1280,7 +1280,7 @@ class DecaDuino {
         * @param maxlen size of the character array
         * @return numbers of characters written (excluding the trailing null byte)
         * @date 20190603
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         int getChannelLDEInterfaceAsJSon(char *buf, int maxlen);
 
@@ -1291,7 +1291,7 @@ class DecaDuino {
         * @param maxlen size of the character array
         * @return numbers of characters written (excluding the trailing null byte)
         * @date 20190603
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         int getChannelLDEInterfaceAsJSon(const LDEInterface_t &data, char *buf, int maxlen);
 
@@ -1299,7 +1299,7 @@ class DecaDuino {
         * @brief Gets bit 22 of register 0x04.
         * @return Receiver Mode 110 kbps data rate.
         * @date 20190603
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         uint8_t getRXM110K();
 
@@ -1307,7 +1307,7 @@ class DecaDuino {
         * @brief Gets subregister 0x21:00.
         * @return length of the SFD sequence used (not used for standard SFD sequences).
         * @date 20190603
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         uint8_t getSFD_LENGTH();
 
@@ -1315,7 +1315,7 @@ class DecaDuino {
         * @brief sets subregister 0x21:00.
         * @param length of the SFD sequence used (not used for standard SFD sequences).
         * @date 20190717
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         void setSFD_LENGTH(uint8_t SFD_LENGTH);
 
@@ -1323,7 +1323,7 @@ class DecaDuino {
         * @brief sets subregister 0x27:20 DRX_STDTOC.
         * @param timeout for SFD detection (in units of preamble symbols).
         * @date 20190724
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         void setSFDTimeout(uint16_t timeout);
 
@@ -1331,7 +1331,7 @@ class DecaDuino {
         * @brief Gets content of subregister file: 0x27:2C (Unsaturated accumulated preamble symbols).
         * @return Unsaturated accumulated preamble symbols
         * @date 20190603
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         uint16_t getRXPACC_NOSAT();
 
@@ -1339,7 +1339,7 @@ class DecaDuino {
         * @brief Enables/disables CIR merory read (sets/unsets the FACE and AMCE bits)
         * @param enable true to enable CIR read, false to disable them
         * @date 20190527
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         void enableCIRAccumulatorRead(bool enable);
 
@@ -1354,7 +1354,7 @@ class DecaDuino {
         * @param readLength Number of samples to read (-1 means read all samples)
         * @return number of samples written
         * @date 20190527
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         int getCIRAccumulator(CIRSample_t *buffer, size_t arrayLength, unsigned int startIndex = 0, int readLength = -1);
 
@@ -1366,7 +1366,7 @@ class DecaDuino {
         * @param readLength Nomber of samples to read (-1 means read all samples)
         * @return numbers of characters written (or that would have been written)
         * @date 20190527
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         int getCIRAccumulatorAsJSon(char* buf, uint16_t maxlen, unsigned int startIndex = 0, int readLength = -1);
 
@@ -1378,7 +1378,7 @@ class DecaDuino {
         * @param maxlen size of the character array
         * @return numbers of characters written (or that would have been written)
         * @date 20190527
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         int CIRAccumulatorToJSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen);
 
@@ -1388,7 +1388,7 @@ class DecaDuino {
         * @param maxlen size of the character array
         * @return numbers of characters written (or that would have been written)
         * @date 20190611
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         int getCIRAccumulatorAsBase64JSon(char* buf, uint16_t maxlen, unsigned int startIndex = 0, int readLength = -1);
 
@@ -1407,7 +1407,7 @@ class DecaDuino {
         * @param maxlen size of the character array
         * @return numbers of characters written (or that would have been written)
         * @date 20190611
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         int CIRAccumulatorToBase64JSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen);
 
@@ -1419,7 +1419,7 @@ class DecaDuino {
         * @param cir_first_index index where to start reading the CIR
         * @return numbers of characters written (or that would have been written, as for snprintf)
         * @date 20220225
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         int printAllRXInfos(char* to, int maxSize, bool cir=false, int cir_first_index=700, int cir_num_samples = -1);
 
@@ -1431,7 +1431,7 @@ class DecaDuino {
         * @param cir_first_index index where to start reading the CIR
         * @return numbers of characters written (or that would have been written, as for snprintf)
         * @date 20220407
-        * @author Quentin Vey
+        * @author Cassandre Vey
         */
         int printMinimalCIRInfos(char* to, int maxSize, int cir_first_index=700, int cir_num_samples = -1);
 
@@ -1576,7 +1576,7 @@ class DecaDuino {
 		/**
         * @brief Returns last received frame's frequency offset
         * @return Last received frame's frequency offset (in Hz)
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20230515
         */
         double getLastFreqOffset();
@@ -1584,7 +1584,7 @@ class DecaDuino {
         /**
         * @brief Returns last received frame's frequency offset in PPM
         * @return Last received frame's frequency offset (in PPM)
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20230515
         */
         double getLastFreqOffsetPPM();
@@ -1593,7 +1593,7 @@ class DecaDuino {
         * @brief Returns last received frame's approximate duration.
         * Warning : does not take into account user-defined SFD length (work for decawave-defined SFD though)
         * @return Last received frame's approximate duration
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20210415
         */
         double getLastRxDuration();
@@ -1604,7 +1604,7 @@ class DecaDuino {
         * @param SFD size in bytes
         * @param Payload size in bytes (including the last 2 bytes of FCS)
         * @return Last received frame's approximate duration
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20210415
         */
         double computeRxDuration(int preambleLength, unsigned int payloadSize);
@@ -1620,7 +1620,7 @@ class DecaDuino {
 		/**
         * @brief Returns first OTP antenna delay value
         * @return The first OTP antenna delay value
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20230420
         */
         uint16_t getOTPAntennaDelay1();
@@ -1628,7 +1628,7 @@ class DecaDuino {
         /**
         * @brief Returns second OTP antenna delay value
         * @return The second OTP antenna delay value
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20230420
         */
         uint16_t getOTPAntennaDelay2();
@@ -1636,7 +1636,7 @@ class DecaDuino {
         /**
         * @brief Returns OTP XTAL_trim
         * @return The OTP XTAL_trimvalue
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20230420
         */
         uint8_t getOTPXTalTrim();
@@ -1644,7 +1644,7 @@ class DecaDuino {
         /**
         * @brief Returns current XTAL_trim in register FS_XTALT
         * @return The current XTAL_trim value
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20230511
         */
         uint8_t getXTalTrim();
@@ -1653,7 +1653,7 @@ class DecaDuino {
         * @brief set XTAL_trim in register FS_XTALT
         * @param value to write
         * @return No return
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20230511
         */
         void setXTalTrim(uint8_t val);
@@ -1662,7 +1662,7 @@ class DecaDuino {
         * @brief set XTAL_trim in register FS_XTALT from value in OTP
         * @param value to write
         * @return No return
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20230511
         */
         void setXTalTrimFromOTP();
@@ -1688,7 +1688,7 @@ class DecaDuino {
         /**
         * @brief Returns the RX antenna delay value in the DW1000 register
         * @return The antenna delay value in the register
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190917
         */
         uint16_t getRXAntennaDelayReg();
@@ -1696,7 +1696,7 @@ class DecaDuino {
 		/**
         * @brief Sets the current antenna delay value to the one defined in calibratedAntennaDelay, and makes the antenna delay follow frequency and PRF changes
         * @return No return
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20200211
         */
 		void useCalibratedAntennaDelay();
@@ -1705,7 +1705,7 @@ class DecaDuino {
         * @brief One-time setting the current antenna delay value to the one defined in calibratedAntennaDelay for
         * current config. If you want this to be done automatically on channel and PRF change, call useCalibratedAntennaDelay().
         * @return No return
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20200211
         */
 		void setCalibratedAntennaDelay();
@@ -1740,7 +1740,7 @@ class DecaDuino {
 
         /**
         * @brief returns the NTM (LDE's Noise Threshold Multiplier)
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190717
         */
         uint8_t getNTM(void);
@@ -1749,14 +1749,14 @@ class DecaDuino {
         * @brief Sets the NTM (LDE's Noise Threshold Multiplier)
         * @param NTM value to set. Must be between 0 and 31
         * @return Indicates whether configuration went well or not
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190717
         */
         bool setNTM(uint8_t NTM);
 
         /**
         * @brief returns the PMULT (LDE's peak multiplier)
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190717
         */
         uint8_t getPMULT(void);
@@ -1765,49 +1765,49 @@ class DecaDuino {
         * @brief sets the PMULT (LDE's peak multiplier)
         * @param PMULT value to set. Must be between 0 and 7
         * @return Indicates whether configuration went well or not
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190717
         */
         bool setPMULT(uint8_t PMULT);
 
         /**
         * @brief Makes use of the standard SFD in TX and RX
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190717
         */
         void setStandardSFD();
 
         /**
         * @brief Makes use DecaWave-recommended SFD in TX and RX (see Table 21: Recommended SFD sequence configurations for best performance in DW1000 user manual)
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190717
         */
         void setDecaWaveSFD();
 
         /**
         * @brief sets the channel settings to the defaults values
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190717
         */
         void setDefaultChannelConfig();
 
         /**
         * @brief changes the tuning of some parameters to improve NLOS performance
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190717
         */
         void enableNLOSTunings();
 
         /**
         * @brief Disables NLOS improvements
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190717
         */
         void disableNLOSTunings();
 
         /**
         * @brief returns true if NLOS tunings are enabled
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190717
         */
         bool getNLOSTunings();
@@ -1816,7 +1816,7 @@ class DecaDuino {
         * @brief Reads a 4-byte word on OTP at given address
         * @param address The OTP address
         * @param dest Destination buffer (must be at least 4 bytes)
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20230420
         */
         void readOTP(uint16_t address, uint8_t dest[4]);
@@ -1825,7 +1825,7 @@ class DecaDuino {
         * @brief Sets Preamble Acquisition Chunk size. See dw1000 user
         * manual, section 4.1.1
         * @param PAC size (8, 16 or 64)
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20230703
         */
         void setRxPAC(uint8_t pac);
@@ -1846,7 +1846,7 @@ class DecaDuino {
         * @brief Sets the Pulse Repetition Frequency for TX
         * @param prf The PRF value to set. Valid values are: 16, 64
         * @return Indicates whether configuration went well or not
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190717
         */
         bool setTxPrf(uint8_t prf);
@@ -1855,7 +1855,7 @@ class DecaDuino {
         * @brief returns the recommended PAC size
         * @param preamble_len the expected length of the received preamble
         * @return recommened PAC size
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190717
         */
         uint8_t recommendedPACSize(uint16_t preamble_len);
@@ -1937,7 +1937,7 @@ class DecaDuino {
         * @brief Sets the RX antenna delay value in the DW1000 register
         * @param antennaDelay The antenna delay value
         * @return No return
-        * @author Quentin Vey
+        * @author Cassandre Vey
         * @date 20190917
         */
         void setRXAntennaDelayReg(uint16_t newAntennaDelay);
@@ -1984,7 +1984,7 @@ class DecaDuino {
 		/**
 		* @brief The global interrupt function. Is triggered by DW1000.
 		* @return No return
-		* @author Quentin Vey
+		* @author Cassandre Vey
         * @date 20210113
 		*/
 		void handleInterrupt();
