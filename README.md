@@ -21,7 +21,8 @@ Instructions here: https://wino.cc/tutorials/teensywino-installing-software-deve
 
 ### DWM1001-DEV (nRF5x)
 
-Instructions here: https://github.com/sandeepmistry/arduino-nRF5/#installing
+Instructions here: https://github.com/irit-rmess/arduino-nRF5
+(more details in french https://octeus.iut-blagnac.fr/enseignants/octeus2/tp/micro-tp-cha%C3%AEne-de-compilation/)
 
 ## Start using DecaDuino with simple example sketchs
 All example sketches are available as usual in the Arduino IDE menu: 
