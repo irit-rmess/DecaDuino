@@ -2774,6 +2774,7 @@ void DecaDuino::readAllRXInfos(registerDump_t *registers, bool cir, int cir_firs
 
     if (cir) {
         registers->CIR_length = this->getCIRAccumulator(registers->CIR,1017, cir_first_index, cir_num_samples);
+        registers->CIR_first_index = cir_first_index;
     }
 }
 
@@ -2783,7 +2784,7 @@ int DecaDuino::printAllRXInfos(char* to, int maxSize, bool cir, int cir_first_in
     read_duration = millis();
     readAllRXInfos(&registers, cir, cir_first_index, cir_num_samples);
     read_duration = millis() - read_duration;
-    int head = printAllRXInfos(&registers, to, maxSize, cir, cir_first_index, cir_num_samples);
+    int head = printAllRXInfos(&registers, to, maxSize, cir);
 
     head += snprintf(&(to[head]), maxSize-head, ", \"registers_read_duration\":%d", read_duration);
     return head;
@@ -2839,13 +2840,13 @@ int DecaDuino::printAllRXInfos(registerDump_t *registerPointer, char* to, int ma
 int DecaDuino::printMinimalCIRInfos(char* to, int maxSize,  int cir_first_index, int cir_num_samples){
     registerDump_t registers;
     readAllRXInfos(&registers, true, cir_first_index, cir_num_samples);
-    return printMinimalCIRInfos(&registers, to, maxSize, cir_first_index, cir_num_samples);
+    return printMinimalCIRInfos(&registers, to, maxSize);
 }
 
 
-int DecaDuino::printMinimalCIRInfos(registerDump_t *registerPointer, char* to, int maxSize,  int cir_first_index, int cir_num_samples){
+int DecaDuino::printMinimalCIRInfos(registerDump_t *registerPointer, char* to, int maxSize){
     char bigbuf[8192];
-    this->CIRAccumulatorToBase64JSon(registerPointer->CIR,registerPointer->CIR_length,bigbuf,sizeof(bigbuf));
+    this->CIRAccumulatorToBase64JSon(registerPointer->CIR,min(registerPointer->CIR_length,1017),bigbuf,sizeof(bigbuf));
 
     return snprintf(to, maxSize,"\"registerDump_CIR\":{"
                                         "\"ACC_MEM\": %s, "
@@ -2859,7 +2860,7 @@ int DecaDuino::printMinimalCIRInfos(registerDump_t *registerPointer, char* to, i
                                         "\"FP_INDEX\": %"PRIu16""
                                     "}",
             bigbuf,
-            cir_first_index,
+            registerPointer->CIR_first_index,
             registerPointer->RX_FINFO.RXPACC,
             registerPointer->RXPACC_NOSAT,
             registerPointer->SFD_LENGTH,
