@@ -1411,8 +1411,21 @@ class DecaDuino {
         */
         int CIRAccumulatorToBase64JSon(CIRSample_t *samples, uint16_t numSamples, char* buf, uint16_t maxlen);
 
+        typedef struct {
+            uint8_t RXM110K:1;
+            uint16_t RXPACC_NOSAT;
+            uint32_t SFD_LENGTH;
+            LDEInterface_t LDE_IF;
+            channelCTRL_t CHAN_CTRL;
+            RXFInfo_t RX_FINFO;
+            RXFQual_t RX_FQUAL;
+            RXTime_t RX_TIME;
+            CIRSample_t CIR[1017];
+            uint32_t CIR_length;
+        }registerDump_t;
+
         /**
-        * @brief Dumps the content of all the registries related to reception.
+        * @brief Dumps the content of all the registers related to reception.
         * @param to string where to write the result (recommended size : 8192)
         * @param maxSize size of that string
         * @param cir enable CIR dump
@@ -1422,6 +1435,20 @@ class DecaDuino {
         * @author Cassandre Vey
         */
         int printAllRXInfos(char* to, int maxSize, bool cir=false, int cir_first_index=700, int cir_num_samples = -1);
+
+        /**
+        * @brief Dumps the content of all the registers related to reception.
+        * @param registerPointer : pointer to a registerDump_t struct with the informations to print. If ==nullptr, then the RXInfos will be read by this method
+        * @param to string where to write the result (recommended size : 8192)
+        * @param maxSize size of that string
+        * @param cir enable CIR dump
+        * @param cir_first_index index where to start reading the CIR
+        * @return numbers of characters written (or that would have been written, as for snprintf)
+        * @date 20220225
+        * @author Cassandre Vey
+        */
+        int printAllRXInfos(registerDump_t *registerPointer, char* to, int maxSize, bool cir=false, int cir_first_index=700, int cir_num_samples = -1);
+
 
         /**
         * @brief Dumps only the content related to CIR.
@@ -1435,18 +1462,19 @@ class DecaDuino {
         */
         int printMinimalCIRInfos(char* to, int maxSize, int cir_first_index=700, int cir_num_samples = -1);
 
-        typedef struct {
-            uint8_t RXM110K:1;
-            uint16_t RXPACC_NOSAT;
-            uint32_t SFD_LENGTH;
-            LDEInterface_t LDE_IF;
-            channelCTRL_t CHAN_CTRL;
-            RXFInfo_t RX_FINFO;
-            RXFQual_t RX_FQUAL;
-            RXTime_t RX_TIME;
-            CIRSample_t CIR[1017];
-            uint32_t CIR_length;
-        }registerDump_t;
+        /**
+        * @brief Dumps only the content related to CIR.
+        * @param registerPointer : pointer to a registerDump_t struct with the informations to print. If ==nullptr, then the RXInfos will be read by this method
+        * @param to string where to write the result (recommended size : 8192)
+        * @param maxSize size of that string
+        * @param cir enable CIR dump
+        * @param cir_first_index index where to start reading the CIR
+        * @return numbers of characters written (or that would have been written, as for snprintf)
+        * @date 20220407
+        * @author Cassandre Vey
+        */
+        int printMinimalCIRInfos(registerDump_t *registerPointer, char* to, int maxSize, int cir_first_index=700, int cir_num_samples = -1);
+
 
         void readAllRXInfos(registerDump_t *registers, bool cir=false, int cir_first_index=700, int cir_num_samples = -1);
 

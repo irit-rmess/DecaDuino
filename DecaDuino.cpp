@@ -2778,24 +2778,32 @@ void DecaDuino::readAllRXInfos(registerDump_t *registers, bool cir, int cir_firs
 }
 
 int DecaDuino::printAllRXInfos(char* to, int maxSize, bool cir, int cir_first_index, int cir_num_samples){
-
-
     registerDump_t registers;
-
     uint32_t read_duration = 0;
     read_duration = millis();
     readAllRXInfos(&registers, cir, cir_first_index, cir_num_samples);
     read_duration = millis() - read_duration;
+    int head = printAllRXInfos(&registers, to, maxSize, cir, cir_first_index, cir_num_samples);
+
+    head += snprintf(&(to[head]), maxSize-head, ", \"registers_read_duration\":%d", read_duration);
+    return head;
+}
+
+
+
+int DecaDuino::printAllRXInfos(registerDump_t *registerPointer, char* to, int maxSize, bool cir, int cir_first_index, int cir_num_samples){
+    registerDump_t *printAllRXInfos = registerPointer;
+
 
 
     char info[128];
-    this->getRxFrameInfoRegisterAsJSon(registers.RX_FINFO,info,128);
+    this->getRxFrameInfoRegisterAsJSon(registerPointer->RX_FINFO,info,128);
 
     char qual[128];
-    this->getRxQualityRegisterAsJSon(registers.RX_FQUAL,qual,128);
+    this->getRxQualityRegisterAsJSon(registerPointer->RX_FQUAL,qual,128);
 
     char stamp[95];
-    this->getRxTimeRegisterAsJSon(registers.RX_TIME,stamp,95);
+    this->getRxTimeRegisterAsJSon(registerPointer->RX_TIME,stamp,95);
 
 
     char bigbuf[8192];
@@ -2803,37 +2811,41 @@ int DecaDuino::printAllRXInfos(char* to, int maxSize, bool cir, int cir_first_in
     bigbuf[1] = '"';
     bigbuf[2] = '\0';
     if (cir){
-        this->CIRAccumulatorToBase64JSon(registers.CIR,registers.CIR_length,bigbuf,sizeof(bigbuf));
+        this->CIRAccumulatorToBase64JSon(registerPointer->CIR,registerPointer->CIR_length,bigbuf,sizeof(bigbuf));
     }
 
 
     char channel[128];
-    this->getChannelControlRegisterAsJSon(registers.CHAN_CTRL,channel,128);
+    this->getChannelControlRegisterAsJSon(registerPointer->CHAN_CTRL,channel,128);
 
     char LDEIf[256];
-    this->getChannelLDEInterfaceAsJSon(registers.LDE_IF,LDEIf,256);
+    this->getChannelLDEInterfaceAsJSon(registerPointer->LDE_IF,LDEIf,256);
 
-    return snprintf(to, maxSize,"{\"registerDump\":{\"RX_FINFO\": %s,\"RX_FQUAL\": %s,\"RX_TIME\": %s,\"ACC_MEM\": %s, \"ACC_MEM_first_index\":%d,\"CHAN_CTRL\": %s, \"RXPACC_NOSAT\": %lu, \"SFD_LENGTH\": %lu, \"RXM110K\": %u, \"LDE_IF\": %s}, \"registers_read_duration\":%d}",
+    return snprintf(to, maxSize,"\"registerDump\":{\"RX_FINFO\": %s,\"RX_FQUAL\": %s,\"RX_TIME\": %s,\"ACC_MEM\": %s, \"ACC_MEM_first_index\":%d,\"CHAN_CTRL\": %s, \"RXPACC_NOSAT\": %lu, \"SFD_LENGTH\": %lu, \"RXM110K\": %u, \"LDE_IF\": %s}",
             info,
             qual,
             stamp,
             bigbuf,
             cir_first_index,
             channel,
-            registers.RXPACC_NOSAT,
-            registers.SFD_LENGTH,
-            registers.RXM110K,
-            LDEIf,
-            read_duration
+            registerPointer->RXPACC_NOSAT,
+            registerPointer->SFD_LENGTH,
+            registerPointer->RXM110K,
+            LDEIf
             );
 }
+
 
 int DecaDuino::printMinimalCIRInfos(char* to, int maxSize,  int cir_first_index, int cir_num_samples){
     registerDump_t registers;
     readAllRXInfos(&registers, true, cir_first_index, cir_num_samples);
+    return printMinimalCIRInfos(&registers, to, maxSize, cir_first_index, cir_num_samples);
+}
 
+
+int DecaDuino::printMinimalCIRInfos(registerDump_t *registerPointer, char* to, int maxSize,  int cir_first_index, int cir_num_samples){
     char bigbuf[8192];
-    this->CIRAccumulatorToBase64JSon(registers.CIR,registers.CIR_length,bigbuf,sizeof(bigbuf));
+    this->CIRAccumulatorToBase64JSon(registerPointer->CIR,registerPointer->CIR_length,bigbuf,sizeof(bigbuf));
 
     return snprintf(to, maxSize,"\"registerDump_CIR\":{"
                                         "\"ACC_MEM\": %s, "
@@ -2848,13 +2860,13 @@ int DecaDuino::printMinimalCIRInfos(char* to, int maxSize,  int cir_first_index,
                                     "}",
             bigbuf,
             cir_first_index,
-            registers.RX_FINFO.RXPACC,
-            registers.RXPACC_NOSAT,
-            registers.SFD_LENGTH,
-            registers.RXM110K,
-            registers.CHAN_CTRL.DWSFD,
-            registers.CHAN_CTRL.RNSSFD,
-            registers.RX_TIME.FP_INDEX
+            registerPointer->RX_FINFO.RXPACC,
+            registerPointer->RXPACC_NOSAT,
+            registerPointer->SFD_LENGTH,
+            registerPointer->RXM110K,
+            registerPointer->CHAN_CTRL.DWSFD,
+            registerPointer->CHAN_CTRL.RNSSFD,
+            registerPointer->RX_TIME.FP_INDEX
             );
 }
 void DecaDuino::sleepRequest(void) {
