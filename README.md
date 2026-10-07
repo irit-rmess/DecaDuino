@@ -7,7 +7,7 @@ layer, DecaDuino can be used as an open framework for wireless Time-of-Flight
 (ToF) ranging systems.
 
 For more details on the DecaDuino library, get the latest version of the
-documentation here: https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/)
+documentation here: https://www.irit.fr/~Adrien.Van-Den-Bossche/decaduino/
 
 ## Installation
 You have to put this library in your Arduino libraries directory.
