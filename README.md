@@ -17,7 +17,7 @@ You need to have the library printfToSerial in your Arduino libraries directory 
 
 ### DecaWino (Teensy)
 
-Instructions here: https://wino.cc/tutorials/teensywino-installing-software-development-tools/
+Instructions here: https://wino.cc/tutorials/teensywino/teensywino-installing-software-development-tools/
 
 ### DWM1001-DEV (nRF5x)
 
